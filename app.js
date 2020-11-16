@@ -23,6 +23,12 @@ var Splashscreen = require('./routes/Splashscreen.routes');
 var Demoscreen = require('./routes/Demoscreen.routes');
 
 
+
+
+var petdetails = require('./routes/petdetails.routes');
+var doctordetails = require('./routes/doctordetails.routes');
+
+
 /*Database connectivity*/
 
 var BaseUrl = "http://54.214.141.11:3000"; 
@@ -99,6 +105,10 @@ app.use('/api/userdetails', userdetails);
 app.use('/api/usertype', Usertype);
 app.use('/api/splashscreen', Splashscreen);
 app.use('/api/demoscreen', Demoscreen);
+
+app.use('/api/petdetails',petdetails);
+app.use('/api/doctordetails',doctordetails);
+
 
 
 

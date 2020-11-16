@@ -4,7 +4,7 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 var userdetailsModel = require('./../models/userdetailsModel');
-
+var dashboard_petlover = require('./dashboard_petlover.json');
 
 router.post('/create', async function(req, res) {
   try{
@@ -47,6 +47,33 @@ router.get('/deletes', function (req, res) {
 });
 
 
+
+
+router.post('/petlove/mobile/dashboard',async function (req, res) {
+ let userdetails  =  await userdetailsModel.findOne({_id:req.body.user_id});
+  let a = {
+    SOS : [],
+    LocationDetails : [],
+    PetDetails : [],
+    userdetails : userdetails,
+    Dashboarddata : dashboard_petlover
+  }
+  res.json({Status:"Success",Message:"Pet Lover Dashboard Details", Data : a ,Code:200});
+
+
+
+
+        // userdetailsModel.find({Person_id:req.body.Person_id}, function (err, StateList) {
+        //   res.json({Status:"Success",Message:"User Details List", Data : StateList ,Code:200});
+        // });
+});
+
+
+
+
+
+
+
 router.post('/getlist_id', function (req, res) {
         userdetailsModel.find({Person_id:req.body.Person_id}, function (err, StateList) {
           res.json({Status:"Success",Message:"User Details List", Data : StateList ,Code:200});
@@ -56,12 +83,10 @@ router.post('/getlist_id', function (req, res) {
 
 router.post('/mobile/resendotp', function (req, res) {
         userdetailsModel.findOne({user_phone:req.body.user_phone}, function (err, StateList) {
-        
         if(StateList == null){
            res.json({Status:"Failed",Message:"Invalid Mobile Number", Data : {} ,Code:404});
         }else{
           let a = {
-            OTP : StateList.otp,
             User_Details : StateList
           }
           res.json({Status:"Success",Message:"OTP sent successfully! welcome to petfolio", Data : a ,Code:200});
