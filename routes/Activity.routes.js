@@ -53,14 +53,14 @@ router.get('/getlist', function (req, res) {
 
 
 router.post('/edit', function (req, res) {
-        ActivityModel.findByIdAndUpdate(req.body.Activity_id, req.body, {new: true}, function (err, UpdatedDetails) {
+        ActivityModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Functiondetails Updated", Data : UpdatedDetails ,Code:200});
         });
 });
 // // DELETES A USER FROM THE DATABASE
 router.post('/delete', function (req, res) {
-      ActivityModel.findByIdAndRemove(req.body.Activity_id, function (err, user) {
+      ActivityModel.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
           res.json({Status:"Success",Message:"SubFunction Deleted successfully", Data : {} ,Code:200});
       });

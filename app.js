@@ -17,6 +17,10 @@ var responseMiddleware = require('./middlewares/response.middleware');
 /*Routing*/
 
 var Activity = require('./routes/Activity.routes');
+var userdetails = require('./routes/userdetails.routes');
+var Usertype = require('./routes/Usertype.routes');
+var Splashscreen = require('./routes/Splashscreen.routes');
+var Demoscreen = require('./routes/Demoscreen.routes');
 
 
 /*Database connectivity*/
@@ -89,8 +93,12 @@ app.use(cookieParser());
 app.use('/api/', express.static(path.join(__dirname, 'public')));
 app.use('/api/', express.static(path.join(__dirname, 'routes')));
 
-app.use('/api/activity', Activity);
 
+app.use('/api/activity', Activity);
+app.use('/api/userdetails', userdetails);
+app.use('/api/usertype', Usertype);
+app.use('/api/splashscreen', Splashscreen);
+app.use('/api/demoscreen', Demoscreen);
 
 
 
