@@ -6,7 +6,7 @@ var petdetailsSchema = new mongoose.Schema({
   user_id  : String,
   pet_img : String,
   pet_name : String,
-  pet_type : Number,
+  pet_type : String,
   pet_breed : String,
   pet_gender : String,
   pet_color : String,

@@ -32,7 +32,7 @@ router.post('/create', async function(req, res) {
         function (err, user) {
           console.log(err);
           console.log(user)
-        res.json({Status:"Success",Message:"User type Added successfully", Data : user ,Code:200}); 
+        res.json({Status:"Success",Message:"Docotor Details Added successfully", Data : user ,Code:200}); 
         });
 }
 catch(e){
@@ -44,14 +44,14 @@ catch(e){
 router.get('/deletes', function (req, res) {
       doctordetailsModel.remove({}, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");
-             res.json({Status:"Success",Message:"User type Deleted", Data : {} ,Code:200});     
+             res.json({Status:"Success",Message:"Docotor Details Deleted", Data : {} ,Code:200});     
       });
 });
 
 
 router.post('/getlist_id', function (req, res) {
         doctordetailsModel.find({Person_id:req.body.Person_id}, function (err, StateList) {
-          res.json({Status:"Success",Message:"User type List", Data : StateList ,Code:200});
+          res.json({Status:"Success",Message:"Docotor Details List", Data : StateList ,Code:200});
         });
 });
 
@@ -59,7 +59,7 @@ router.post('/getlist_id', function (req, res) {
 
 router.get('/getlist', function (req, res) {
         doctordetailsModel.find({}, function (err, Functiondetails) {
-          res.json({Status:"Success",Message:"User type Details", Data : Functiondetails ,Code:200});
+          res.json({Status:"Success",Message:"Docotor Details Details", Data : Functiondetails ,Code:200});
         });
 });
 
@@ -69,21 +69,21 @@ router.get('/mobile/getlist', function (req, res) {
           let a = {
             usertypedata : Functiondetails
           }
-          res.json({Status:"Success",Message:"User type Details", Data : a ,Code:200});
+          res.json({Status:"Success",Message:"Docotor Details Details", Data : a ,Code:200});
         });
 });
 
 router.post('/edit', function (req, res) {
         doctordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
-             res.json({Status:"Success",Message:"User type Updated", Data : UpdatedDetails ,Code:200});
+             res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
         });
 });
 // // DELETES A USER FROM THE DATABASE
 router.post('/delete', function (req, res) {
       doctordetailsModel.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
-          res.json({Status:"Success",Message:"User type Deleted successfully", Data : {} ,Code:200});
+          res.json({Status:"Success",Message:"Docotor Details Deleted successfully", Data : {} ,Code:200});
       });
 });
 

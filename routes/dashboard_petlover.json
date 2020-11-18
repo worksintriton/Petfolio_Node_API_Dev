@@ -55,17 +55,20 @@
             {
               "_id":"123456",
               "service_icon":"http://mysalveo.com/api/uploads/images.jpeg",
-              "service_title":"Bathing"
+              "service_title":"Bathing",
+              "background_color":"#00FFA2"
             },
             {
               "_id":"123456",
               "service_icon":"http://mysalveo.com/api/uploads/images.jpeg",
-              "service_title":"Bathing"
+              "service_title":"Bathing",
+              "background_color":"#00FFA2"
             },
             {
                "_id":"123456",
               "service_icon":"http://mysalveo.com/api/uploads/images.jpeg",
-              "service_title":"Bathing"
+              "service_title":"Bathing",
+              "background_color":"#00FFA2"
             }
           ],
            "Products_details" : 

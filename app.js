@@ -27,11 +27,14 @@ var Demoscreen = require('./routes/Demoscreen.routes');
 
 var petdetails = require('./routes/petdetails.routes');
 var doctordetails = require('./routes/doctordetails.routes');
+var vendordetails = require('./routes/vendordetails.routes');
+var locationdetails = require('./routes/locationdetails.routes');
+
 
 
 /*Database connectivity*/
 
-var BaseUrl = "http://54.214.141.11:3000"; 
+var BaseUrl = "http://52.25.163.13:3000/api"; 
 const mongoose = require('mongoose'); 
 mongoose.connect('mongodb://localhost:27017/Salveo'); 
 var db = mongoose.connection; 
@@ -108,6 +111,12 @@ app.use('/api/demoscreen', Demoscreen);
 
 app.use('/api/petdetails',petdetails);
 app.use('/api/doctordetails',doctordetails);
+app.use('/api/vendordetails',vendordetails);
+app.use('/api/locationdetails',locationdetails);
+
+
+
+
 
 
 

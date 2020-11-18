@@ -10,7 +10,12 @@ var userdetailsSchema = new mongoose.Schema({
   user_phone : String,
   date_of_reg : String,
   otp : Number,
-  user_type : Number
+  user_type : Number,
+  user_status : String,
+  fb_token : String,
+  device_id : String,
+  device_type : String,
+
 
 });
 
