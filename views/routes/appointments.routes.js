@@ -143,6 +143,14 @@ router.post('/mobile/doctor/app_edit', function (req, res) {
 });
 
 
+router.post('/mobile/user/edit', function (req, res) {
+        AppointmentsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Appointment Updated", Data : UpdatedDetails ,Code:200});
+        });
+});
+
+
 
 
 router.post('/edit', function (req, res) {
@@ -151,6 +159,8 @@ router.post('/edit', function (req, res) {
              res.json({Status:"Success",Message:"Appointment Updated", Data : UpdatedDetails ,Code:200});
         });
 });
+
+
 // // DELETES A USER FROM THE DATABASE
 router.post('/delete', function (req, res) {
       AppointmentsModel.findByIdAndRemove(req.body._id, function (err, user) {

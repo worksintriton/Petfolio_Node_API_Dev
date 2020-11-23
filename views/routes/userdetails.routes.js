@@ -14,7 +14,48 @@ router.post('/create', async function(req, res) {
        let phone  =  await userdetailsModel.findOne({user_phone : req.body.user_phone});
        console.log(phone);
        if(phone !== null){
-        res.json({Status:"Failed",Message:"This phone number already registered",Data : {},Code:404}); 
+        console.log('This phone number already registered');
+        if(phone.user_status == 'Incomplete'){
+           let a  = {
+            user_details : phone
+        }
+        var json = "";
+        var username = "tritonitsolutionstrans";
+        var password = 20145;
+        var mobilno = req.body.user_phone;
+        var message =
+          "Hi, Your OTP is " + phone.otp + ". Petfolio OTP for Signup.";
+        // var dumbell = "DUMBELL";
+        var dumbell = "VOXITW";
+        var tye = 0;
+        var baseurls =
+          "http://www.smsintegra.com/" +
+          "api/smsapi.aspx?uid=" +
+          username +
+          "&pwd=" +
+          password +
+          "&mobile=" +
+          mobilno +
+          "&msg=" +
+          message +
+          "&sid=" +
+          dumbell +
+          "&type=" +
+          tye;
+        console.log(baseurls);
+        requestss(baseurls, { json: true }, async (err, response, body) => {
+           if (err) {
+            return console.log(err);
+          }
+          else{
+        res.json({Status:"Success",Message:"Sign up successfully! welcome to petfolio",Data : a , Code:200}); 
+              }
+        });
+        }else{
+            res.json({Status:"Failed",Message:"This phone number already registered",Data : {},Code:404}); 
+        }
+
+
        }else
        {
           await userdetailsModel.create({
@@ -108,7 +149,7 @@ router.post('/petlove/mobile/dashboard',async function (req, res) {
 
 
 router.post('/mobile/login',async function (req, res) {
-    let userdetails  =  await userdetailsModel.findOne({user_phone : req.body.user_phone});
+    let userdetails  =  await userdetailsModel.findOne({user_phone:req.body.user_phone,user_status:"Incomplete"});
     if(userdetails == null){
       res.json({Status:"Failed",Message:"Invalid Account",Data : {},Code:404}); 
     } else 
@@ -275,6 +316,15 @@ router.post('/mobile/update/fb_token', function (req, res) {
              res.json({Status:"Success",Message:"FB Updated", Data : UpdatedDetails ,Code:200});
         });
 });
+
+
+router.post('/mobile/edit', function (req, res) {
+        userdetailsModel.findByIdAndUpdate(req.body.user_id, req.body, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"User Details Updated", Data : UpdatedDetails ,Code:200});
+        });
+});
+
 
 
 router.post('/edit', function (req, res) {
