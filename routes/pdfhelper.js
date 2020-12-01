@@ -10,7 +10,7 @@ const puppeteer = require('puppeteer');
 const { v4: uuidv4 } = require('uuid');
 var fs = require('fs');
 var pug = require ('pug');
-var BaseUrl = "http://18.237.123.253:3000";
+var BaseUrl = "http://mysalveo.com";
 var app = express();
 app.use('/api/', express.static(path.join(__dirname, 'routes')));
 
