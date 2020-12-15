@@ -14,7 +14,8 @@ router.post('/create', async function(req, res) {
             pet_type_id: req.body.pet_type_id,
             pet_breed : req.body.pet_breed,
             user_type_value : req.body.user_type_value,
-            date_and_time : req.body.date_and_time
+            date_and_time : req.body.date_and_time,
+            delete_status : false
         }, 
         function (err, user) {
           console.log(user)

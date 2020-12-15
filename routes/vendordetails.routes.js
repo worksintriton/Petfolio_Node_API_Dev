@@ -20,6 +20,7 @@ router.post('/create', async function(req, res) {
             govt_id : req.body.govt_id,
             certificate : req.body.certificate,
             date_and_time : req.body.date_and_time,
+            delete_status : false
         }, 
         function (err, user) {
           console.log(user)

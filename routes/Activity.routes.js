@@ -17,6 +17,7 @@ router.post('/create', async function(req, res) {
             title : req.body.title,
             describ : req.body.describ,
             date_and_time: req.body.date_and_time,
+            delete_status : false
         }, 
         function (err, user) {
           console.log(user)

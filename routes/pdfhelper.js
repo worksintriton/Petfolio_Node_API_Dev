@@ -10,47 +10,49 @@ const puppeteer = require('puppeteer');
 const { v4: uuidv4 } = require('uuid');
 var fs = require('fs');
 var pug = require ('pug');
-var BaseUrl = "http://mysalveo.com";
+var BaseUrl = "http://52.25.163.13:3000";
 var app = express();
 app.use('/api/', express.static(path.join(__dirname, 'routes')));
 
 exports.pdfgenerator = async function (doctordata,patientdata,meditationdata,Prescription_data,doctor_commeents) {
    try{
     //console.log(Prescription_data);
-    console.log("image path");
+    console.log("image path",doctordata);
        var source = fs.readFileSync(path.resolve(__dirname, "./views/doctor.pug"),'utf-8');
-     var Specilization = "";
-     for(var i=0; i< doctordata.Specilization.length; i++){
+       //console.log(source)
+     var specialization = "";
+     for(var i=0; i< doctordata.specialization.length; i++){
             
             if(i == 0){
-                Specilization = doctordata.Specilization[i];
+              specialization = doctordata.specialization[i].specialization;
             }
             else{
-                  Specilization = Specilization + "," + doctordata.Specilization[i];
+              specialization = specialization + "," + doctordata.specialization[i].specialization;
             }
      }
-     console.log(Specilization)
+     console.log(specialization)
      let template = pug.compile(source);
      let data = {
-      doctorname : doctordata.Name,
-      doctorsepecilization: Specilization,
+      doctorname : doctordata.dr_name,
+      doctorsepecilization: specialization,
       doctorsignature: doctordata.signature,
-      patientname : patientdata.Name,
-      patientage: patientdata.Age,
-      dotorsignature: doctordata.signature,
-      KMSnumber : doctordata.KMS_registration,
-      patientage:patientdata.age,
-      patientgender:patientdata.Gender,
-      patientheight: patientdata.Height,
-      patientweight:patientdata.Weight,
-      Problem_info:meditationdata.Problem_info,
-      passed_Medications:meditationdata.passed_Medications,
+       patientname : patientdata.pet_name,
+    //   patientage: patientdata.Age,
+    //   dotorsignature: doctordata.signature,
+    //   KMSnumber : doctordata.KMS_registration,
+    //   patientage:patientdata.age,
+    //   patientgender:patientdata.Gender,
+    //   patientheight: patientdata.Height,
+    //   patientweight:patientdata.Weight,
+    //   Problem_info:meditationdata.Problem_info,
+    //   passed_Medications:meditationdata.passed_Medications,
       Prescription_data:Prescription_data,
-      doctor_commeents:doctor_commeents
+       doctor_commeents:doctor_commeents
      }
      let html = template(data);
-     //console.log(html)
-     console.log("What is the path" , __dirname)
+     //console.log("html data" , html);
+     //console.log(data)
+     //console.log("What is the path" , __dirname)
         var options = { format: 'Letter', height: "20.5in",
   width: "18in"};
         var filepath = __dirname + '/public/prescriptions/' + uuidv4() + '.pdf' ;
@@ -61,7 +63,7 @@ exports.pdfgenerator = async function (doctordata,patientdata,meditationdata,Pre
          return new Promise(async function (resolve, reject) {
                  await pdf.create(html, options).toFile(filepath, function(err, response) {
                     if (err){
-                        console.log(err)
+                        console.log("error",err)
                         reject( false);
                     }
                     resolve(Finalpath);
@@ -71,7 +73,7 @@ exports.pdfgenerator = async function (doctordata,patientdata,meditationdata,Pre
         //var html = pug.compileFile(layout, { pretty: true })(locals);
       }
       catch(e){
-        console.log(e)
+        console.log("error in catch", e)
        return false;
       }
 }

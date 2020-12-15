@@ -13,7 +13,8 @@ router.post('/create', async function(req, res) {
   if(doctor_specModels == null){
     await doctor_specModel.create({
             specialzation:  req.body.specialzation,
-            date_and_time : req.body.date_and_time
+            date_and_time : req.body.date_and_time,
+            delete_status : false
         }, 
         function (err, user) {
           console.log(user)

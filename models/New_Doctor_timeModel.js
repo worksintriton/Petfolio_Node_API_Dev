@@ -14,6 +14,7 @@ var New_DoctortimeSchema = new mongoose.Schema({
 
   mobile_type : String,
 
+  delete_status : Boolean,
 
 });
 mongoose.model('New_Doctortime', New_DoctortimeSchema);

@@ -15,6 +15,7 @@ var vendordetailsSchema = new mongoose.Schema({
   govt_id : Array,
   certificate : Array,
   date_and_time : String,
+  delete_status : Boolean,
 
 });
 

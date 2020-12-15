@@ -16,6 +16,7 @@ var userdetailsSchema = new mongoose.Schema({
   device_id : String,
   device_type : String,
   mobile_type : String,
+  delete_status : Boolean,
 
 
 

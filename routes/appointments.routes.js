@@ -10,10 +10,8 @@ var doctordetailsModel = require('./../models/doctordetailsModel');
 router.post('/mobile/create', async function(req, res) {
   try{
         let display_date = req.body.date_and_time;
-
         let Appointmentid = "PET-" + new Date().getTime();
         var doctordetailsModels = await doctordetailsModel.findOne({user_id:req.body.doctor_id});
-
         await AppointmentsModel.create({
             doctor_id : req.body.doctor_id,
             appointment_UID : Appointmentid,
@@ -48,11 +46,21 @@ router.post('/mobile/create', async function(req, res) {
             completed_at : req.body.completed_at,
             missed_at : req.body.missed_at,
             mobile_type : req.body.mobile_type,
-            doc_business_info : doctordetailsModels
+            doc_business_info : doctordetailsModels,
+            delete_status : false
         }, 
         function (err, user) {
           console.log(user)
+          var data = {
+          _id : user._id,
+          video_id : "https://meet.jit.si/" + user._id,
+          msg_id : "Meeting_id/"+user._id,
+         }
+          AppointmentsModel.findByIdAndUpdate(data._id, data, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.status(500).send("There was a problem updating the user.");
+             // res.json({Status:"Success",Message:"Appointmentdetails Updated", Data : UpdatedDetails ,Code:200});
         res.json({Status:"Success",Message:"Appointment Added successfully", Data : user ,Code:200}); 
+        });
         });
 }
 catch(e){
@@ -72,7 +80,23 @@ router.post('/mobile/doc_getlist/newapp', function (req, res) {
                console.log(dateA,dateB);
                return dateB - dateA;
                });
-          res.json({Status:"Success",Message:"New Appointment List", Data : StateList ,Code:200});
+           var sort_data = [];
+          for(let a = 0 ; a < StateList.length ; a ++){
+            if(StateList[a].appointment_types == 'Emergency'){
+              sort_data.push(StateList[a]);
+            }
+           if(a == StateList.length - 1){
+             for(let b = 0 ; b < StateList.length ; b ++){
+              if(StateList[b].appointment_types !== 'Emergency'){
+              sort_data.push(StateList[b]);
+                }
+                if(b == StateList.length - 1){
+                   console.log(sort_data);
+                res.json({Status:"Success",Message:"New Appointment List", Data : sort_data ,Code:200});
+                }
+             }
+           }
+          } 
         }).populate('user_id doctor_id pet_id');
 });
 
@@ -126,7 +150,7 @@ router.post('/mobile/plove_getlist/newapp',async function (req, res) {
 });
 
 
-router.post('/mobile/plover_getlist/comapp', function (req, res) {
+router.post('/mobile/plove_getlist/comapp', function (req, res) {
         AppointmentsModel.find({user_id:req.body.user_id,appoinment_status:"Completed"}, function (err, StateList) {
           console.log(StateList);
            StateList.sort(function compare(a, b) {
@@ -143,7 +167,7 @@ router.post('/mobile/plover_getlist/comapp', function (req, res) {
 
 
 
-router.post('/mobile/plover_getlist/missapp', function (req, res) {
+router.post('/mobile/plove_getlist/missapp', function (req, res) {
         AppointmentsModel.find({user_id:req.body.user_id,appoinment_status:"Missed"}, function (err, StateList) {
           console.log(StateList);
            StateList.sort(function compare(a, b) {
@@ -330,7 +354,7 @@ router.post('/getlist_id', function (req, res) {
 router.get('/getlist', function (req, res) {
         AppointmentsModel.find({}, function (err, Functiondetails) {
           res.json({Status:"Success",Message:"Appointment Details", Data : Functiondetails ,Code:200});
-        });
+        }).populate('user_id doctor_id pet_id');
 });
 
 

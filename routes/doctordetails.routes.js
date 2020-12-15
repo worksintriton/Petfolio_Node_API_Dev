@@ -29,7 +29,10 @@ router.post('/create', async function(req, res) {
             profile_verification_status : req.body.profile_verification_status,
             slot_type : req.body.slot_type,
             date_and_time : req.body.date_and_time,
-            mobile_type : req.body.mobile_type
+            signature : req.body.signature,
+            mobile_type : req.body.mobile_type,
+            communication_type : req.body.communication_type,
+            delete_status : false
         }, 
         function (err, user) {
           console.log(err);
@@ -56,6 +59,93 @@ router.post('/getlist_id', function (req, res) {
           res.json({Status:"Success",Message:"Docotor Details List", Data : StateList ,Code:200});
         });
 });
+
+
+router.post('/text_search', function (req, res) {
+        doctordetailsModel.find({}, function (err, StateList) {
+        var final_data = [];
+        var keyword = req.body.search_string.toLowerCase();
+        for(let a = 0 ; a  < StateList.length ; a ++){
+          var doctorname = StateList[a].dr_name.toLowerCase();
+          if(doctorname.indexOf(keyword) !== -1 == true){
+             let d = {
+            "_id": StateList[a]._id,
+            "user_id": StateList[a].user_id,
+            "dr_title": StateList[a].dr_title,
+            "doctor_name": StateList[a].dr_name,
+            "clinic_name": StateList[a].clinic_name,
+            "specialization": StateList[a].specialization,
+            "doctor_img": StateList[a].clinic_pic[0].clinic_pic,
+            "clinic_loc" : StateList[a].clinic_loc,
+            "communication_type" : StateList[a].communication_type,
+            "distance" : 2 ,
+            "star_count" : 2.5,
+            "review_count" : 234
+          }
+            final_data.push(d);
+          } else 
+          {
+            for(let b = 0; b < StateList[a].specialization.length ; b++){
+              let spec = StateList[a].specialization[b].specialization.toLowerCase();
+              if(spec.indexOf(keyword) !== -1 == true){
+                let d = {
+            "_id": StateList[a]._id,
+            "user_id": StateList[a].user_id,
+            "dr_title": StateList[a].dr_title,
+            "doctor_name": StateList[a].dr_name,
+            "clinic_name": StateList[a].clinic_name,
+            "specialization": StateList[a].specialization,
+            "doctor_img": StateList[a].clinic_pic[0].clinic_pic,
+            "clinic_loc" : StateList[a].clinic_loc,
+            "communication_type" : StateList[a].communication_type,
+            "distance" : 2 ,
+            "star_count" : 2.5,
+            "review_count" : 234
+          }
+                 final_data.push(d);
+              }
+            }           
+          }
+
+          if(a == StateList.length - 1){
+             res.json({Status:"Success",Message:"Vehicledetails", Data : final_data ,Code:200});
+          }
+        }
+        });
+});
+
+
+
+router.post('/filter_doctor', function (req, res) {
+        doctordetailsModel.find({}, function (err, StateList) {
+        // res.json({Status:"Success",Message:"Filtered Doctor List", Data : StateList ,Code:200});
+        final_data = [];
+        for(let a = 0 ; a < StateList.length ; a ++){
+          console.log(StateList[a]);
+          let d = {
+            "_id": StateList[a]._id,
+            "user_id": StateList[a].user_id,
+            "dr_title": StateList[a].dr_title,
+            "doctor_name": StateList[a].dr_name,
+            "clinic_name": StateList[a].clinic_name,
+            "specialization": StateList[a].specialization,
+            "doctor_img": StateList[a].clinic_pic[0].clinic_pic,
+            "clinic_loc" : StateList[a].clinic_loc,
+            "communication_type" : StateList[a].communication_type,
+            "distance" : 2 ,
+            "star_count" : 2.5,
+            "review_count" : 234
+          }
+          final_data.push(d);
+         if(a == StateList.length - 1){
+          res.json({Status:"Success",Message:"Filtered Doctor List", Data : final_data ,Code:200});
+         }
+        }
+        });
+});
+
+
+
 
 
 router.post('/fetch_doctor_id', function (req, res) {
@@ -88,6 +178,46 @@ router.post('/fetch_doctor_id', function (req, res) {
             "review_count": 223
           }
           res.json({Status:"Success",Message:"Docotor Details", Data : dd ,Code:200});
+        });
+});
+
+
+
+
+
+
+
+router.post('/check_status', function (req, res) {
+        doctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
+          console.log(StateList);
+          let message = "Dear Doctor, We appreciate your interest and look forward to have you as part of Salveo Team. Our team is reviewing your profile and will get in touch with you to close the formalities. Your profile is pending verification.";
+         if(StateList == null){
+          let dd = {
+            'user_id' : req.body.user_id,
+            'profile_status' : false,
+            'profile_verification_status' : "Not verified"
+          }
+          if(dd.profile_verification_status == "Not verified"){
+             res.json({Status:"Success",Message:message, Data : dd ,Code:200});
+          } else if(dd.profile_verification_status == 0) {
+              res.json({Status:"Success",Message:"Profile not updated", Data : dd ,Code:200});
+          }else {
+            res.json({Status:"Success",Message:"Doctor Status", Data : dd ,Code:200});
+          }
+        }else {
+          let dd = {
+            'user_id' : req.body.user_id,
+            'profile_status' : StateList.profile_status,
+            'profile_verification_status' : StateList.profile_verification_status
+          }
+          if(dd.profile_verification_status == "Not verified"){
+             res.json({Status:"Success",Message:message, Data : dd ,Code:200});
+          } else if(dd.profile_verification_status == 0) {
+              res.json({Status:"Success",Message:"Profile not updated", Data : dd ,Code:200});
+          }else {
+            res.json({Status:"Success",Message:"Doctor Status", Data : dd ,Code:200});
+          }
+        }
         });
 });
 

@@ -9,7 +9,8 @@ var ActivitySchema = new mongoose.Schema({
   user_id : String,
   title : String,
   describ : String,
-  date_and_time : String
+  date_and_time : String,
+    delete_status : Boolean,
 });
 mongoose.model('Activity', ActivitySchema);
 

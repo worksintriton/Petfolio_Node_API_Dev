@@ -53,6 +53,7 @@ var appointmentSchema = new mongoose.Schema({
   missed_at : String,
   mobile_type : String,
   doc_business_info : Array,
+  delete_status : Boolean,
 
   
 });

@@ -4,6 +4,7 @@ const requestss = require("request");
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
+var GeoPoint = require('geopoint');
 var userdetailsModel = require('./../models/userdetailsModel');
 var locationdetailsModel = require('./../models/locationdetailsModel');
 var dashboard_petlover = require('./dashboard_petlover.json');
@@ -18,9 +19,9 @@ router.post('/create', async function(req, res) {
   try{
        let random = Math.floor(Math.random() * 899999 + 100000);
        let phone  =  await userdetailsModel.findOne({user_phone : req.body.user_phone});
-       console.log(phone);
+       // console.log(phone);
        if(phone !== null){
-        console.log('This phone number already registered');
+        // console.log('This phone number already registered');
         if(phone.user_status == 'Incomplete'){
            let a  = {
             user_details : phone
@@ -77,9 +78,10 @@ router.post('/create', async function(req, res) {
             device_id : "",
             device_type : "",
             mobile_type : req.body.mobile_type,
+            delete_status : false
         }, 
         function (err, user) {
-          console.log(user)
+          // console.log(user)
         let a  = {
             user_details : user
         }
@@ -106,7 +108,7 @@ router.post('/create', async function(req, res) {
           dumbell +
           "&type=" +
           tye;
-        console.log(baseurls);
+        // console.log(baseurls);
         requestss(baseurls, { json: true }, async (err, response, body) => {
            if (err) {
             return console.log(err);
@@ -135,40 +137,58 @@ router.get('/deletes', function (req, res) {
 
 
 router.post('/petlove/mobile/dashboard',async function (req, res) {
+  // console.log(req.body);
  let userdetails  =  await userdetailsModel.findOne({_id:req.body.user_id});
  let location_details  =  await locationdetailsModel.find({user_id:req.body.user_id,default_status:true});
  let tem_doctordetailsModel  =  await doctordetailsModel.find({});
  let Banner_details  =  await doctordetailsModel.find({});
  let petdetailsModels  =  await petdetailsModel.find({user_id:req.body.user_id});
-
  let homebanner  =  await homebannerModel.find({});
-
-
- console.log(petdetailsModels);
-   console.log(tem_doctordetailsModel);
+     dashboard_petlover.Banner_details = []
+    for(let c = 0 ; c < homebanner.length; c ++){
+       let gg = {
+        '_id': homebanner[c]._id,
+        'title' :  homebanner[c].img_title,
+        'img_path' :  homebanner[c].img_path,
+       }
+      dashboard_petlover.Banner_details.push(gg);
+    }
+ // dashboard_petlover.Banner_details = dashboard_petlover;
    let final_docdetails = [];
    for(let a = 0 ; a < tem_doctordetailsModel.length; a ++){
+    // console.log(tem_doctordetailsModel[a]);
+    var point1 = new GeoPoint(+req.body.lat, +req.body.long);
+    var point2 = new GeoPoint(+tem_doctordetailsModel[a].clinic_lat,+tem_doctordetailsModel[a].clinic_long);
+    var distance = point1.distanceTo(point2, true)//output in kilometers
+    // console.log(distance);
+    
     let dd = {
        '_id' : tem_doctordetailsModel[a].user_id,
        "doctor_name" : tem_doctordetailsModel[a].dr_name,
        "doctor_img" : tem_doctordetailsModel[a].clinic_pic[0].clinic_pic,
        "specialization" : tem_doctordetailsModel[a].specialization,
+       "distance" : distance.toFixed(2),
        "star_count" : 4,
        "review_count": 223
     }
-    console.log(tem_doctordetailsModel[a]);
     final_docdetails.push(dd);
    }
+   var ascending = final_docdetails.sort((a, b) => Number(a.distance) - Number(b.distance));
    dashboard_petlover.Doctor_details = [];
-   dashboard_petlover.Doctor_details = final_docdetails;
+   dashboard_petlover.Doctor_details = ascending;
  if(userdetails.user_type == 1){
     let a = {
-    SOS : [],
+    SOS : [{Number:9876543210},{Number:9876543211},{Number:9876543212},{Number:9876543214}],
     LocationDetails : location_details,
     PetDetails : petdetailsModels,
     userdetails : userdetails,
     Dashboarddata : dashboard_petlover,
-    homebanner : homebanner
+    messages : [
+    {'title':'Doctor','message':'Unable to find the doctor near your location can i show the doctor above the location'},
+    {'title':'Product','message':'Unable to find the Product near your location can i show the doctor above the location'},
+    {'title':'sercive','message':'Unable to find the Sercive near your location can i show the doctor above the location'}
+    ]
+    // homebanner : homebanner
   }
   res.json({Status:"Success",Message:"Pet Lover Dashboard Details", Data : a ,Code:200});
 }else{
@@ -205,14 +225,14 @@ router.post('/mobile/login',async function (req, res) {
       res.json({Status:"Failed",Message:"Invalid Account",Data : {},Code:404}); 
     } else 
     {
-     console.log(userdetails);
+     // console.log(userdetails);
      if(userdetails.user_type == 1){
      let random = Math.floor(Math.random() * 899999 + 100000);
      let updatedata = {otp:random}
      var updatedetails = await userdetailsModel.findByIdAndUpdate({_id:userdetails._id},updatedata,{
        new: true
      });
-     console.log(updatedetails);
+     // console.log(updatedetails);
       let a  = {
             user_details : updatedetails
         }
@@ -254,7 +274,7 @@ router.post('/mobile/login',async function (req, res) {
      var updatedetails = await userdetailsModel.findByIdAndUpdate({_id:userdetails._id},updatedata,{
        new: true
      });
-     console.log(updatedetails);
+     // console.log(updatedetails);
       let a  = {
             user_details : updatedetails
         }
@@ -281,7 +301,7 @@ router.post('/mobile/login',async function (req, res) {
           dumbell +
           "&type=" +
           tye;
-        console.log(baseurls);
+        // console.log(baseurls);
         requestss(baseurls, { json: true }, async (err, response, body) => {
           if (err) {
             return console.log(err);
@@ -365,7 +385,7 @@ router.get('/getlist', function (req, res) {
 router.get('/adminpanel/Dashboard/count',async function (req, res) {    
     let petloverdetails  =  await userdetailsModel.find({user_type:1});
     let doctordetails  =  await userdetailsModel.find({user_type:4});
-    console.log(petloverdetails,doctordetails);
+    // console.log(petloverdetails,doctordetails);
      let a  = {
        petloverdetails : petloverdetails,
        petloverdetails_count : petloverdetails.length,

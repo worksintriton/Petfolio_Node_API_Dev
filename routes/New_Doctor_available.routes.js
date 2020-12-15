@@ -467,7 +467,7 @@ router.post('/get_day_details',async function (req, res) {
 
 
 router.get('/time_type', function (req, res) {
-        let a = [{"Name":"1 Hour","type":"0"},{"Name":"30 Mins","type":"1"},{"Name":"15 Mins","type":"2"},{"Name":"10 Mins","type":"3"}];
+        let a = [{"Name":"1 Mins","type":"0"},{"Name":"30 Mins","type":"1"},{"Name":"15 Mins","type":"2"},{"Name":"10 Mins","type":"3"}];
         res.json({Status:"Success",Message:"Time_type list", Data : a,Code:200});
 });
 

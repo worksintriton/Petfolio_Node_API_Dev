@@ -15,6 +15,7 @@ router.post('/create', async function(req, res) {
             img_index : req.body.img_index,
             show_status : req.body.show_status,
             date_and_time : req.body.date_and_time,
+            delete_status : false
         }, 
         function (err, user) {
           console.log(user)

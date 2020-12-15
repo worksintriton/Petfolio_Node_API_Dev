@@ -14,6 +14,7 @@ router.post('/create', async function(req, res) {
             user_id:  req.body.user_id,
             Date : req.body.Date,
             mobile_type : req.body.mobile_type,
+            delete_status : false
         }, 
         function (err, user) {
           console.log(user)

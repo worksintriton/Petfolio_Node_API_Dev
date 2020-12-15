@@ -7,7 +7,8 @@ var SplashscreenSchema = new mongoose.Schema({
   img_title : String,
   img_index : Number,
   show_status : Boolean,
-  date_and_time : String
+  date_and_time : String,
+    delete_status : Boolean,
 });
 mongoose.model('Splashscreen', SplashscreenSchema);
 

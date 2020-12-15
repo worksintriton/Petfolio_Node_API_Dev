@@ -14,6 +14,76 @@ router.post('/create', async function(req, res) {
             notify_descri : req.body.notify_descri,
             notify_img : req.body.notify_img,
             notify_time : "",
+            date_and_time : req.body.date_and_time,
+            delete_status : false
+        }, 
+        function (err, user) {
+          console.log(user)
+        res.json({Status:"Success",Message:"Notification Added successfully", Data : user ,Code:200}); 
+        });
+}
+catch(e){
+      res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+}
+});
+
+
+
+router.post('/send_notifiation', async function(req, res) {
+  ///Notification Sending process///
+   var headers1 = {
+          authorization:
+            "key=AAAAuAfKTJc:APA91bEgV3d-Ww4UU6EbruDZ-UOQUhFsYnwuuYGclQ6-AEr0i1cqhrprwD7o2bUc_CXAPlqOE4A0JKy-c_RsBNfOP2eoFgSVGICKpFIYQjzMuUKdUD61HVI0U9KTOOKXVwbUszR2BeVQ",
+          "content-type": "application/json"
+     };
+     // Set the message as high priority and have it expire after 24 hours.
+        var options = {
+          priority: "high",
+          timeToLive: 60 * 60 * 24
+        };
+          var request1 = require("request");
+           // firebase url
+        var myURL1 = "https://fcm.googleapis.com/fcm/send";
+        var body1 = {
+          to: req.body.user_token,
+          notification: {
+            title: req.body.title,
+            body: req.body.message,
+            subtitle: req.body.subtitle,
+            sound: "default"
+          }
+        };
+         request1.post(
+            {
+              url: myURL1,
+              method: "POST",
+              headers1,
+              body: body1,
+              options,
+              json: true
+            }, function(error, response, body1) {
+              if (error) {
+                return res.json(
+                  _.merge(
+                    {
+                      error: error
+                    },
+                    utils.errors["500"]
+                  )
+                );
+              }else {
+              	// console.log(response);
+                console.log("Firebase Send");
+              }
+            });
+
+  try{
+        await notificationModel.create({
+            user_id:  req.body.user_id,
+            notify_title : req.body.notify_title,
+            notify_descri : req.body.notify_descri,
+            notify_img : req.body.notify_img,
+            notify_time : "",
             date_and_time : req.body.date_and_time
         }, 
         function (err, user) {
@@ -25,6 +95,7 @@ catch(e){
       res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
 }
 });
+
 
 
 router.get('/deletes', function (req, res) {

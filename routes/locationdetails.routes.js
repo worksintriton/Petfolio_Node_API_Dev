@@ -15,6 +15,7 @@ router.post('/create', async function(req, res) {
    } else {
         default_Status = false
    }
+   console.log(default_Status);
   try{
         await locationdetailsModel.create({
             user_id:  req.body.user_id,
@@ -30,6 +31,7 @@ router.post('/create', async function(req, res) {
             default_status : default_Status,
             date_and_time : req.body.date_and_time,
             mobile_type : req.body.mobile_type,
+            delete_status : false
         }, 
         function (err, user) {
           console.log(user)
@@ -74,12 +76,28 @@ router.get('/mobile/getlist', function (req, res) {
         });
 });
 
+
+router.post('/default/edit',async function (req, res) {
+         let location_details  =  await locationdetailsModel.findOne({user_id:req.body.user_id,default_status:true});
+           const update = { default_status : false};
+            var Corporatecodeupdate = await locationdetailsModel.findByIdAndUpdate({_id:location_details._id},update,{
+           new: true
+          });
+        locationdetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Location Updated", Data : UpdatedDetails ,Code:200});
+        });
+});
+
 router.post('/edit', function (req, res) {
         locationdetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Location Updated", Data : UpdatedDetails ,Code:200});
         });
 });
+
+
+
 // // DELETES A USER FROM THE DATABASE
 router.post('/delete', function (req, res) {
       locationdetailsModel.findByIdAndRemove(req.body._id, function (err, user) {

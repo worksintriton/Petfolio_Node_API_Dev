@@ -8,7 +8,8 @@ var HomebannerSchema = new mongoose.Schema({
   img_describ : String,
   img_index : Number,
   show_status : Boolean,
-  date_and_time : String
+  date_and_time : String,
+    delete_status : Boolean,
 });
 mongoose.model('Homebanner', HomebannerSchema);
 

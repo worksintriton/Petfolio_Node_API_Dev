@@ -5,7 +5,8 @@ const Schema = mongoose.Schema;
 var pettypeSchema = new mongoose.Schema({  
   pet_type_title:  String,
   pet_type_value : Number,
-  date_and_time : String
+  date_and_time : String,
+  delete_status : Boolean,
 });
 mongoose.model('pettype', pettypeSchema);
 

@@ -25,7 +25,10 @@ var doctordetailsSchema = new mongoose.Schema({
   profile_verification_status : String,
   slot_type : String,
   date_and_time : String,
+  signature : String,
   mobile_type : String,
+  communication_type : String,
+  delete_status : Boolean,
 });
 
 mongoose.model('doctordetails', doctordetailsSchema);

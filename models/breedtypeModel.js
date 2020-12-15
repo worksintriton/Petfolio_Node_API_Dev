@@ -9,7 +9,8 @@ var breedtypeSchema = new mongoose.Schema({
       },
   pet_breed : String,
   pet_breed_value : Number,
-  date_and_time : String
+  date_and_time : String,
+    delete_status : Boolean,
 });
 mongoose.model('breedtype', breedtypeSchema);
 

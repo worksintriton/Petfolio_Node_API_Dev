@@ -17,6 +17,7 @@ var petdetailsSchema = new mongoose.Schema({
   default_status : Boolean,
   date_and_time : String,
     mobile_type : String,
+      delete_status : Boolean,
 });
 
 mongoose.model('petdetails', petdetailsSchema);

@@ -43,6 +43,37 @@ catch(e){
 });
 
 
+
+router.post('/create', async function(req, res) {
+  try{
+    console.log("Request body",req.body);
+        await petdetailsModel.create({
+            user_id:  req.body.user_id,
+            pet_img : req.body.pet_img,
+            pet_name : req.body.pet_name,
+            pet_type : req.body.pet_type,
+            pet_breed : req.body.pet_breed,
+            pet_gender : req.body.pet_gender,
+            pet_color : req.body.pet_color,
+            pet_weight : req.body.pet_weight,
+            pet_age : req.body.pet_age,
+            vaccinated : req.body.vaccinated,
+            last_vaccination_date : req.body.last_vaccination_date,
+            default_status : req.body.default_status,
+            date_and_time : req.body.date_and_time,
+            mobile_type : req.body.mobile_type,
+        }, 
+        function (err, user) {
+          console.log(user)
+            console.log(err)
+        res.json({Status:"Success",Message:"pet details Added successfully", Data : user ,Code:200}); 
+        });
+}
+catch(e){
+      res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+}
+});
+
 router.get('/deletes', function (req, res) {
       petdetailsModel.remove({}, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");
@@ -58,14 +89,14 @@ let pettypeModels  =  await pettypeModel.find({});
 // pet_type_title
 let final_data1 = [];
 for(let y = 0 ; y < pettypeModels.length; y ++){
+  console.log(pettypeModels[y]);
  let u = {
-  pet_handle : pet_type_title[0]
- } 
+  pet_handle : pettypeModels[y].pet_type_title
+   } 
 final_data1.push(u);
 }
-
-
   let a = [];
+  let h = [{'com_type':"Online",'Value':0},{'com_type':"Visit",'Value':1},{'com_type':"Online Or Visit",'Value':2}];
   let b = [];
   let c = [
      {gender : "Male"},
@@ -92,7 +123,8 @@ final_data1.push(u);
     color : d,
     specialzation : e,
     pet_handle : f,
-    services : g
+    services : g,
+    communication_type : h
   }
  res.json({Status:"Success",Message:"Pet type list", Data : final ,Code:200});
 });
