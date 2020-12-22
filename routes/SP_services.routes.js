@@ -3,38 +3,39 @@ var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
-var pettypeModel = require('./../models/pettypeModel');
+var SP_servicesMode = require('./../models/SP_servicesModel');
 
 
 router.post('/create', async function(req, res) {
+   let userdetails  =  await SP_servicesMode.findOne({img_title:req.body.img_title});
+   console.log(userdetails);
+   if(userdetails == null){
   try{
- let pettypedetails  =  await pettypeModel.findOne({pet_type_title:req.body.pet_type_title});
-
-  if(pettypedetails == null){
-    await pettypeModel.create({
-            pet_type_title:  req.body.pet_type_title,
-            user_type_value : req.body.user_type_value,
+        await SP_servicesMode.create({
+            img_path:  req.body.img_path,
+            img_title : req.body.img_title,
+            img_index : req.body.img_index,
+            show_status : req.body.show_status,
             date_and_time : req.body.date_and_time,
             delete_status : false
         }, 
         function (err, user) {
           console.log(user)
-        res.json({Status:"Success",Message:"PET type Added successfully", Data : user ,Code:200}); 
+        res.json({Status:"Success",Message:"SP_servicesMode screen Added successfully", Data : user ,Code:200}); 
         });
-  }else{
-      res.json({Status:"Failed",Message:"already pettype added", Data : {},Code:500});
-  }
-
-       
 }
 catch(e){
       res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
 }
+   }
+   else{
+            res.json({Status:"Failed",Message:"This Service already added", Data : {} ,Code:404}); 
+   }
+
 });
 
-
 router.post('/filter_date', function (req, res) {
-        pettypeModel.find({}, function (err, StateList) {
+        SP_servicesMode.find({}, function (err, StateList) {
           var final_Date = [];
           for(let a = 0; a < StateList.length; a ++){
             var fromdate = new Date(req.body.fromdate);
@@ -52,52 +53,51 @@ router.post('/filter_date', function (req, res) {
 });
 
 
-
 router.get('/deletes', function (req, res) {
-      pettypeModel.remove({}, function (err, user) {
+      SP_servicesMode.remove({}, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");
-             res.json({Status:"Success",Message:"PET type Deleted", Data : {} ,Code:200});     
+             res.json({Status:"Success",Message:"SP_servicesMode screen  Deleted", Data : {} ,Code:200});     
       });
 });
 
 
 router.post('/getlist_id', function (req, res) {
-        pettypeModel.find({Person_id:req.body.Person_id}, function (err, StateList) {
-          res.json({Status:"Success",Message:"PET type List", Data : StateList ,Code:200});
+        SP_servicesMode.find({Person_id:req.body.Person_id}, function (err, StateList) {
+          res.json({Status:"Success",Message:"SP_servicesMode screen  List", Data : StateList ,Code:200});
         });
 });
 
 
 
 router.get('/getlist', function (req, res) {
-        pettypeModel.find({}, function (err, Functiondetails) {
-          res.json({Status:"Success",Message:"PET type Details", Data : Functiondetails ,Code:200});
+        SP_servicesMode.find({}, function (err, Functiondetails) {
+          res.json({Status:"Success",Message:"SP_servicesMode screen  Details", Data : Functiondetails ,Code:200});
         });
 });
 
 
 router.get('/mobile/getlist', function (req, res) {
-        pettypeModel.find({}, function (err, Functiondetails) {
-          let a = {
-            usertypedata : Functiondetails
+        SP_servicesMode.find({show_status:true}, function (err, Functiondetails) {
+          let a ={
+             SplashScreendata : Functiondetails
           }
-          res.json({Status:"Success",Message:"PET type Details", Data : a ,Code:200});
+          res.json({Status:"Success",Message:"SP_servicesMode screen  Details", Data : a ,Code:200});
         });
 });
 
+
 router.post('/edit', function (req, res) {
-        pettypeModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+        SP_servicesMode.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
-             res.json({Status:"Success",Message:"PET type Updated", Data : UpdatedDetails ,Code:200});
+             res.json({Status:"Success",Message:"SP_servicesMode screen  Updated", Data : UpdatedDetails ,Code:200});
         });
 });
 // // DELETES A USER FROM THE DATABASE
 router.post('/delete', function (req, res) {
-      pettypeModel.findByIdAndRemove(req.body._id, function (err, user) {
+      SP_servicesMode.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
-          res.json({Status:"Success",Message:"PET type Deleted successfully", Data : {} ,Code:200});
+          res.json({Status:"Success",Message:"SP_servicesMode screen Deleted successfully", Data : {} ,Code:200});
       });
 });
-
 
 module.exports = router;

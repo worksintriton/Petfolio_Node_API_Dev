@@ -3,7 +3,7 @@ var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
-var AppointmentsModel = require('./../models/AppointmentsModel');
+var SP_appointmentsModels = require('./../models/SP_appointmentsModels');
 var doctordetailsModel = require('./../models/doctordetailsModel');
 
 
@@ -12,19 +12,19 @@ router.post('/mobile/create', async function(req, res) {
         let display_date = req.body.date_and_time;
         let Appointmentid = "PET-" + new Date().getTime();
         var doctordetailsModels = await doctordetailsModel.findOne({user_id:req.body.doctor_id});
-        await AppointmentsModel.create({
-            doctor_id : req.body.doctor_id,
+        await SP_appointmentsModels.create({
+            sp_id : req.body.doctor_id,
             appointment_UID : Appointmentid,
             booking_date : req.body.booking_date,
             booking_time : req.body.booking_time,
             booking_date_time : req.body.booking_date_time,
-            communication_type : req.body.communication_type,
-            msg_id : Appointmentid,
-            video_id : req.body.video_id,
+            // communication_type : req.body.communication_type,
+            // msg_id : Appointmentid,
+            // video_id : req.body.video_id,
             user_id : req.body.user_id,
             pet_id : req.body.pet_id,
             problem_info : req.body.problem_info,
-            doc_attched : req.body.doc_attched,
+            sp_attched : req.body.doc_attched,
             appoinment_status : "Incomplete",
             start_appointment_status : "Not Started",
             end_appointment_status : "Not End",
@@ -35,8 +35,8 @@ router.post('/mobile/create', async function(req, res) {
             display_date : req.body.display_date,
             server_date_time : req.body.server_date_time,
             payment_method : req.body.payment_method,
-            prescription_details : "",
-            vaccination_details :"",
+            // prescription_details : "",
+            // vaccination_details :"",
             appointment_types : req.body.appointment_types,
             allergies : req.body.allergies,
             payment_id : req.body.payment_id,
@@ -46,7 +46,7 @@ router.post('/mobile/create', async function(req, res) {
             completed_at : req.body.completed_at,
             missed_at : req.body.missed_at,
             mobile_type : req.body.mobile_type,
-            doc_business_info : doctordetailsModels,
+            sp_business_info : doctordetailsModels,
             delete_status : false
         }, 
         function (err, user) {
@@ -56,10 +56,10 @@ router.post('/mobile/create', async function(req, res) {
           video_id : "https://meet.jit.si/" + user._id,
           msg_id : "Meeting_id/"+user._id,
          }
-          AppointmentsModel.findByIdAndUpdate(data._id, data, {new: true}, function (err, UpdatedDetails) {
+          SP_appointmentsModels.findByIdAndUpdate(data._id, data, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.status(500).send("There was a problem updating the user.");
              // res.json({Status:"Success",Message:"Appointmentdetails Updated", Data : UpdatedDetails ,Code:200});
-        res.json({Status:"Success",Message:"Appointment Added successfully", Data : user ,Code:200}); 
+        res.json({Status:"Success",Message:"SP Appointment Added successfully", Data : user ,Code:200}); 
         });
         });
 }
@@ -70,7 +70,7 @@ catch(e){
 
 
 router.post('/mobile/doc_getlist/newapp', function (req, res) {
-        AppointmentsModel.find({doctor_id:req.body.doctor_id,appoinment_status:"Incomplete"}, function (err, StateList) {
+        SP_appointmentsModels.find({sp_id:req.body.sp_id,appoinment_status:"Incomplete"}, function (err, StateList) {
           console.log(StateList);
            StateList.sort(function compare(a, b) {
               console.log(a.server_date_time);
@@ -110,7 +110,7 @@ router.post('/mobile/doc_getlist/newapp', function (req, res) {
 
 
 router.post('/filter_date', function (req, res) {
-        AppointmentsModel.find({}, function (err, StateList) {
+        SP_appointmentsModels.find({}, function (err, StateList) {
           var final_Date = [];
           for(let a = 0; a < StateList.length; a ++){
             var fromdate = new Date(req.body.fromdate);
@@ -124,13 +124,13 @@ router.post('/filter_date', function (req, res) {
               res.json({Status:"Success",Message:"Demo screen  List", Data : final_Date ,Code:200});
             }
           }
-        }).populate('user_id doctor_id pet_id');
+        }).populate('user_id sp_id pet_id');
 });
 
 
 
-router.post('/mobile/doc_getlist/comapp', function (req, res) {
-        AppointmentsModel.find({doctor_id:req.body.doctor_id,appoinment_status:"Completed"}, function (err, StateList) {
+router.post('/mobile/sp_getlist/comapp', function (req, res) {
+        SP_appointmentsModels.find({sp_id:req.body.sp_id,appoinment_status:"Completed"}, function (err, StateList) {
           console.log(StateList);
            StateList.sort(function compare(a, b) {
               console.log(a.server_date_time);
@@ -141,13 +141,13 @@ router.post('/mobile/doc_getlist/comapp', function (req, res) {
                return dateB - dateA;
                });
           res.json({Status:"Success",Message:"Completed Appointment List", Data : StateList ,Code:200});
-        }).populate('user_id doctor_id pet_id');
+        }).populate('user_id sp_id pet_id');
 });
 
 
 
-router.post('/mobile/doc_getlist/missapp', function (req, res) {
-        AppointmentsModel.find({doctor_id:req.body.doctor_id,appoinment_status:"Missed"}, function (err, StateList) {
+router.post('/mobile/sp_getlist/missapp', function (req, res) {
+        SP_appointmentsModels.find({sp_id:req.body.sp_id,appoinment_status:"Missed"}, function (err, StateList) {
           console.log(StateList);
            StateList.sort(function compare(a, b) {
               console.log(a.server_date_time);
@@ -158,12 +158,12 @@ router.post('/mobile/doc_getlist/missapp', function (req, res) {
                return dateB - dateA;
                });
           res.json({Status:"Success",Message:"Missed Appointment List", Data : StateList ,Code:200});
-        }).populate('user_id doctor_id pet_id');
+        }).populate('user_id sp_id pet_id');
 });
 
 
 router.post('/mobile/plove_getlist/newapp',async function (req, res) {
-        AppointmentsModel.find({user_id:req.body.user_id,appoinment_status:"Incomplete"}, function (err, StateList) {
+        SP_appointmentsModels.find({user_id:req.body.user_id,appoinment_status:"Incomplete"}, function (err, StateList) {
           console.log(StateList);
            StateList.sort(function compare(a, b) {
               console.log(a.server_date_time);
@@ -174,12 +174,12 @@ router.post('/mobile/plove_getlist/newapp',async function (req, res) {
                return dateB - dateA;
                });
           res.json({Status:"Success",Message:"New Appointment List", Data : StateList ,Code:200});
-        }).populate('user_id doctor_id pet_id');
+        }).populate('user_id sp_id pet_id');
 });
 
 
 router.post('/mobile/plove_getlist/comapp', function (req, res) {
-        AppointmentsModel.find({user_id:req.body.user_id,appoinment_status:"Completed"}, function (err, StateList) {
+        SP_appointmentsModels.find({user_id:req.body.user_id,appoinment_status:"Completed"}, function (err, StateList) {
           console.log(StateList);
            StateList.sort(function compare(a, b) {
               console.log(a.server_date_time);
@@ -196,7 +196,7 @@ router.post('/mobile/plove_getlist/comapp', function (req, res) {
 
 
 router.post('/mobile/plove_getlist/missapp', function (req, res) {
-        AppointmentsModel.find({user_id:req.body.user_id,appoinment_status:"Missed"}, function (err, StateList) {
+        SP_appointmentsModels.find({user_id:req.body.user_id,appoinment_status:"Missed"}, function (err, StateList) {
           console.log(StateList);
            StateList.sort(function compare(a, b) {
               console.log(a.server_date_time);
@@ -345,7 +345,7 @@ router.post('/get_doc_new',async function (req, res) {
 
 router.post('/check', async function(req, res) {
   try{
-    await AppointmentsModel.findOne({user_id:req.body.user_id,Booking_Date:req.body.Booking_Date,Booking_Time:req.body.Booking_Time}, function (err, Appointmentdetails) {
+    await SP_appointmentsModels.findOne({user_id:req.body.user_id,Booking_Date:req.body.Booking_Date,Booking_Time:req.body.Booking_Time}, function (err, Appointmentdetails) {
           console.log(Appointmentdetails);
           if(Appointmentdetails!== null){
             res.json({Status:"Failed",Message:"Slot not Available",Data : {} ,Code:300});
@@ -364,7 +364,7 @@ catch(e){
 
 
 router.get('/deletes', function (req, res) {
-      AppointmentsModel.remove({}, function (err, user) {
+      SP_appointmentsModels.remove({}, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");
              res.json({Status:"Success",Message:"Appointment Deleted", Data : {} ,Code:200});     
       });
@@ -372,7 +372,7 @@ router.get('/deletes', function (req, res) {
 
 
 router.post('/getlist_id', function (req, res) {
-        AppointmentsModel.findOne({_id:req.body.Appointment_id}, function (err, StateList) {
+        SP_appointmentsModels.findOne({_id:req.body.Appointment_id}, function (err, StateList) {
           res.json({Status:"Success",Message:"Appointment Details", Data : StateList ,Code:200});
         }).populate('user_id doctor_id pet_id');
 });
@@ -380,14 +380,14 @@ router.post('/getlist_id', function (req, res) {
 
 
 router.get('/getlist', function (req, res) {
-        AppointmentsModel.find({}, function (err, Functiondetails) {
+        SP_appointmentsModels.find({}, function (err, Functiondetails) {
           res.json({Status:"Success",Message:"Appointment Details", Data : Functiondetails ,Code:200});
         }).populate('user_id doctor_id pet_id');
 });
 
 
 router.get('/mobile/getlist', function (req, res) {
-        AppointmentsModel.find({}, function (err, Functiondetails) {
+        SP_appointmentsModels.find({}, function (err, Functiondetails) {
           let a = {
             usertypedata : Functiondetails
           }
@@ -397,7 +397,7 @@ router.get('/mobile/getlist', function (req, res) {
 
 
 router.post('/mobile/doctor/app_edit', function (req, res) {
-        AppointmentsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+        SP_appointmentsModels.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Appointment Updated", Data : UpdatedDetails ,Code:200});
         });
@@ -405,7 +405,7 @@ router.post('/mobile/doctor/app_edit', function (req, res) {
 
 
 router.post('/mobile/user/edit', function (req, res) {
-        AppointmentsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+        SP_appointmentsModels.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Appointment Updated", Data : UpdatedDetails ,Code:200});
         });
@@ -413,7 +413,7 @@ router.post('/mobile/user/edit', function (req, res) {
 
 
 router.post('/reviews/update', function (req, res) {
-        AppointmentsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+        SP_appointmentsModels.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Appointment Updated", Data : UpdatedDetails ,Code:200});
         });
@@ -422,7 +422,7 @@ router.post('/reviews/update', function (req, res) {
 
 
 router.post('/edit', function (req, res) {
-        AppointmentsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+        SP_appointmentsModels.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Appointment Updated", Data : UpdatedDetails ,Code:200});
         });
@@ -431,7 +431,7 @@ router.post('/edit', function (req, res) {
 
 // // DELETES A USER FROM THE DATABASE
 router.post('/delete', function (req, res) {
-      AppointmentsModel.findByIdAndRemove(req.body._id, function (err, user) {
+      SP_appointmentsModels.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
           res.json({Status:"Success",Message:"Appointment Deleted successfully", Data : {} ,Code:200});
       });

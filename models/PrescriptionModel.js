@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var timestamps = require('mongoose-timestamp');
 const Schema = mongoose.Schema; 
 var PrescriptionSchema = new mongoose.Schema({  
   doctor_id : String,  
@@ -13,5 +14,6 @@ var PrescriptionSchema = new mongoose.Schema({
   Prescription_type : String,
     delete_status : Boolean,
 });
+PrescriptionSchema.plugin(timestamps);
 mongoose.model('Prescription', PrescriptionSchema);
 module.exports = mongoose.model('Prescription');

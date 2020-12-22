@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-
+var timestamps = require('mongoose-timestamp');
 const Schema = mongoose.Schema; 
 
 var HomebannerSchema = new mongoose.Schema({  
@@ -11,6 +11,6 @@ var HomebannerSchema = new mongoose.Schema({
   date_and_time : String,
     delete_status : Boolean,
 });
+HomebannerSchema.plugin(timestamps);
 mongoose.model('Homebanner', HomebannerSchema);
-
 module.exports = mongoose.model('Homebanner');

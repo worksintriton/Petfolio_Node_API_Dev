@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-
+var timestamps = require('mongoose-timestamp');
 const Schema = mongoose.Schema; 
 
 var userdetailsSchema = new mongoose.Schema({ 
@@ -17,11 +17,7 @@ var userdetailsSchema = new mongoose.Schema({
   device_type : String,
   mobile_type : String,
   delete_status : Boolean,
-
-
-
-
 });
-
+userdetailsSchema.plugin(timestamps);
 mongoose.model('userdetails', userdetailsSchema);
 module.exports = mongoose.model('userdetails');

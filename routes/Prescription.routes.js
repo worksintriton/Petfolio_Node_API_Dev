@@ -78,6 +78,27 @@ router.delete('/deletes', function (req, res) {
       });
 });
 
+
+router.post('/filter_date', function (req, res) {
+        Prescription.find({}, function (err, StateList) {
+          var final_Date = [];
+          for(let a = 0; a < StateList.length; a ++){
+            var fromdate = new Date(req.body.fromdate);
+            var todate = new Date(req.body.todate);
+            var checkdate = new Date(StateList[a].createdAt);
+            console.log(fromdate,todate,checkdate);
+            if(checkdate >= fromdate && checkdate <= todate){
+              final_Date.push(StateList[a]);
+            }
+            if(a == StateList.length - 1){
+              res.json({Status:"Success",Message:"Demo screen  List", Data : final_Date ,Code:200});
+            }
+          }
+        });
+});
+
+
+
 router.post('/edit',async function (req, res) {
   let doctor_commeents = req.body.Doctor_Comments || "";
   try{

@@ -4,6 +4,8 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 var doctordetailsModel = require('./../models/doctordetailsModel');
+var locationdetailsModel = require('./../models/locationdetailsModel');
+var GeoPoint = require('geopoint');
 
 
 router.post('/create', async function(req, res) {
@@ -46,6 +48,25 @@ catch(e){
 });
 
 
+router.post('/filter_date', function (req, res) {
+        doctordetailsModel.find({}, function (err, StateList) {
+          var final_Date = [];
+          for(let a = 0; a < StateList.length; a ++){
+            var fromdate = new Date(req.body.fromdate);
+            var todate = new Date(req.body.todate);
+            var checkdate = new Date(StateList[a].createdAt);
+            console.log(fromdate,todate,checkdate);
+            if(checkdate >= fromdate && checkdate <= todate){
+              final_Date.push(StateList[a]);
+            }
+            if(a == StateList.length - 1){
+              res.json({Status:"Success",Message:"Demo screen  List", Data : final_Date ,Code:200});
+            }
+          }
+        });
+});
+
+
 router.get('/deletes', function (req, res) {
       doctordetailsModel.remove({}, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");
@@ -61,14 +82,25 @@ router.post('/getlist_id', function (req, res) {
 });
 
 
-router.post('/text_search', function (req, res) {
+
+router.post('/text_search',async function (req, res) {
+        let userlocation  =  await locationdetailsModel.findOne({user_id:req.body.user_id,default_status: true});
+        var user_lat = userlocation.location_lat;
+        var user_long = userlocation.location_long;
+         console.log(user_lat,user_long);
         doctordetailsModel.find({}, function (err, StateList) {
         var final_data = [];
         var keyword = req.body.search_string.toLowerCase();
         for(let a = 0 ; a  < StateList.length ; a ++){
+            var point1 = new GeoPoint(+user_lat, +user_long);
+            var point2 = new GeoPoint(+StateList[a].clinic_lat,+StateList[a].clinic_long);
+            var distance = point1.distanceTo(point2, true)//output in kilometers
+            console.log(distance);
           var doctorname = StateList[a].dr_name.toLowerCase();
           if(doctorname.indexOf(keyword) !== -1 == true){
-             let d = {
+                if(req.body.communication_type == 0){
+          if(StateList[a].communication_type == 'Online Or Visit' || StateList[a].communication_type == 'Online'){
+            let d = {
             "_id": StateList[a]._id,
             "user_id": StateList[a].user_id,
             "dr_title": StateList[a].dr_title,
@@ -78,17 +110,40 @@ router.post('/text_search', function (req, res) {
             "doctor_img": StateList[a].clinic_pic[0].clinic_pic,
             "clinic_loc" : StateList[a].clinic_loc,
             "communication_type" : StateList[a].communication_type,
-            "distance" : 2 ,
+            "distance" : ""+distance.toFixed(2),
             "star_count" : 2.5,
             "review_count" : 234
           }
             final_data.push(d);
+                  }      
+                } else if(req.body.communication_type == 1){
+            if(StateList[a].communication_type == 'Online Or Visit' || StateList[a].communication_type == 'Visit'){
+          let d = {
+            "_id": StateList[a]._id,
+            "user_id": StateList[a].user_id,
+            "dr_title": StateList[a].dr_title,
+            "doctor_name": StateList[a].dr_name,
+            "clinic_name": StateList[a].clinic_name,
+            "specialization": StateList[a].specialization,
+            "doctor_img": StateList[a].clinic_pic[0].clinic_pic,
+            "clinic_loc" : StateList[a].clinic_loc,
+            "communication_type" : StateList[a].communication_type,
+            "distance" : ""+distance.toFixed(2),
+            "star_count" : 2.5,
+            "review_count" : 234
+          }
+            final_data.push(d);
+                  }
+
+                }
           } else 
           {
             for(let b = 0; b < StateList[a].specialization.length ; b++){
               let spec = StateList[a].specialization[b].specialization.toLowerCase();
               if(spec.indexOf(keyword) !== -1 == true){
-                let d = {
+          if(req.body.communication_type == 0){
+          if(StateList[a].communication_type == 'Online Or Visit' || StateList[a].communication_type == 'Online'){
+            let d = {
             "_id": StateList[a]._id,
             "user_id": StateList[a].user_id,
             "dr_title": StateList[a].dr_title,
@@ -98,21 +153,150 @@ router.post('/text_search', function (req, res) {
             "doctor_img": StateList[a].clinic_pic[0].clinic_pic,
             "clinic_loc" : StateList[a].clinic_loc,
             "communication_type" : StateList[a].communication_type,
-            "distance" : 2 ,
+            "distance" : ""+distance.toFixed(2),
             "star_count" : 2.5,
             "review_count" : 234
           }
-                 final_data.push(d);
+            final_data.push(d);
+                  }      
+                } else if(req.body.communication_type == 1){
+            if(StateList[a].communication_type == 'Online Or Visit' || StateList[a].communication_type == 'Visit'){
+          let d = {
+            "_id": StateList[a]._id,
+            "user_id": StateList[a].user_id,
+            "dr_title": StateList[a].dr_title,
+            "doctor_name": StateList[a].dr_name,
+            "clinic_name": StateList[a].clinic_name,
+            "specialization": StateList[a].specialization,
+            "doctor_img": StateList[a].clinic_pic[0].clinic_pic,
+            "clinic_loc" : StateList[a].clinic_loc,
+            "communication_type" : StateList[a].communication_type,
+            "distance" : ""+distance.toFixed(2),
+            "star_count" : 2.5,
+            "review_count" : 234
+          }
+            final_data.push(d);
+                  }
+
+                }
               }
             }           
           }
-
           if(a == StateList.length - 1){
-             res.json({Status:"Success",Message:"Vehicledetails", Data : final_data ,Code:200});
+             if(req.body.communication_type == 0){
+              let final_data_chat = [];
+              for(let c  = 0 ; c < final_data.length ; c ++){
+                 if(+final_data[c].distance < 15){
+                   final_data_chat.push(final_data[c]);
+                 }
+                 if(c == final_data.length - 1){
+                  if(final_data_chat.length == 0){
+                  res.json({Status:"Success",Message:"No result found check with Online.", Data : final_data_chat ,Code:200});
+
+                  }else{
+                  res.json({Status:"Success",Message:"Text Search Details.", Data : final_data_chat ,Code:200});
+                  }
+                 }
+              }
+             } else 
+             {
+             res.json({Status:"Success",Message:"Text Search Result", Data : final_data ,Code:200});
+             }
           }
         }
         });
 });
+
+
+
+router.post('/filter_doctor1',async function (req, res) {
+      let userlocation  =  await locationdetailsModel.findOne({user_id:req.body.user_id,default_status: true});
+      var user_lat = userlocation.location_lat;
+      var user_long = userlocation.location_long;
+        doctordetailsModel.find({}, function (err, StateList) {
+        final_data = [];
+        for(let a = 0 ; a < StateList.length ; a ++){
+          var point1 = new GeoPoint(+user_lat, +user_long);
+          var point2 = new GeoPoint(+StateList[a].clinic_lat,+StateList[a].clinic_long);
+          var distance = point1.distanceTo(point2, true)//output in kilometers
+          let d = {
+            "_id": StateList[a]._id,
+            "user_id": StateList[a].user_id,
+            "dr_title": StateList[a].dr_title,
+            "doctor_name": StateList[a].dr_name,
+            "clinic_name": StateList[a].clinic_name,
+            "specialization": StateList[a].specialization,
+            "doctor_img": StateList[a].clinic_pic[0].clinic_pic,
+            "clinic_loc" : StateList[a].clinic_loc,
+            "communication_type" : StateList[a].communication_type,
+            "distance" : ""+distance,
+            "star_count" : 2.5,
+            "review_count" : 234
+          }
+          final_data.push(d);
+         if(a == StateList.length - 1){
+        console.log('Check 1');
+        var specialization_filter_data = [];
+        if(req.body.specialization == '') {
+          console.log('Check 2');
+          specialization_filter_data = final_data;
+           var star_count_filter_data = [];
+            if(req.body.Review_count == 0){
+              star_count_filter_data = specialization_filter_data;
+            res.json({Status:"Success",Message:"Filtered Doctor List", Data : star_count_filter_data ,Code:200});
+            }else{
+              for(let t = 0 ; t < specialization_filter_data.length ; t++){
+                console.log("in");
+                console.log(specialization_filter_data[t]);
+                 if(specialization_filter_data[t].review_count > req.body.Review_count){
+                        star_count_filter_data.push(specialization_filter_data[t]);
+                 }                  
+                 if(t == specialization_filter_data.length - 1){
+                    res.json({Status:"Success",Message:"Filtered Doctor List", Data : star_count_filter_data ,Code:200});
+
+                 }
+              }
+            }
+        } 
+        else
+        {
+          console.log('check 3');
+        for(let c = 0 ; c < final_data.length; c++){
+          console.log(final_data[c]);
+          console.log(final_data[c].specialization);
+          for(let b = 0; b < final_data[c].specialization.length ; b++){
+            console.log('check 4');
+            console.log(final_data[c].specialization[b].specialization,req.body.specialization);
+            if(final_data[c].specialization[b].specialization == req.body.specialization){
+                  specialization_filter_data.push(final_data[c]);
+            }
+          }
+          if(c == final_data.length - 1){
+            console.log('check 5');
+            var star_count_filter_data = [];
+            if(req.body.Review_count == 0){
+              star_count_filter_data = specialization_filter_data;
+            res.json({Status:"Success",Message:"Filtered Doctor List", Data : star_count_filter_data ,Code:200});
+            }else{
+              for(let t = 0 ; t < specialization_filter_data.length ; t++){
+                console.log("in");
+                 if(specialization_filter_data[t].review_count > req.body.Review_count){
+                        star_count_filter_data.push(specialization_filter_data[t]);
+                 }                  
+                 if(t == specialization_filter_data.length - 1){
+                    res.json({Status:"Success",Message:"Filtered Doctor List", Data : star_count_filter_data ,Code:200});
+
+                 }
+              }
+            }
+          }
+        }
+        }
+         }
+        }
+        });
+});
+
 
 
 
@@ -132,7 +316,7 @@ router.post('/filter_doctor', function (req, res) {
             "doctor_img": StateList[a].clinic_pic[0].clinic_pic,
             "clinic_loc" : StateList[a].clinic_loc,
             "communication_type" : StateList[a].communication_type,
-            "distance" : 2 ,
+            "distance" : "2" ,
             "star_count" : 2.5,
             "review_count" : 234
           }
@@ -190,7 +374,7 @@ router.post('/fetch_doctor_id', function (req, res) {
 router.post('/check_status', function (req, res) {
         doctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
           console.log(StateList);
-          let message = "Dear Doctor, We appreciate your interest and look forward to have you as part of Salveo Team. Our team is reviewing your profile and will get in touch with you to close the formalities. Your profile is pending verification.";
+          let message = "Dear Doctor, We appreciate your interest and look forward to have you as part of Petfolio Team. Our team is reviewing your profile and will get in touch with you to close the formalities. Your profile is pending verification.";
          if(StateList == null){
           let dd = {
             'user_id' : req.body.user_id,

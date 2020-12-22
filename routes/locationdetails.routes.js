@@ -44,6 +44,25 @@ catch(e){
 });
 
 
+router.post('/filter_date', function (req, res) {
+        locationdetailsModel.find({}, function (err, StateList) {
+          var final_Date = [];
+          for(let a = 0; a < StateList.length; a ++){
+            var fromdate = new Date(req.body.fromdate);
+            var todate = new Date(req.body.todate);
+            var checkdate = new Date(StateList[a].createdAt);
+            console.log(fromdate,todate,checkdate);
+            if(checkdate >= fromdate && checkdate <= todate){
+              final_Date.push(StateList[a]);
+            }
+            if(a == StateList.length - 1){
+              res.json({Status:"Success",Message:"Demo screen  List", Data : final_Date ,Code:200});
+            }
+          }
+        });
+});
+
+
 router.get('/deletes', function (req, res) {
       locationdetailsModel.remove({}, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");

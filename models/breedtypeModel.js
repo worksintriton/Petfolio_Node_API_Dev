@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-
+var timestamps = require('mongoose-timestamp');
 const Schema = mongoose.Schema; 
 
 var breedtypeSchema = new mongoose.Schema({  
@@ -12,6 +12,6 @@ var breedtypeSchema = new mongoose.Schema({
   date_and_time : String,
     delete_status : Boolean,
 });
+breedtypeSchema.plugin(timestamps);
 mongoose.model('breedtype', breedtypeSchema);
-
 module.exports = mongoose.model('breedtype');

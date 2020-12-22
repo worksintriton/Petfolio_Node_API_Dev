@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-
+var timestamps = require('mongoose-timestamp');
 const Schema = mongoose.Schema; 
 
 var UsertypeSchema = new mongoose.Schema({  
@@ -9,6 +9,6 @@ var UsertypeSchema = new mongoose.Schema({
   date_and_time : String,
     delete_status : Boolean,
 });
+UsertypeSchema.plugin(timestamps);
 mongoose.model('Usertype', UsertypeSchema);
-
 module.exports = mongoose.model('Usertype');

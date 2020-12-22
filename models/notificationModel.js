@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-
+var timestamps = require('mongoose-timestamp');
 const Schema = mongoose.Schema; 
 
 var notificationSchema = new mongoose.Schema({  
@@ -11,6 +11,6 @@ var notificationSchema = new mongoose.Schema({
   date_and_time : String,
     delete_status : Boolean,
 });
+notificationSchema.plugin(timestamps);
 mongoose.model('notification', notificationSchema);
-
 module.exports = mongoose.model('notification');

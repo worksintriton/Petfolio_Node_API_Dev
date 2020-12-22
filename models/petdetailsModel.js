@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-
+var timestamps = require('mongoose-timestamp');
 const Schema = mongoose.Schema; 
 
 var petdetailsSchema = new mongoose.Schema({  
@@ -19,7 +19,6 @@ var petdetailsSchema = new mongoose.Schema({
     mobile_type : String,
       delete_status : Boolean,
 });
-
+petdetailsSchema.plugin(timestamps);
 mongoose.model('petdetails', petdetailsSchema);
-
 module.exports = mongoose.model('petdetails');

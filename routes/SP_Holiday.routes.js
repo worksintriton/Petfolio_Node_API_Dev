@@ -3,14 +3,14 @@ var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
-var HolidayModel = require('./../models/HolidayModel');
+var SP_HolidayModel = require('./../models/SP_HolidayModel');
 
 
 router.post('/create', async function(req, res) {
   try{
-    var datas = await HolidayModel.findOne({user_id:req.body.user_id,Date:req.body.Date});
+    var datas = await SP_HolidayModel.findOne({user_id:req.body.user_id,Date:req.body.Date});
     if(datas == null){
-              await HolidayModel.create({
+              await SP_HolidayModel.create({
             user_id:  req.body.user_id,
             Date : req.body.Date,
             mobile_type : req.body.mobile_type,
@@ -18,7 +18,7 @@ router.post('/create', async function(req, res) {
         }, 
         function (err, user) {
           console.log(user)
-        res.json({Status:"Success",Message:"Added successfully", Data : user ,Code:200}); 
+        res.json({Status:"Success",Message:"SP Added successfully", Data : user ,Code:200}); 
         });
             }
             else{
@@ -32,14 +32,14 @@ catch(e){
 
 
 router.get('/deletes', function (req, res) {
-      HolidayModel.remove({}, function (err, user) {
+      SP_HolidayModel.remove({}, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");
              res.json({Status:"Success",Message:"ActivityModel Deleted", Data : {} ,Code:200});     
       });
 });
 
 router.post('/filter_date', function (req, res) {
-        HolidayModel.find({}, function (err, StateList) {
+        SP_HolidayModel.find({}, function (err, StateList) {
           var final_Date = [];
           for(let a = 0; a < StateList.length; a ++){
             var fromdate = new Date(req.body.fromdate);
@@ -50,7 +50,7 @@ router.post('/filter_date', function (req, res) {
               final_Date.push(StateList[a]);
             }
             if(a == StateList.length - 1){
-              res.json({Status:"Success",Message:"Demo screen  List", Data : final_Date ,Code:200});
+              res.json({Status:"Success",Message:"SP screen  List", Data : final_Date ,Code:200});
             }
           }
         });
@@ -58,22 +58,22 @@ router.post('/filter_date', function (req, res) {
 
 
 router.post('/getlist_id', function (req, res) {
-        HolidayModel.find({user_id:req.body.user_id}, function (err, StateList) {
-          res.json({Status:"Success",Message:"doctor holiday list", Data : StateList ,Code:200});
+        SP_HolidayModel.find({user_id:req.body.user_id}, function (err, StateList) {
+          res.json({Status:"Success",Message:"SP holiday list", Data : StateList ,Code:200});
         });
 });
 
 
 
 router.get('/getlist', function (req, res) {
-        HolidayModel.find({}, function (err, Functiondetails) {
-          res.json({Status:"Success",Message:"doctor holiday list", Data : Functiondetails ,Code:200});
+        SP_HolidayModel.find({}, function (err, Functiondetails) {
+          res.json({Status:"Success",Message:"SP holiday list", Data : Functiondetails ,Code:200});
         });
 });
 
 
 router.post('/edit', function (req, res) {
-        HolidayModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+        SP_HolidayModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Functiondetails Updated", Data : UpdatedDetails ,Code:200});
         });
@@ -81,8 +81,9 @@ router.post('/edit', function (req, res) {
 
 // // DELETES A USER FROM THE DATABASE
 router.post('/delete', function (req, res) {
-      HolidayModel.findByIdAndRemove(req.body._id, function (err, user) {
+      SP_HolidayModel.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+          console.log(err);
           res.json({Status:"Success",Message:"Holiday Deleted successfully", Data : {} ,Code:200});
       });
 });

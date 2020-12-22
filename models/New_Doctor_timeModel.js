@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var timestamps = require('mongoose-timestamp');
 const Schema = mongoose.Schema; 
 var New_DoctortimeSchema = new mongoose.Schema({  
   
@@ -17,6 +18,6 @@ var New_DoctortimeSchema = new mongoose.Schema({
   delete_status : Boolean,
 
 });
+New_DoctortimeSchema.plugin(timestamps);
 mongoose.model('New_Doctortime', New_DoctortimeSchema);
-
 module.exports = mongoose.model('New_Doctortime');

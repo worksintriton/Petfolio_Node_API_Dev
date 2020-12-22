@@ -21,6 +21,7 @@ var userdetails = require('./routes/userdetails.routes');
 var Usertype = require('./routes/Usertype.routes');
 var Splashscreen = require('./routes/Splashscreen.routes');
 var Demoscreen = require('./routes/Demoscreen.routes');
+var PrescriptionRouter  = require('./routes/Prescription.routes');
 
 
 
@@ -29,6 +30,23 @@ var petdetails = require('./routes/petdetails.routes');
 var doctordetails = require('./routes/doctordetails.routes');
 var vendordetails = require('./routes/vendordetails.routes');
 var locationdetails = require('./routes/locationdetails.routes');
+var homebannerdetails = require('./routes/homebanner.routes');
+var doctor_sepc = require('./routes/doctor_sepc.routes');
+
+
+var appointments = require('./routes/appointments.routes');
+
+var pettype = require('./routes/pettype.routes');
+var breedtype = require('./routes/breedtype.routes');
+var notification = require('./routes/notification.routes');
+var New_DoctorAvailable = require('./routes/New_Doctor_available.routes');
+var HolidayRouter = require('./routes/Holiday.routes');
+
+var SP_Holiday = require('./routes/SP_Holiday.routes');
+var SP_services = require('./routes/SP_services.routes');
+var SP_appointments = require('./routes/sp_appointments.routes');
+
+
 
 
 
@@ -111,8 +129,26 @@ app.use('/api/demoscreen', Demoscreen);
 
 app.use('/api/petdetails',petdetails);
 app.use('/api/doctordetails',doctordetails);
-app.use('/api/vendordetails',vendordetails);
+app.use('/api/service_provider',vendordetails);
 app.use('/api/locationdetails',locationdetails);
+
+app.use('/api/appointments',appointments);
+app.use('/api/pettype',pettype);
+app.use('/api/breedtype',breedtype);
+app.use('/api/notification',notification);
+app.use('/api/new_doctortime',New_DoctorAvailable);
+app.use('/api/holiday',HolidayRouter);
+app.use('/api/homebanner',homebannerdetails);
+app.use('/api/doctor_spec',doctor_sepc);
+app.use('/api/prescription',PrescriptionRouter);
+
+app.use('/api/sp_holiday',SP_Holiday);
+app.use('/api/sp_services',SP_services);
+app.use('/api/sp_appointments',SP_appointments);
+
+
+
+
 
 
 

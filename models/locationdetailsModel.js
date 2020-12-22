@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-
+var timestamps = require('mongoose-timestamp');
 const Schema = mongoose.Schema; 
 
 var locationdetailsSchema = new mongoose.Schema({  
@@ -18,7 +18,6 @@ var locationdetailsSchema = new mongoose.Schema({
   mobile_type : String,
     delete_status : Boolean,
 });
-
+locationdetailsSchema.plugin(timestamps);
 mongoose.model('locationdetails', locationdetailsSchema);
-
 module.exports = mongoose.model('locationdetails');

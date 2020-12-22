@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-
+var timestamps = require('mongoose-timestamp');
 const Schema = mongoose.Schema; 
 
 var DemoscreenSchema = new mongoose.Schema({  
@@ -12,6 +12,6 @@ var DemoscreenSchema = new mongoose.Schema({
     delete_status : Boolean,
       delete_status : Boolean,
 });
+DemoscreenSchema.plugin(timestamps);
 mongoose.model('Demoscreen', DemoscreenSchema);
-
 module.exports = mongoose.model('Demoscreen');
