@@ -329,6 +329,48 @@ router.post('/mobile/login',async function (req, res) {
              res.json({Status:"Success",Message:"OTP Send to your mobile number",Data : a , Code:200}); 
               }
          });
+     }else if(userdetails.user_type == 2){
+     let random = Math.floor(Math.random() * 899999 + 100000);
+     let updatedata = {otp:random}
+     var updatedetails = await userdetailsModel.findByIdAndUpdate({_id:userdetails._id},updatedata,{
+       new: true
+     });
+     // console.log(updatedetails);
+      let a  = {
+            user_details : updatedetails
+        }
+        var json = "";
+        var username = "tritonitsolutionstrans";
+        var password = 20145;
+        var mobilno = req.body.user_phone;
+        var message =
+          "Hi, Your OTP is " + random + ". Petfolio OTP for Signup.";
+        // var dumbell = "DUMBELL";
+        var dumbell = "VOXITW";
+        var tye = 0;
+        var baseurls =
+          "http://www.smsintegra.com/" +
+          "api/smsapi.aspx?uid=" +
+          username +
+          "&pwd=" +
+          password +
+          "&mobile=" +
+          mobilno +
+          "&msg=" +
+          message +
+          "&sid=" +
+          dumbell +
+          "&type=" +
+          tye;
+        console.log(baseurls);
+        requestss(baseurls, { json: true }, async (err, response, body) => {
+          if (err) {
+            return console.log(err);
+          }
+          else{
+             res.json({Status:"Success",Message:"OTP Send to your mobile number",Data : a , Code:200}); 
+              }
+         });
      }
     }
 });
