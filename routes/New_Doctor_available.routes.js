@@ -17,6 +17,8 @@ router.use(responseMiddleware());
 
 router.post('/fetch_dates',async function(req, res) {
   var date_details = await New_Doctor_time.findOne({user_id:req.body.user_id});
+  console.log(date_details);
+  console.log(req.body);
   if(date_details == null){
     let Datass = [];
      if(req.body.types == 1){
@@ -116,6 +118,7 @@ router.post('/fetch_dates',async function(req, res) {
              ];
              Datass = a;
      }
+     // console.log(a);
     New_Doctor_time.create({
           Doctor_name: req.body.Doctor_name,
           user_id: req.body.user_id,
@@ -140,7 +143,7 @@ router.post('/get_time_Details',async function (req, res) {
   console.log(req.body.Day.length);
    if(req.body.Day.length == 0){
        let datasss = [];
-          datasss = date_datas.onehour;       
+          datasss = date_datas.fiftymin;       
     res.json({Status:"Success",Message:"Time list Details", Data : datasss ,Code:200});
    }else {
      let times = date_details.Doctor_time;
@@ -156,6 +159,11 @@ router.post('/get_time_Details',async function (req, res) {
 
 router.post('/update_doc_date',async function (req, res) {
   console.log("Request body",req.body);
+  let doctordetails  =  await doctordetailsModel.findOne({user_id:req.body.user_id});
+  console.log(doctordetails);
+  doctordetailsModel.findByIdAndUpdate(doctordetails._id,{calender_status : true}, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+  });
     var date_details = await New_Doctor_time.findOne({user_id:req.body.user_id});
      for(let d = 0 ; d < req.body.days.length ; d ++)
      {
@@ -495,6 +503,7 @@ router.get('/time_type', function (req, res) {
 
 
 router.post('/get_doc_new',async function (req, res) {
+  console.log(req.body);
    var date_details = await New_Doctor_time.findOne({user_id:req.body.user_id});
    var Holiday_details = await HolidayModel.find({user_id:req.body.user_id});
    console.log(date_details);
@@ -507,10 +516,12 @@ router.post('/get_doc_new',async function (req, res) {
    let weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
    let dayss = weekday[d.getDay()];
    for(let a = 0 ; a < date_details.Doctor_date_time.length ; a ++){
+    console.log(dayss,date_details.Doctor_date_time[a].Title);
      if(dayss == date_details.Doctor_date_time[a].Title){
                if(date_details.Doctor_date_time[a].Status == false){
                 res.json({Status:"Failed",Message:"Doctor is not available on this day", Data : [] ,Code:404});
                }else{
+                console.log(date_details.Doctor_time[a].Time);
                    let times = date_details.Doctor_time[a].Time;
                    let finaltime = [];
                    for(let c = 0 ; c < times.length ; c ++){
@@ -538,20 +549,21 @@ router.post('/get_doc_new',async function (req, res) {
                       if(req.body.Date == req.body.cur_date){
                         let datas = [];
                         let check = 1;
-                        console.log(finaltime);
                         for(let a  = 0 ; a < finaltime.length ; a ++)
                         {
-                          // console.log(finaltime[a].time)
+                          // console.log("Testing",finaltime[a].time)
                           let cur_time = finaltime[a].time.split(":");
                           let cur_time1 = req.body.cur_time.split(":");
                           let cur_time2 = finaltime[a].time.split(" ");
                           let cur_time3 = req.body.cur_time.split(" ");
                           if(cur_time2[1] == cur_time3[1]){
-                            console.log(finaltime[a].time);
-                            console.log(+cur_time[0],+cur_time1[0]);
                           if(+cur_time[0] >= +cur_time1[0]){
+                             if(cur_time2[1] == 'PM' && +cur_time[0] == 12){
+                             }else {
                             check = 0;
-                            console.log("Testing");
+                            console.log("AMS",cur_time2[1] ,cur_time3[1]);
+                            console.log("Status True",+cur_time[0] , +cur_time1[0]);
+                             }
                            }
                            }
                           if(check == 0){
@@ -559,18 +571,44 @@ router.post('/get_doc_new',async function (req, res) {
                             time : finaltime[a].time
                             }
                             datas.push(d);
+
                           }
                           if(a == finaltime.length - 1){
-                            finaltime = [];
+                            if(datas.length == 0){
+                              finaltime = [];
+                            }else{
+                              finaltime = [];
+                              var com = [];
+                                     console.log(datas);
                                      let cur_time3 = req.body.cur_time.split(" ");
                                      let cur_time1 = cur_time3[0].split(":");
                                      let cur_time2 = datas[0].time.split(" ");
                                      let cur_time4 = cur_time2[0].split(":");
-                                     console.log(cur_time1,cur_time4); 
-                                     if(+cur_time1[1] > 0 &&  cur_time1[0] == cur_time4[0]){
-                                         datas.splice(0, 1);
-                                     }
+                                     // if(+cur_time1[1] > 0 &&  cur_time1[0] == cur_time4[0]){
+                                     //     datas.splice(0, 1);
+                                     // }
+                                    let fifteenmin = date_datas.fiftymin;
+
+                                    // for(let v = 0 ; v < datas.length ; v ++){
+                                    //    let datas_15_spa = datas[v].time.split(" ");
+                                    //    let datas_15_col = datas_15_spa[0].split(":");
+                                    //  for(let y = 0 ; y < fifteenmin.length ; y ++){
+                                    //  let time_15_spa = fifteenmin[y].Time.split(" ");
+                                    //  let time_15_col = time_15_spa[0].split(":");
+                                    //  // console.log(datas_15_spa[1],datas_15_col[0],datas_15_col[1]);
+                                    //  // console.log(time_15_spa[1],time_15_col[0],time_15_col[1]);
+                                    //  if(datas_15_spa[1] == time_15_spa[1] && datas_15_col[0] == time_15_col[0]){
+                        
+                                    //       let d = {
+                                    //        time : fifteenmin[y].Time
+                                    //        }
+                                    //     com.push(d);
+                                    //  }
+                                    //  }
+                                    // }
+                                    
                             finaltime = datas;
+                            }
                           }
                         }
                       }

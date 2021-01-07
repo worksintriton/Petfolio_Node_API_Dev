@@ -125,7 +125,7 @@
           "Status" : false 
       },
       {
-          "Time" : "12:00 AM",
+          "Time" : "12:00 PM",
           "Status" : false 
       }
      ],
@@ -329,6 +329,22 @@
 
 
   "fiftymin" : [
+      {
+          "Time" : "12:00 AM",
+          "Status" : false
+      },
+      {
+          "Time" : "12:15 AM",
+          "Status" : false
+      },
+      {
+          "Time" : "12:30 AM",
+          "Status" : false
+      },
+      {
+          "Time" : "12:45 AM",
+          "Status" : false
+      },
       {
           "Time" : "01:00 AM",
           "Status" : false 
@@ -695,22 +711,6 @@
       },
       {
           "Time" : "11:45 PM",
-          "Status" : false 
-      },
-      {
-          "Time" : "12:00 AM",
-          "Status" : false 
-      },
-      {
-          "Time" : "12:15 AM",
-          "Status" : false 
-      },
-      {
-          "Time" : "12:30 AM",
-          "Status" : false 
-      },
-      {
-          "Time" : "12:45 AM",
           "Status" : false 
       }
      ]

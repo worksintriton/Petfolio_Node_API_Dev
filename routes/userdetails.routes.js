@@ -7,12 +7,14 @@ router.use(bodyParser.json());
 var GeoPoint = require('geopoint');
 var userdetailsModel = require('./../models/userdetailsModel');
 var locationdetailsModel = require('./../models/locationdetailsModel');
+var dashboard_petlover1 = require('./dashboard_petlover1.json');
 var dashboard_petlover = require('./dashboard_petlover.json');
 var doctordetailsModel = require('./../models/doctordetailsModel');
 var petdetailsModel = require('./../models/petdetailsModel');
 var homebannerModel = require('./../models/homebannerModel');
 var AppointmentsModel = require('./../models/AppointmentsModel');
-
+var product_categoriesModel = require('./../models/product_categoriesModel');
+var SP_servicesMode = require('./../models/SP_servicesModel');
 
 
 router.post('/create', async function(req, res) {
@@ -74,6 +76,7 @@ router.post('/create', async function(req, res) {
             user_type : req.body.user_type,
             user_status : "Incomplete",
             otp : random,
+            profile_img : "",
             fb_token : "",
             device_id : "",
             device_type : "",
@@ -157,12 +160,18 @@ router.post('/filter_date', function (req, res) {
 
 router.post('/petlove/mobile/dashboard',async function (req, res) {
   // console.log(req.body);
- let userdetails  =  await userdetailsModel.findOne({_id:req.body.user_id});
+ let userdetails  =  await userdetailsModel.findOne({_id:req.body.user_id}); 
+
+
+  
  let location_details  =  await locationdetailsModel.find({user_id:req.body.user_id,default_status:true});
  let tem_doctordetailsModel  =  await doctordetailsModel.find({});
  let Banner_details  =  await doctordetailsModel.find({});
+ // let product_categoriesModels  =  await product_categoriesModel.find({});
  let petdetailsModels  =  await petdetailsModel.find({user_id:req.body.user_id});
  let homebanner  =  await homebannerModel.find({});
+ // dashboard_petlover.Products_details = product_categoriesModels;
+ // dashboard_petlover.Puppy_Products_details = product_categoriesModels;
      dashboard_petlover.Banner_details = []
     for(let c = 0 ; c < homebanner.length; c ++){
        let gg = {
@@ -216,6 +225,82 @@ router.post('/petlove/mobile/dashboard',async function (req, res) {
 });
 
 
+
+router.post('/petlove/mobile/dashboard1',async function (req, res) {
+  // console.log(req.body);
+ let userdetails  =  await userdetailsModel.findOne({_id:req.body.user_id});
+ let SP_servicelist  =  await SP_servicesMode.find({});
+ console.log(SP_servicelist);
+ var SP_servicelist_final = [];
+ for(let s = 0 ; s < SP_servicelist.length ; s ++){
+  let q = {
+              "_id" : SP_servicelist[s]._id,
+              "service_icon":SP_servicelist[s].img_path,
+              "service_title":SP_servicelist[s].img_title,
+              "background_color":"#00FFA2"
+    }
+    SP_servicelist_final.push(q);
+ }
+ let location_details  =  await locationdetailsModel.find({user_id:req.body.user_id,default_status:true});
+ let tem_doctordetailsModel  =  await doctordetailsModel.find({});
+ let Banner_details  =  await doctordetailsModel.find({});
+ let product_categoriesModels  =  await product_categoriesModel.find({});
+ let petdetailsModels  =  await petdetailsModel.find({user_id:req.body.user_id});
+ let homebanner  =  await homebannerModel.find({});
+ dashboard_petlover1.Service_details =  SP_servicelist_final;
+ dashboard_petlover1.Products_details = product_categoriesModels;
+ dashboard_petlover1.Puppy_Products_details = product_categoriesModels;
+     dashboard_petlover1.Banner_details = []
+    for(let c = 0 ; c < homebanner.length; c ++){
+       let gg = {
+        '_id': homebanner[c]._id,
+        'title' :  homebanner[c].img_title,
+        'img_path' :  homebanner[c].img_path,
+       }
+      dashboard_petlover1.Banner_details.push(gg);
+    }
+ // dashboard_petlover1.Banner_details = dashboard_petlover1;
+   let final_docdetails = [];
+   for(let a = 0 ; a < tem_doctordetailsModel.length; a ++){
+    // console.log(tem_doctordetailsModel[a]);
+    var point1 = new GeoPoint(+req.body.lat, +req.body.long);
+    var point2 = new GeoPoint(+tem_doctordetailsModel[a].clinic_lat,+tem_doctordetailsModel[a].clinic_long);
+    var distance = point1.distanceTo(point2, true)//output in kilometers
+    // console.log(distance);
+    
+    let dd = {
+       '_id' : tem_doctordetailsModel[a].user_id,
+       "doctor_name" : tem_doctordetailsModel[a].dr_name,
+       "doctor_img" : tem_doctordetailsModel[a].clinic_pic[0].clinic_pic,
+       "specialization" : tem_doctordetailsModel[a].specialization,
+       "distance" : distance.toFixed(2),
+       "star_count" : 4,
+       "review_count": 223
+    }
+    final_docdetails.push(dd);
+   }
+   var ascending = final_docdetails.sort((a, b) => Number(a.distance) - Number(b.distance));
+   dashboard_petlover1.Doctor_details = [];
+   dashboard_petlover1.Doctor_details = ascending;
+ if(userdetails.user_type == 1){
+    let a = {
+    SOS : [{Number:9876543210},{Number:9876543211},{Number:9876543212},{Number:9876543214}],
+    LocationDetails : location_details,
+    PetDetails : petdetailsModels,
+    userdetails : userdetails,
+    Dashboarddata : dashboard_petlover1,
+    messages : [
+    {'title':'Doctor','message':'Unable to find the doctor near your location can i show the doctor above the location'},
+    {'title':'Product','message':'Unable to find the Product near your location can i show the doctor above the location'},
+    {'title':'sercive','message':'Unable to find the Sercive near your location can i show the doctor above the location'}
+    ]
+    // homebanner : homebanner
+  }
+  res.json({Status:"Success",Message:"Pet Lover Dashboard Details", Data : a ,Code:200});
+}else{
+  res.json({Status:"Failed",Message:"Working on it !", Data : {},Code:404});
+}
+});
 
 
 
@@ -464,6 +549,16 @@ router.post('/mobile/update/fb_token', function (req, res) {
              res.json({Status:"Success",Message:"FB Updated", Data : UpdatedDetails ,Code:200});
         });
 });
+
+
+router.post('/mobile/update/profile', function (req, res) {
+        userdetailsModel.findByIdAndUpdate(req.body.user_id, req.body, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Profile Updated", Data : UpdatedDetails ,Code:200});
+        });
+});
+
+
 
 
 router.post('/mobile/edit', function (req, res) {

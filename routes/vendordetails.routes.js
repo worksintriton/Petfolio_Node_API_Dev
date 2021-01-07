@@ -9,6 +9,7 @@ var userdetailsModel = require('./../models/userdetailsModel');
 var homebannerModel = require('./../models/homebannerModel');
 var locationdetailsModel = require('./../models/locationdetailsModel');
 var SP_specialationsMode = require('./../models/SP_servicesModel');
+var SP_servicesMode = require('./../models/SP_servicesModel');
 
 
 router.post('/create', async function(req, res) {
@@ -32,7 +33,8 @@ router.post('/create', async function(req, res) {
             sp_loc : req.body.sp_loc,
             sp_lat : req.body.sp_lat,
             sp_long : req.body.sp_long,
-            delete_status : false
+            delete_status : false,
+            calender_status : false
         }, 
         function (err, user) {
           console.log(user)
@@ -78,6 +80,91 @@ router.post('/mobile/dashboard',async function (req, res) {
 });
 
 
+router.post('/mobile/service_cat',async function (req, res) {
+  console.log(req.body);
+ let location_details  =  await locationdetailsModel.findOne({user_id:req.body.user_id,default_status:true});
+  let services_details  =  await SP_servicesMode.find({});
+  var final_Data = [];
+   for(let a = 0 ; a < services_details.length; a ++){
+     let c = {
+         "_id" : services_details[a]._id,
+        "image": services_details[a].img_path,
+        "title": services_details[a].img_title,
+        "sub_title": services_details[a].img_title,
+     }
+     final_Data.push(c);
+     if(a == services_details.length - 1 ){
+      res.json({Status:"Success",Message:"Service Cat List", Data : final_Data ,Code:200});
+     }
+   }  
+});
+
+
+
+router.post('/mobile/servicedetails',async function (req, res) {
+ let location_details  =  await locationdetailsModel.findOne({user_id:req.body.user_id,default_status:true});
+  let services_details  =  await SP_servicesMode.findOne({_id:req.body.cata_id});
+  let vendordetailsModels  =  await vendordetailsModel.find({});
+  console.log(location_details);
+  console.log(services_details);
+  console.log(vendordetailsModels);
+   let a = {
+    Service_Details : {
+      "image_path" : services_details.img_title,
+      "title" : services_details.img_path,
+      "count" : 0
+     },
+     Service_provider : [
+      {
+        "_id" : "1234QWERTYUIOP",
+        "image":"http://mysalveo.com/api/uploads/images.jpeg",
+        "service_provider_name":"Mohammed",
+        "service_price":100,
+        "service_offer": 23,
+        "service_place":"Chennai",
+        "distance":2,
+        "rating_count" : 5,
+        "comments_count":12,
+      },
+      {
+        "_id" : "1234QWERTYUIOP",
+        "image":"http://mysalveo.com/api/uploads/images.jpeg",
+        "service_provider_name":"Mohammed",
+        "service_price":100,
+        "service_offer": 23,
+        "service_place":"Chennai",
+        "distance":2,
+        "rating_count" : 5,
+        "comments_count":12,
+      },
+      {
+        "_id" : "1234QWERTYUIOP",
+        "image":"http://mysalveo.com/api/uploads/images.jpeg",
+        "service_provider_name":"Mohammed",
+        "service_price":100,
+        "service_offer": 23,
+        "service_place":"Chennai",
+        "distance":2,
+        "rating_count" : 5,
+        "comments_count":12,
+      },
+      {
+        "_id" : "1234QWERTYUIOP",
+        "image":"http://mysalveo.com/api/uploads/images.jpeg",
+        "service_provider_name":"Mohammed",
+        "service_price":100,
+        "service_offer": 23,
+        "service_place":"Chennai",
+        "distance":2,
+        "rating_count" : 5,
+        "comments_count":12,
+      }
+     ]
+   }
+  res.json({Status:"Success",Message:"Service Provider List", Data : a ,Code:200});
+});
+
+
 
 router.post('/filter_date', function (req, res) {
         vendordetailsModel.find({}, function (err, StateList) {
@@ -107,13 +194,134 @@ router.get('/deletes', function (req, res) {
 });
 
 
+router.get('/calendar_timelist', function (req, res) {
+  let a = {
+    morning_time_list : [
+     {
+      "time" : "12:00 AM"
+     },
+     {
+      "time" : "01:00 AM"
+     },
+     {
+      "time" : "02:00 AM"
+     },
+     {
+      "time" : "03:00 AM"
+     },
+     {
+      "time" : "04:00 AM"
+     },
+     {
+      "time" : "05:00 AM"
+     },
+     {
+      "time" : "06:00 AM"
+     },
+     {
+      "time" : "07:00 AM"
+     },
+     {
+      "time" : "08:00 AM"
+     },
+     {
+      "time" : "09:00 AM"
+     },
+     {
+      "time" : "10:00 AM"
+     },
+     {
+      "time" : "11:00 AM"
+     }
+    ],
+    evening_time_list : [{
+      "time" : "12:00 PM"
+     },
+     {
+      "time" : "01:00 PM"
+     },
+     {
+      "time" : "02:00 PM"
+     },
+     {
+      "time" : "03:00 PM"
+     },
+     {
+      "time" : "04:00 PM"
+     },
+     {
+      "time" : "05:00 PM"
+     },
+     {
+      "time" : "06:00 PM"
+     },
+     {
+      "time" : "07:00 PM"
+     },
+     {
+      "time" : "08:00 PM"
+     },
+     {
+      "time" : "09:00 PM"
+     },
+     {
+      "time" : "10:00 PM"
+     },
+     {
+      "time" : "11:00 PM"
+     }],
+  }
+  res.json({Status:"Success",Message:"calendar time List", Data : a ,Code:200});
+        
+});
+
+
+
 router.post('/getlist_id', function (req, res) {
         vendordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
           res.json({Status:"Success",Message:"User type List", Data : StateList ,Code:200});
         });
 });
 
-
+router.post('/mobile/sp_fetch_by_id',async function (req, res) {
+    let services_details  =  await SP_servicesMode.findOne({_id:req.body.cata_id});
+    let Details = {
+      "image_path" : services_details.img_title,
+      "title" : services_details.img_path,
+      "count" : 0
+     }
+        vendordetailsModel.findOne({user_id:req.body.sp_id}, function (err, StateList) {
+       let a =  {
+        "bus_service_list": StateList.bus_service_list,
+        "bus_spec_list":  StateList.bus_spec_list,
+        "bus_service_gall":  StateList.bus_service_gall,
+        "bus_certif": StateList.bus_certif,
+        "_id":  StateList._id,
+        "user_id":  StateList.user_id,
+        "bus_user_name":  StateList.bus_user_name,
+        "bus_user_email":  StateList.bus_user_email,
+        "bussiness_name": StateList.bussiness_name,
+        "bus_user_phone": StateList.bus_user_phone,
+        "bus_profile": StateList.bus_profile,
+        "bus_proof": StateList.bus_proof,
+        "date_and_time": StateList.date_and_time,
+        "mobile_type": StateList.mobile_type,
+        "profile_status": StateList.profile_status,
+        "profile_verification_status": StateList.profile_verification_status,
+        "sp_loc": StateList.sp_loc,
+        "sp_lat": StateList.sp_lat,
+        "sp_long": StateList.sp_long,
+        "delete_status":StateList.delete_status,
+        "updatedAt": StateList.updatedAt,
+        "createdAt":StateList.createdAt,
+        "__v": StateList.__v,
+        "distance": 0 ,
+        "rating" : 0,
+        "comments" : 0
+    }
+          res.json({Status:"Success",Message:"SP Details", Data : a, Details : Details ,Code:200});
+        });
+});
 
 router.get('/getlist', function (req, res) {
         vendordetailsModel.find({}, function (err, Functiondetails) {
@@ -170,10 +378,32 @@ router.get('/sp_dropdown',async function (req, res) {
     "Specialization":"Specialization - 6"
    }
    ];
+   var times = [
+   {
+    "time":"15 mins"
+   },
+   {
+    "time":"30 mins"
+   },
+   {
+    "time":"45 mins"
+   },
+   {
+    "time":"1 hrs"
+   },
+   {
+    "time":"2 hrs"
+   },
+   {
+    "time":"3 hrs"
+   }
+   ];
+
    let c = 
     {
       "service_list" :service_list,
-      "Specialization" : Specialization
+      "Specialization" : Specialization,
+      "time" : times
     }
    
   res.json({Status:"Success",Message:"SP Service List", Data : c ,Code:200});
@@ -188,7 +418,8 @@ router.post('/check_status', function (req, res) {
           let dd = {
             'user_id' : req.body.user_id,
             'profile_status' : false,
-            'profile_verification_status' : "Not verified"
+            'profile_verification_status' : "Not verified",
+            'calender_status' : false,
           }
           if(dd.profile_verification_status == "Not verified"){
              res.json({Status:"Success",Message:message, Data : dd ,Code:200});
@@ -201,13 +432,16 @@ router.post('/check_status', function (req, res) {
           let dd = {
             'user_id' : req.body.user_id,
             'profile_status' : StateList.profile_status,
-            'profile_verification_status' : StateList.profile_verification_status
+            'profile_verification_status' : StateList.profile_verification_status,
+            'calender_status' : StateList.calender_status,
           }
           if(dd.profile_verification_status == "Not verified"){
              res.json({Status:"Success",Message:message, Data : dd ,Code:200});
           } else if(dd.profile_verification_status == 0) {
               res.json({Status:"Success",Message:"Profile not updated", Data : dd ,Code:200});
-          }else {
+          } else if(dd.calender_status == 0) {
+              res.json({Status:"Success",Message:"Service Provider Calendor not updated", Data : dd ,Code:200});
+          } else {
             res.json({Status:"Success",Message:"Service Provider Status", Data : dd ,Code:200});
           }
         }

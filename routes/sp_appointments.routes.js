@@ -13,7 +13,7 @@ router.post('/mobile/create', async function(req, res) {
         let Appointmentid = "PET-" + new Date().getTime();
         var doctordetailsModels = await doctordetailsModel.findOne({user_id:req.body.doctor_id});
         await SP_appointmentsModels.create({
-            sp_id : req.body.doctor_id,
+            sp_id : req.body.sp_id,
             appointment_UID : Appointmentid,
             booking_date : req.body.booking_date,
             booking_time : req.body.booking_time,
@@ -46,7 +46,7 @@ router.post('/mobile/create', async function(req, res) {
             completed_at : req.body.completed_at,
             missed_at : req.body.missed_at,
             mobile_type : req.body.mobile_type,
-            sp_business_info : doctordetailsModels,
+            sp_business_info : req.body.sp_business_info,
             delete_status : false
         }, 
         function (err, user) {
@@ -69,7 +69,7 @@ catch(e){
 });
 
 
-router.post('/mobile/doc_getlist/newapp', function (req, res) {
+router.post('/mobile/sp_getlist/newapp', function (req, res) {
         SP_appointmentsModels.find({sp_id:req.body.sp_id,appoinment_status:"Incomplete"}, function (err, StateList) {
           console.log(StateList);
            StateList.sort(function compare(a, b) {

@@ -23,6 +23,7 @@ var vendordetailsSchema = new mongoose.Schema({
   profile_status : Boolean,
   profile_verification_status : String,
   delete_status : Boolean,
+  calender_status : Boolean,
 });
 vendordetailsSchema.plugin(timestamps);
 mongoose.model('vendordetails', vendordetailsSchema);

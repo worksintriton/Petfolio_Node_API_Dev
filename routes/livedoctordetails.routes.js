@@ -3,7 +3,7 @@ var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
-var doctordetailsModel = require('./../models/doctordetailsModel');
+var livedoctordetailsModel = require('./../models/livedoctordetailsModel');
 var locationdetailsModel = require('./../models/locationdetailsModel');
 var GeoPoint = require('geopoint');
 
@@ -11,7 +11,7 @@ var GeoPoint = require('geopoint');
 router.post('/create', async function(req, res) {
   try{
     console.log(req.body);
-        await doctordetailsModel.create({
+        await livedoctordetailsModel.create({
             user_id:  req.body.user_id,
             dr_title : req.body.dr_title,
             dr_name : req.body.dr_name,
@@ -34,8 +34,6 @@ router.post('/create', async function(req, res) {
             signature : req.body.signature,
             mobile_type : req.body.mobile_type,
             communication_type : req.body.communication_type,
-            live_status : "Not Live",
-            live_by : "",
             delete_status : false,
             consultancy_fees : req.body.consultancy_fees,
             calender_status : false
@@ -53,7 +51,7 @@ catch(e){
 
 
 router.post('/filter_date', function (req, res) {
-        doctordetailsModel.find({}, function (err, StateList) {
+        livedoctordetailsModel.find({}, function (err, StateList) {
           var final_Date = [];
           for(let a = 0; a < StateList.length; a ++){
             var fromdate = new Date(req.body.fromdate);
@@ -72,7 +70,7 @@ router.post('/filter_date', function (req, res) {
 
 
 router.get('/deletes', function (req, res) {
-      doctordetailsModel.remove({}, function (err, user) {
+      livedoctordetailsModel.remove({}, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");
              res.json({Status:"Success",Message:"Docotor Details Deleted", Data : {} ,Code:200});     
       });
@@ -80,7 +78,7 @@ router.get('/deletes', function (req, res) {
 
 
 router.post('/getlist_id', function (req, res) {
-        doctordetailsModel.find({Person_id:req.body.Person_id}, function (err, StateList) {
+        livedoctordetailsModel.find({Person_id:req.body.Person_id}, function (err, StateList) {
           res.json({Status:"Success",Message:"Docotor Details List", Data : StateList ,Code:200});
         });
 });
@@ -92,7 +90,7 @@ router.post('/text_search',async function (req, res) {
         var user_lat = userlocation.location_lat;
         var user_long = userlocation.location_long;
          console.log(user_lat,user_long);
-        doctordetailsModel.find({}, function (err, StateList) {
+        livedoctordetailsModel.find({}, function (err, StateList) {
         var final_data = [];
         var keyword = req.body.search_string.toLowerCase();
         for(let a = 0 ; a  < StateList.length ; a ++){
@@ -217,7 +215,7 @@ router.post('/filter_doctor1',async function (req, res) {
       let userlocation  =  await locationdetailsModel.findOne({user_id:req.body.user_id,default_status: true});
       var user_lat = userlocation.location_lat;
       var user_long = userlocation.location_long;
-        doctordetailsModel.find({}, function (err, StateList) {
+        livedoctordetailsModel.find({}, function (err, StateList) {
         final_data = [];
         for(let a = 0 ; a < StateList.length ; a ++){
           var point1 = new GeoPoint(+user_lat, +user_long);
@@ -305,7 +303,7 @@ router.post('/filter_doctor1',async function (req, res) {
 
 
 router.post('/filter_doctor', function (req, res) {
-        doctordetailsModel.find({}, function (err, StateList) {
+        livedoctordetailsModel.find({}, function (err, StateList) {
         // res.json({Status:"Success",Message:"Filtered Doctor List", Data : StateList ,Code:200});
         final_data = [];
         for(let a = 0 ; a < StateList.length ; a ++){
@@ -337,7 +335,7 @@ router.post('/filter_doctor', function (req, res) {
 
 
 router.post('/fetch_doctor_id', function (req, res) {
-        doctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
+        livedoctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
           console.log(StateList);
           console.log(err);
       let dd = {
@@ -374,7 +372,7 @@ router.post('/fetch_doctor_id', function (req, res) {
 
 
 router.post('/fetch_doctor_user_id', function (req, res) {
-        doctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
+        livedoctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
           console.log(StateList);
           res.json({Status:"Success",Message:"Docotor Details", Data : StateList ,Code:200});
         });
@@ -385,7 +383,7 @@ router.post('/fetch_doctor_user_id', function (req, res) {
 
 
 router.post('/check_status', function (req, res) {
-        doctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
+        livedoctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
           console.log(StateList);
           let message = "Dear Doctor, We appreciate your interest and look forward to have you as part of Petfolio Team. Our team is reviewing your profile and will get in touch with you to close the formalities. Your profile is pending verification.";
          if(StateList == null){
@@ -427,9 +425,9 @@ router.post('/check_status', function (req, res) {
 
 
 router.post('/update_calendar_status',async function (req, res) {
-        let doctordetails  =  await doctordetailsModel.findOne({user_id:req.body.user_id});
+        let doctordetails  =  await livedoctordetailsModel.findOne({user_id:req.body.user_id});
         console.log(doctordetails);
-        doctordetailsModel.findByIdAndUpdate(doctordetails._id, req.body, {new: true}, function (err, UpdatedDetails) {
+        livedoctordetailsModel.findByIdAndUpdate(doctordetails._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
         });
@@ -439,7 +437,7 @@ router.post('/update_calendar_status',async function (req, res) {
 
 
 router.get('/getlist', function (req, res) {
-        doctordetailsModel.find({}, function (err, Functiondetails) {
+        livedoctordetailsModel.find({}, function (err, Functiondetails) {
           res.json({Status:"Success",Message:"Docotor Details Details", Data : Functiondetails ,Code:200});
         });
 });
@@ -447,14 +445,14 @@ router.get('/getlist', function (req, res) {
 
 
 router.get('/admin/getlist', function (req, res) {
-        doctordetailsModel.find({}, function (err, Functiondetails) {
+        livedoctordetailsModel.find({}, function (err, Functiondetails) {
           res.json({Status:"Success",Message:"Docotor Details Details", Data : Functiondetails ,Code:200});
         }).populate('user_id');
 });
 
 
 router.get('/mobile/getlist', function (req, res) {
-        doctordetailsModel.find({}, function (err, Functiondetails) {
+        livedoctordetailsModel.find({}, function (err, Functiondetails) {
           let a = {
             usertypedata : Functiondetails
           }
@@ -463,14 +461,14 @@ router.get('/mobile/getlist', function (req, res) {
 });
 
 router.post('/edit', function (req, res) {
-        doctordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+        livedoctordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
         });
 });
 // // DELETES A USER FROM THE DATABASE
 router.post('/delete', function (req, res) {
-      doctordetailsModel.findByIdAndRemove(req.body._id, function (err, user) {
+      livedoctordetailsModel.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
           res.json({Status:"Success",Message:"Docotor Details Deleted successfully", Data : {} ,Code:200});
       });

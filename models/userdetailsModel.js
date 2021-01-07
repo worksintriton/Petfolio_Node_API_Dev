@@ -9,6 +9,7 @@ var userdetailsSchema = new mongoose.Schema({
   user_email : String,
   user_phone : String,
   date_of_reg : String,
+  profile_img : String,
   otp : Number,
   user_type : Number,
   user_status : String,

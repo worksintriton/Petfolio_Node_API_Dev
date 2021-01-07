@@ -28,6 +28,7 @@ var PrescriptionRouter  = require('./routes/Prescription.routes');
 
 var petdetails = require('./routes/petdetails.routes');
 var doctordetails = require('./routes/doctordetails.routes');
+var livedoctordetails = require('./routes/livedoctordetails.routes');
 var vendordetails = require('./routes/vendordetails.routes');
 var locationdetails = require('./routes/locationdetails.routes');
 var homebannerdetails = require('./routes/homebanner.routes');
@@ -45,7 +46,13 @@ var HolidayRouter = require('./routes/Holiday.routes');
 var SP_Holiday = require('./routes/SP_Holiday.routes');
 var SP_services = require('./routes/SP_services.routes');
 var SP_appointments = require('./routes/sp_appointments.routes');
+var SP_available_time = require('./routes/sp_available_time.routes');
 
+
+var product_vendor = require('./routes/product_vendor.routes');
+var product_cate = require('./routes/product_categories.routes');
+var product_subcat = require('./routes/product_subcat.routes');
+var product_details = require('./routes/product_details.routes');
 
 
 
@@ -79,6 +86,48 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers,X-Access-Token,XKey,Authorization');
   next();
 });
+
+
+
+///////Notification Auto Schedule Process for 15 min  once ///////
+const intervalObj = setInterval(() => {
+var indiaTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+console.log(indiaTime);
+var space = indiaTime.split(":");
+console.log(space);
+console.log(+space[1]);
+if(+space[1] % 5 === 0  ){
+  console.log("Checking Notification");
+}
+notificationcall();
+},60000);
+
+function notificationcall(){
+    console.log("***********************API IS CALL *********************");
+    console.log("********************************************");
+//     console.log(time,dates);
+// let params = {   
+//         "Booking_Date" : dates,
+//         "Booking_Time": time
+// }
+// var request = require("request");
+//   request.post('http://mysalveo.com/api/notifications/notifydoctor',params,function(err,res,body)
+//   {
+//   if(err) //TODO: handle err
+//     console.log(res.body);
+// });
+
+//     request.post('http://mysalveo.com/api/notifications/notifypatient',params,function(err,res,body)
+//   {
+//   if(err) //TODO: handle err
+//     console.log(res.body);
+// });
+
+}
+
+
+////////////// Notification Process Close here //////////////
+
 
 
 
@@ -129,6 +178,7 @@ app.use('/api/demoscreen', Demoscreen);
 
 app.use('/api/petdetails',petdetails);
 app.use('/api/doctordetails',doctordetails);
+app.use('/api/livedoctordetails',livedoctordetails);
 app.use('/api/service_provider',vendordetails);
 app.use('/api/locationdetails',locationdetails);
 
@@ -145,6 +195,17 @@ app.use('/api/prescription',PrescriptionRouter);
 app.use('/api/sp_holiday',SP_Holiday);
 app.use('/api/sp_services',SP_services);
 app.use('/api/sp_appointments',SP_appointments);
+app.use('/api/sp_available_time',SP_available_time);
+
+
+
+
+
+app.use('/api/product_vendor',product_vendor);
+app.use('/api/product_cate',product_cate);
+app.use('/api/product_subcat',product_subcat);
+app.use('/api/product_details',product_details);
+
 
 
 
