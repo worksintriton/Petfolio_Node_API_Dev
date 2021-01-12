@@ -6,12 +6,26 @@ router.use(bodyParser.json());
 var AppointmentsModel = require('./../models/AppointmentsModel');
 var doctordetailsModel = require('./../models/doctordetailsModel');
 
+var userdetailsModel = require('./../models/userdetailsModel');
+var request = require("request");
 
 router.post('/mobile/create', async function(req, res) {
   try{
+    var Appointment_details = await AppointmentsModel.findOne({doctor_id:req.body.doctor_id,booking_date:req.body.booking_date,booking_time:req.body.booking_time});
+    if(Appointment_details !== null){
+      res.json({Status:"Failed",Message:"Slot Not Available", Data : {} ,Code:404}); 
+    }
+    else
+    {
         let display_date = req.body.date_and_time;
         let Appointmentid = "PET-" + new Date().getTime();
         var doctordetailsModels = await doctordetailsModel.findOne({user_id:req.body.doctor_id});
+
+        var  doctor_token =  await userdetailsModel.findOne({_id:req.body.doctor_id});
+        var user_token = await userdetailsModel.findOne({_id:req.body.user_id});
+
+
+
         await AppointmentsModel.create({
             doctor_id : req.body.doctor_id,
             appointment_UID : Appointmentid,
@@ -58,10 +72,54 @@ router.post('/mobile/create', async function(req, res) {
          }
           AppointmentsModel.findByIdAndUpdate(data._id, data, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.status(500).send("There was a problem updating the user.");
-             // res.json({Status:"Success",Message:"Appointmentdetails Updated", Data : UpdatedDetails ,Code:200});
-        res.json({Status:"Success",Message:"Appointment Added successfully", Data : user ,Code:200}); 
+var params = {
+    "user_token" : user_token.fb_token,
+    "name" : user_token.first_name,
+    "title" : "New Appointment",
+    "message" : "Your Appointment Booked successfully",
+    "subtitle" : "New Appointment",
+    "notify_time" : req.body.booking_date,
+    "message_status" :"unread",
+    "status" : "0",
+    "user_id" : user_token._id
+}
+
+var params1 = {
+    "user_token" : doctor_token.fb_token,
+    "name" : doctor_token.first_name,
+    "title" : "New Appointment",
+    "message" : "Your Appointment Booked successfully",
+    "subtitle" : "New Appointment",
+    "notify_time" : req.body.booking_date,
+    "message_status" :"unread",
+    "status" : "0",
+    "user_id" : doctor_token._id
+}
+
+request.post(
+    'http://52.25.163.13:3000/api/notification/send_notifiation',
+    { json: params },
+    function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            console.log(body);
+        }
+    }
+);
+
+request.post(
+    'http://52.25.163.13:3000/api/notification/send_notifiation',
+    { json: params1 },
+    function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            console.log(body);
+        }
+    }
+);
+     
+res.json({Status:"Success",Message:"Appointment Added successfully", Data : user ,Code:200});    
         });
         });
+    }
 }
 catch(e){
       res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
@@ -75,8 +133,8 @@ router.post('/mobile/doc_getlist/newapp', function (req, res) {
            StateList.sort(function compare(a, b) {
               console.log(a.server_date_time);
               console.log(b.server_date_time);
-               var dateA = new Date(a.server_date_time);
-               var dateB = new Date(b.server_date_time);
+               var dateA = new Date(a.updatedAt);
+               var dateB = new Date(b.updatedAt);
                console.log(dateA,dateB);
                return dateB - dateA;
                });
@@ -135,8 +193,8 @@ router.post('/mobile/doc_getlist/comapp', function (req, res) {
            StateList.sort(function compare(a, b) {
               console.log(a.server_date_time);
               console.log(b.server_date_time);
-               var dateA = new Date(a.server_date_time);
-               var dateB = new Date(b.server_date_time);
+               var dateA = new Date(a.updatedAt);
+               var dateB = new Date(b.updatedAt);
                console.log(dateA,dateB);
                return dateB - dateA;
                });
@@ -152,8 +210,8 @@ router.post('/mobile/doc_getlist/missapp', function (req, res) {
            StateList.sort(function compare(a, b) {
               console.log(a.server_date_time);
               console.log(b.server_date_time);
-               var dateA = new Date(a.server_date_time);
-               var dateB = new Date(b.server_date_time);
+               var dateA = new Date(a.updatedAt);
+               var dateB = new Date(b.updatedAt);
                console.log(dateA,dateB);
                return dateB - dateA;
                });
@@ -168,8 +226,8 @@ router.post('/mobile/plove_getlist/newapp',async function (req, res) {
            StateList.sort(function compare(a, b) {
               console.log(a.server_date_time);
               console.log(b.server_date_time);
-               var dateA = new Date(a.server_date_time);
-               var dateB = new Date(b.server_date_time);
+               var dateA = new Date(a.updatedAt);
+               var dateB = new Date(b.updatedAt);
                console.log(dateA,dateB);
                return dateB - dateA;
                });
@@ -184,8 +242,8 @@ router.post('/mobile/plove_getlist/comapp', function (req, res) {
            StateList.sort(function compare(a, b) {
               console.log(a.server_date_time);
               console.log(b.server_date_time);
-               var dateA = new Date(a.server_date_time);
-               var dateB = new Date(b.server_date_time);
+               var dateA = new Date(a.updatedAt);
+               var dateB = new Date(b.updatedAt);
                console.log(dateA,dateB);
                return dateB - dateA;
                });
@@ -201,8 +259,8 @@ router.post('/mobile/plove_getlist/missapp', function (req, res) {
            StateList.sort(function compare(a, b) {
               console.log(a.server_date_time);
               console.log(b.server_date_time);
-               var dateA = new Date(a.server_date_time);
-               var dateB = new Date(b.server_date_time);
+               var dateA = new Date(a.updatedAt);
+               var dateB = new Date(b.updatedAt);
                console.log(dateA,dateB);
                return dateB - dateA;
                });
@@ -345,7 +403,7 @@ router.post('/get_doc_new',async function (req, res) {
 
 router.post('/check', async function(req, res) {
   try{
-    await AppointmentsModel.findOne({user_id:req.body.user_id,Booking_Date:req.body.Booking_Date,Booking_Time:req.body.Booking_Time}, function (err, Appointmentdetails) {
+    await AppointmentsModel.findOne({doctor_id:req.body.doctor_id,Booking_Date:req.body.Booking_Date,Booking_Time:req.body.Booking_Time}, function (err, Appointmentdetails) {
           console.log(Appointmentdetails);
           if(Appointmentdetails!== null){
             res.json({Status:"Failed",Message:"Slot not Available",Data : {} ,Code:300});

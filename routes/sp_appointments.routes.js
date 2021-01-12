@@ -10,7 +10,7 @@ var doctordetailsModel = require('./../models/doctordetailsModel');
 router.post('/mobile/create', async function(req, res) {
   try{
         let display_date = req.body.date_and_time;
-        let Appointmentid = "PET-" + new Date().getTime();
+        let Appointmentid = "SP-" + new Date().getTime();
         var doctordetailsModels = await doctordetailsModel.findOne({user_id:req.body.doctor_id});
         await SP_appointmentsModels.create({
             sp_id : req.body.sp_id,
@@ -18,31 +18,24 @@ router.post('/mobile/create', async function(req, res) {
             booking_date : req.body.booking_date,
             booking_time : req.body.booking_time,
             booking_date_time : req.body.booking_date_time,
-            // communication_type : req.body.communication_type,
-            // msg_id : Appointmentid,
-            // video_id : req.body.video_id,
             user_id : req.body.user_id,
             pet_id : req.body.pet_id,
-            problem_info : req.body.problem_info,
+            additional_info : req.body.additional_info,
             sp_attched : req.body.doc_attched,
             appoinment_status : "Incomplete",
             start_appointment_status : "Not Started",
             end_appointment_status : "Not End",
-            doc_feedback : req.body.doc_feedback,
-            doc_rate : req.body.doc_rate,
+            sp_feedback : req.body.sp_feedback,
+            sp_rate : req.body.sp_rate,
             user_feedback : req.body.user_feedback,
             user_rate : req.body.user_rate,
             display_date : req.body.display_date,
             server_date_time : req.body.server_date_time,
-            payment_method : req.body.payment_method,
-            // prescription_details : "",
-            // vaccination_details :"",
-            appointment_types : req.body.appointment_types,
-            allergies : req.body.allergies,
             payment_id : req.body.payment_id,
-            amount : req.body.amount,
+            payment_method : req.body.payment_method,
             service_name :  req.body.service_name,
             service_amount :  req.body.service_amount,
+            service_time : req.body.service_time,
             completed_at : req.body.completed_at,
             missed_at : req.body.missed_at,
             mobile_type : req.body.mobile_type,

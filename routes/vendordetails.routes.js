@@ -88,9 +88,9 @@ router.post('/mobile/service_cat',async function (req, res) {
    for(let a = 0 ; a < services_details.length; a ++){
      let c = {
          "_id" : services_details[a]._id,
-        "image": services_details[a].img_path,
+        "image": services_details[a].img_banner,
         "title": services_details[a].img_title,
-        "sub_title": services_details[a].img_title,
+        "sub_title": services_details[a].img_subtitle,
      }
      final_Data.push(c);
      if(a == services_details.length - 1 ){
@@ -108,60 +108,39 @@ router.post('/mobile/servicedetails',async function (req, res) {
   console.log(location_details);
   console.log(services_details);
   console.log(vendordetailsModels);
-   let a = {
-    Service_Details : {
-      "image_path" : services_details.img_title,
-      "title" : services_details.img_path,
-      "count" : 0
-     },
-     Service_provider : [
-      {
-        "_id" : "1234QWERTYUIOP",
-        "image":"http://mysalveo.com/api/uploads/images.jpeg",
-        "service_provider_name":"Mohammed",
-        "service_price":100,
-        "service_offer": 23,
-        "service_place":"Chennai",
-        "distance":2,
-        "rating_count" : 5,
-        "comments_count":12,
-      },
-      {
-        "_id" : "1234QWERTYUIOP",
-        "image":"http://mysalveo.com/api/uploads/images.jpeg",
-        "service_provider_name":"Mohammed",
-        "service_price":100,
-        "service_offer": 23,
-        "service_place":"Chennai",
-        "distance":2,
-        "rating_count" : 5,
-        "comments_count":12,
-      },
-      {
-        "_id" : "1234QWERTYUIOP",
-        "image":"http://mysalveo.com/api/uploads/images.jpeg",
-        "service_provider_name":"Mohammed",
-        "service_price":100,
-        "service_offer": 23,
-        "service_place":"Chennai",
-        "distance":2,
-        "rating_count" : 5,
-        "comments_count":12,
-      },
-      {
-        "_id" : "1234QWERTYUIOP",
-        "image":"http://mysalveo.com/api/uploads/images.jpeg",
-        "service_provider_name":"Mohammed",
-        "service_price":100,
-        "service_offer": 23,
-        "service_place":"Chennai",
+    var final_Data = [];
+   for(let x = 0 ; x < vendordetailsModels.length; x ++){
+    console.log(vendordetailsModels[x]);
+    console.log(vendordetailsModels[x].sp_loc);
+     let c =  {
+        "_id" : vendordetailsModels[x]._id,
+        "image": vendordetailsModels[x].bus_service_gall[0].bus_service_gall,
+        "service_provider_name": vendordetailsModels[x].bussiness_name,
+        "service_price": 200,
+        "service_offer": 0,
+        "service_place":vendordetailsModels[x].sp_loc,
         "distance":2,
         "rating_count" : 5,
         "comments_count":12,
       }
-     ]
+     final_Data.push(c);
+     if(x == vendordetailsModels.length - 1 ){
+      // res.json({Status:"Success",Message:"Service Cat List", Data : final_Data ,Code:200});
+   let a = {
+    Service_Details : {
+      "_id": services_details._id,
+      "image_path" :services_details.img_path,
+      "title" : services_details.img_title,
+      "count" : 0
+     },
+     Service_provider : final_Data
    }
   res.json({Status:"Success",Message:"Service Provider List", Data : a ,Code:200});
+     }
+   }
+
+
+
 });
 
 
@@ -286,11 +265,15 @@ router.post('/getlist_id', function (req, res) {
 router.post('/mobile/sp_fetch_by_id',async function (req, res) {
     let services_details  =  await SP_servicesMode.findOne({_id:req.body.cata_id});
     let Details = {
-      "image_path" : services_details.img_title,
-      "title" : services_details.img_path,
-      "count" : 0
+      "_id": services_details._id,
+      "image_path" : services_details.img_path,
+      "title" : services_details.img_title,
+      "count" : 0,
+      "amount" : 200,
+      "time" : "15 mins"
      }
-        vendordetailsModel.findOne({user_id:req.body.sp_id}, function (err, StateList) {
+        vendordetailsModel.findOne({_id:req.body.sp_id}, function (err, StateList) {
+          console.log(StateList);
        let a =  {
         "bus_service_list": StateList.bus_service_list,
         "bus_spec_list":  StateList.bus_spec_list,

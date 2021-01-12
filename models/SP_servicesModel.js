@@ -5,6 +5,8 @@ const Schema = mongoose.Schema;
 var SP_servicesSchema = new mongoose.Schema({  
   img_path:  String,
   img_title : String,
+  img_subtitle : String,
+  img_banner : String,
   img_index : Number,
   show_status : Boolean,
   date_and_time : String,

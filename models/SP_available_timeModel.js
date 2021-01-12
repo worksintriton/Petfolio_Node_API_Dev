@@ -1,13 +1,23 @@
 var mongoose = require('mongoose');
 var timestamps = require('mongoose-timestamp');
 const Schema = mongoose.Schema; 
+var New_sptimeSchema = new mongoose.Schema({  
+  
+  sp_name: String,
 
-var SP_availabel_timeSchema = new mongoose.Schema({  
-  user_id : String,
-  Dates : Array,
+  user_id: String,
+
+  sp_date_time: Array,
+
+  sp_time: Array,
+
+  Update_date : String,
+
   mobile_type : String,
+
   delete_status : Boolean,
+
 });
-SP_availabel_timeSchema.plugin(timestamps);
-mongoose.model('SP_availabel_time', SP_availabel_timeSchema);
-module.exports = mongoose.model('SP_availabel_time');
+New_sptimeSchema.plugin(timestamps);
+mongoose.model('New_sptime', New_sptimeSchema);
+module.exports = mongoose.model('New_sptime');

@@ -11,9 +11,6 @@ var sp_appointmentSchema = new mongoose.Schema({
   booking_date: String,
   booking_time: String,
   booking_date_time : String,
-  // communication_type : String,
-  // msg_id : String,
-  // video_id : String,
   user_id : {  
        type: Schema.Types.ObjectId,
        ref: 'userdetails',
@@ -22,14 +19,7 @@ var sp_appointmentSchema = new mongoose.Schema({
        type: Schema.Types.ObjectId,
        ref: 'petdetails',
     },
-
-   // pet_record :
-   // {  
-   //     type: Schema.Types.ObjectId,
-   //     ref: 'Payment',
-   //    }  
-   
-  // problem_info : String,
+  additional_info : String,
   sp_attched : Array,
   appoinment_status : String,
   start_appointment_status : String,
@@ -42,20 +32,14 @@ var sp_appointmentSchema = new mongoose.Schema({
   server_date_time : String,
   payment_id : String,
   payment_method : String,
-  // prescription_details : String,
-  // vaccination_details : String,
-  appointment_types : String,
-  allergies : String,
-  amount : String,
   service_name : String,
   service_amount : String,
+  service_time : String,
   completed_at : String,
   missed_at : String,
   mobile_type : String,
   sp_business_info : Array,
   delete_status : Boolean,
-
-  
 });
 sp_appointmentSchema.plugin(timestamps);
 mongoose.model('sp_appointment', sp_appointmentSchema);

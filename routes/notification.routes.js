@@ -7,6 +7,7 @@ var notificationModel = require('./../models/notificationModel');
 
 
 router.post('/create', async function(req, res) {
+  console.log(req.body);
   try{
         await notificationModel.create({
             user_id:  req.body.user_id,
@@ -48,12 +49,11 @@ router.post('/filter_date', function (req, res) {
 
 
 router.post('/send_notifiation', async function(req, res) {
-  ///Notification Sending process///
-   var headers1 = {
-          authorization:
-            "key=AAAAuAfKTJc:APA91bEgV3d-Ww4UU6EbruDZ-UOQUhFsYnwuuYGclQ6-AEr0i1cqhrprwD7o2bUc_CXAPlqOE4A0JKy-c_RsBNfOP2eoFgSVGICKpFIYQjzMuUKdUD61HVI0U9KTOOKXVwbUszR2BeVQ",
-          "content-type": "application/json"
-     };
+  console.log("Notification Send Request", req.body);
+     const headers = {
+ 'Authorization': 'key=AAAAuAfKTJc:APA91bEqg2JkAjFv_0zTeD-1V2NYdQuwEn9jFJitGzMj607Qh7Xp5UhSEkzVKcgN64s4pt0UA1jqdjPAhnZP9bA1bxLcWJonPHWuRQfP4DkW2du79egB9krlUH2GRa6WmGZ0uOLd0Gyg',
+ 'Content-Type': 'application/json'
+}
      // Set the message as high priority and have it expire after 24 hours.
         var options = {
           priority: "high",
@@ -75,7 +75,7 @@ router.post('/send_notifiation', async function(req, res) {
             {
               url: myURL1,
               method: "POST",
-              headers1,
+              headers,
               body: body1,
               options,
               json: true
@@ -90,7 +90,7 @@ router.post('/send_notifiation', async function(req, res) {
                   )
                 );
               }else {
-              	// console.log(response);
+              	console.log(response.body);
                 console.log("Firebase Send");
               }
             });
