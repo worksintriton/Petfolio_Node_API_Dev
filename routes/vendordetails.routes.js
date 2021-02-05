@@ -10,9 +10,10 @@ var homebannerModel = require('./../models/homebannerModel');
 var locationdetailsModel = require('./../models/locationdetailsModel');
 var SP_specialationsMode = require('./../models/SP_servicesModel');
 var SP_servicesMode = require('./../models/SP_servicesModel');
-
+var GeoPoint = require('geopoint');
 
 router.post('/create', async function(req, res) {
+  console.log(req.body);
   try{
         await vendordetailsModel.create({
             user_id:  req.body.user_id,
@@ -37,7 +38,7 @@ router.post('/create', async function(req, res) {
             calender_status : false
         }, 
         function (err, user) {
-          console.log(user)
+     
         res.json({Status:"Success",Message:"SP Added successfully", Data : user ,Code:200}); 
         });
 }
@@ -49,6 +50,7 @@ catch(e){
 
 
 router.post('/mobile/dashboard',async function (req, res) {
+    console.log(req.body);
  let userdetails  =  await userdetailsModel.findOne({_id:req.body.user_id});
  let location_details  =  await locationdetailsModel.find({user_id:req.body.user_id,default_status:true});
  let homebanner  =  await homebannerModel.find({});
@@ -101,29 +103,61 @@ router.post('/mobile/service_cat',async function (req, res) {
 
 
 
+
+
+
+
+
 router.post('/mobile/servicedetails',async function (req, res) {
+    console.log(req.body);
  let location_details  =  await locationdetailsModel.findOne({user_id:req.body.user_id,default_status:true});
+  var user_lat = location_details.location_lat;
+  var user_long = location_details.location_long;
   let services_details  =  await SP_servicesMode.findOne({_id:req.body.cata_id});
   let vendordetailsModels  =  await vendordetailsModel.find({});
-  console.log(location_details);
-  console.log(services_details);
-  console.log(vendordetailsModels);
     var final_Data = [];
    for(let x = 0 ; x < vendordetailsModels.length; x ++){
-    console.log(vendordetailsModels[x]);
-    console.log(vendordetailsModels[x].sp_loc);
-     let c =  {
+    var point1 = new GeoPoint(+user_lat, +user_long);
+    var point2 = new GeoPoint(+vendordetailsModels[x].sp_lat,+vendordetailsModels[x].sp_long);
+    var distance = point1.distanceTo(point2, true)//output in kilometers
+   if(req.body.Count_value_start == 0 && req.body.Count_value_end == 0 && req.body.review_count == 0){
+    let service_prices = 0;
+            for(let c = 0; c < vendordetailsModels[x].bus_service_list.length ; c ++){
+              if(vendordetailsModels[x].bus_service_list[c].bus_service_list == services_details.img_title)
+                {
+                       service_prices = vendordetailsModels[x].bus_service_list[c].amount;     
+                }   
+      }
+    if(req.body.distance == 0){
+         if(distance < 15){
+         let c =  {
         "_id" : vendordetailsModels[x]._id,
         "image": vendordetailsModels[x].bus_service_gall[0].bus_service_gall,
         "service_provider_name": vendordetailsModels[x].bussiness_name,
-        "service_price": 200,
+        "service_price": +service_prices,
         "service_offer": 0,
         "service_place":vendordetailsModels[x].sp_loc,
-        "distance":2,
+        "distance": +distance.toFixed(2),
         "rating_count" : 5,
         "comments_count":12,
       }
      final_Data.push(c);
+         }
+    }
+    else {
+     let c =  {
+        "_id" : vendordetailsModels[x]._id,
+        "image": vendordetailsModels[x].bus_service_gall[0].bus_service_gall,
+        "service_provider_name": vendordetailsModels[x].bussiness_name,
+        "service_price": +service_prices,
+        "service_offer": 0,
+        "service_place":vendordetailsModels[x].sp_loc,
+        "distance": +distance.toFixed(2),
+        "rating_count" : 5,
+        "comments_count":12,
+      }
+     final_Data.push(c);
+    }
      if(x == vendordetailsModels.length - 1 ){
       // res.json({Status:"Success",Message:"Service Cat List", Data : final_Data ,Code:200});
    let a = {
@@ -135,24 +169,105 @@ router.post('/mobile/servicedetails',async function (req, res) {
      },
      Service_provider : final_Data
    }
-  res.json({Status:"Success",Message:"Service Provider List", Data : a ,Code:200});
+   if(req.body.distance == 1){
+
+    if(a.Service_provider.length == 0){
+    res.json({Status:"Failed",Message:"Service Provider List",alert_msg : "Around 15 kms no recorde found, shall i show above 15 kms", Data : a ,Code:404});
+    }else{
+             res.json({Status:"Success",Message:"Service Provider List",alert_msg : "Around 15 kms no recorde found, shall i show above 15 kms", Data : a ,Code:200});
+    }
+   }else{
+       res.json({Status:"Success",Message:"Service Provider List",alert_msg : "Around 15 kms no recorde found, shall i show above 15 kms", Data : a ,Code:200});
+   }
      }
    }
+   else
+   { 
+  if(req.body.distance == 0){
+         if(distance < 15){
+           let service_prices = 0;
+            for(let c = 0; c < vendordetailsModels[x].bus_service_list.length ; c ++){
+              if(vendordetailsModels[x].bus_service_list[c].bus_service_list == services_details.img_title)
+                {
+                       service_prices = vendordetailsModels[x].bus_service_list[c].amount;     
+                }   
+            }
+          if(service_prices > req.body.Count_value_start && service_prices < req.body.Count_value_end)
+           {
+      let c =  {
+        "_id" : vendordetailsModels[x]._id,
+        "image": vendordetailsModels[x].bus_service_gall[0].bus_service_gall,
+        "service_provider_name": vendordetailsModels[x].bussiness_name,
+        "service_price": +service_prices,
+        "service_offer": 0,
+        "service_place":vendordetailsModels[x].sp_loc,
+        "distance": +distance.toFixed(2),
+        "rating_count" : 5,
+        "comments_count":12,
+      }
+     final_Data.push(c);
+           }        
+         }
+    }
+    else {
+       let service_prices = 0;
+            for(let c = 0; c < vendordetailsModels[x].bus_service_list.length ; c ++){
+              if(vendordetailsModels[x].bus_service_list[c].bus_service_list == services_details.img_title)
+                {
+                       service_prices = vendordetailsModels[x].bus_service_list[c].amount;     
+                }   
+            }
+          if(service_prices > req.body.Count_value_start && service_prices < req.body.Count_value_end)
+           {
+      let c =  {
+        "_id" : vendordetailsModels[x]._id,
+        "image": vendordetailsModels[x].bus_service_gall[0].bus_service_gall,
+        "service_provider_name": vendordetailsModels[x].bussiness_name,
+        "service_price": +service_prices,
+        "service_offer": 0,
+        "service_place":vendordetailsModels[x].sp_loc,
+        "distance": +distance.toFixed(2),
+        "rating_count" : 5,
+        "comments_count":12,
+      }
+     final_Data.push(c);
+           }
+    }
+     if(x == vendordetailsModels.length - 1 ){
+      // res.json({Status:"Success",Message:"Service Cat List", Data : final_Data ,Code:200});
+   let a = {
+    Service_Details : {
+      "_id": services_details._id,
+      "image_path" :services_details.img_path,
+      "title" : services_details.img_title,
+      "count" : 0
+     },
+     Service_provider : final_Data
+   }
+   if(a.Service_provider.length == 0){
+    res.json({Status:"Failed",Message:"Service Provider List",alert_msg : "Around 15 kms no recorde found, shall i show above 15 kms", Data : a ,Code:404});
+   }else{
+    res.json({Status:"Success",Message:"Service Provider List",alert_msg : "Around 15 kms no recorde found, shall i show above 15 kms", Data : a ,Code:200});
+   }
+  // res.json({Status:"Success",Message:"Service Provider List",alert_msg : "Around 15 kms no recorde found, shall i show above 15 kms", Data : a ,Code:200});
+    }
 
-
-
+   }
+     
+   }
 });
 
 
 
 router.post('/filter_date', function (req, res) {
+    console.log(req.body);
         vendordetailsModel.find({}, function (err, StateList) {
           var final_Date = [];
           for(let a = 0; a < StateList.length; a ++){
             var fromdate = new Date(req.body.fromdate);
             var todate = new Date(req.body.todate);
             var checkdate = new Date(StateList[a].createdAt);
-            console.log(fromdate,todate,checkdate);
+           
             if(checkdate >= fromdate && checkdate <= todate){
               final_Date.push(StateList[a]);
             }
@@ -164,6 +279,38 @@ router.post('/filter_date', function (req, res) {
 });
 
 
+router.get('/filter_price_list', function (req, res) {
+  let a = [
+    {
+      "Display_text":"Under Rs.500",
+      "Count_value_start" : 0,
+      "Count_value_end" : 500,
+    },
+    {
+      "Display_text":"Rs. 500 - Rs. 1,000",
+      "Count_value_start" : 500,
+      "Count_value_end" : 1000,
+    },
+    {
+      "Display_text":"Rs. 1,000 - Rs. 2,000",
+      "Count_value_start" : 1000,
+      "Count_value_end" : 2000,
+    },
+    {
+      "Display_text":"Rs. 2,000 - Rs. 3,000",
+      "Count_value_start" : 2000,
+      "Count_value_end" : 3000,
+    },
+    {
+      "Display_text":"Rs. 3,000 - Above",
+      "Count_value_start" : 3000,
+      "Count_value_end" : 1000000,
+    }
+  ]
+ res.json({Status:"Success",Message:"SP filter price list", Data : a ,Code:200});          
+});
+
+
 
 router.get('/deletes', function (req, res) {
       vendordetailsModel.remove({}, function (err, user) {
@@ -171,6 +318,7 @@ router.get('/deletes', function (req, res) {
              res.json({Status:"Success",Message:"User type Deleted", Data : {} ,Code:200});     
       });
 });
+
 
 
 router.get('/calendar_timelist', function (req, res) {
@@ -257,12 +405,14 @@ router.get('/calendar_timelist', function (req, res) {
 
 
 router.post('/getlist_id', function (req, res) {
+    console.log(req.body);
         vendordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
           res.json({Status:"Success",Message:"User type List", Data : StateList ,Code:200});
         });
 });
 
 router.post('/mobile/sp_fetch_by_id',async function (req, res) {
+    console.log(req.body);
     let services_details  =  await SP_servicesMode.findOne({_id:req.body.cata_id});
     let Details = {
       "_id": services_details._id,
@@ -273,7 +423,7 @@ router.post('/mobile/sp_fetch_by_id',async function (req, res) {
       "time" : "15 mins"
      }
         vendordetailsModel.findOne({_id:req.body.sp_id}, function (err, StateList) {
-          console.log(StateList);
+
        let a =  {
         "bus_service_list": StateList.bus_service_list,
         "bus_spec_list":  StateList.bus_spec_list,
@@ -315,6 +465,7 @@ router.get('/getlist', function (req, res) {
 
 
 router.get('/sp_dropdown',async function (req, res) {
+
    let SP_specialationsModess  =  await SP_specialationsMode.find({});
    var service_list = []
    for(let a = 0 ; a < SP_specialationsModess.length ; a ++ ){
@@ -394,8 +545,9 @@ router.get('/sp_dropdown',async function (req, res) {
 
 
 router.post('/check_status', function (req, res) {
+    console.log(req.body);
         vendordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
-          console.log(StateList);
+         
           let message = "Dear Service Provider, We appreciate your interest and look forward to have you as part of Petfolio Team. Our team is reviewing your profile and will get in touch with you to close the formalities. Your profile is pending verification.";
          if(StateList == null){
           let dd = {
@@ -433,6 +585,7 @@ router.post('/check_status', function (req, res) {
 
 
 router.get('/mobile/getlist', function (req, res) {
+    console.log(req.body);
         vendordetailsModel.find({}, function (err, Functiondetails) {
           let a = {
             usertypedata : Functiondetails
@@ -442,13 +595,30 @@ router.get('/mobile/getlist', function (req, res) {
 });
 
 router.post('/edit', function (req, res) {
+    console.log(req.body);
         vendordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"User type Updated", Data : UpdatedDetails ,Code:200});
         });
 });
-// // DELETES A USER FROM THE DATABASE
+
 router.post('/delete', function (req, res) {
+    console.log(req.body);
+ let c = {
+    delete_status : true
+  }
+  vendordetailsModel.findByIdAndUpdate(req.body._id, c, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Location Deleted successfully", Data : UpdatedDetails ,Code:200});
+  });
+});
+
+
+
+
+// // DELETES A USER FROM THE DATABASE
+router.post('/admin_delete', function (req, res) {
+    console.log(req.body);
       vendordetailsModel.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
           res.json({Status:"Success",Message:"User type Deleted successfully", Data : {} ,Code:200});

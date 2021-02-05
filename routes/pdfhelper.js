@@ -10,11 +10,11 @@ const puppeteer = require('puppeteer');
 const { v4: uuidv4 } = require('uuid');
 var fs = require('fs');
 var pug = require ('pug');
-var BaseUrl = "http://52.25.163.13:3000";
+var BaseUrl = "http://54.212.108.156:3000";
 var app = express();
-app.use('/api/', express.static(path.join(__dirname, 'routes')));
+app.use('/api/', express.static(path.join(__dirname, 'public')));
 
-exports.pdfgenerator = async function (doctordata,patientdata,meditationdata,Prescription_data,doctor_commeents) {
+exports.pdfgenerator = async function (doctordata,Prescription_data,doctor_commeents) {
    try{
     //console.log(Prescription_data);
     console.log("image path",doctordata);
@@ -36,7 +36,7 @@ exports.pdfgenerator = async function (doctordata,patientdata,meditationdata,Pre
       doctorname : doctordata.dr_name,
       doctorsepecilization: specialization,
       doctorsignature: doctordata.signature,
-       patientname : patientdata.pet_name,
+       patientname : "",
     //   patientage: patientdata.Age,
     //   dotorsignature: doctordata.signature,
     //   KMSnumber : doctordata.KMS_registration,
@@ -56,7 +56,7 @@ exports.pdfgenerator = async function (doctordata,patientdata,meditationdata,Pre
         var options = { format: 'Letter', height: "20.5in",
   width: "18in"};
         var filepath = __dirname + '/public/prescriptions/' + uuidv4() + '.pdf' ;
-        var filepart = filepath.slice(54,94);
+        var filepart = filepath.slice(52,94);
         console.log("filepart",filepath)
         var Finalpath = BaseUrl +'/api/public/prescriptions/' + filepart;
         console.log("Finalpath",Finalpath)

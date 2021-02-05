@@ -5,13 +5,13 @@ router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 var SP_appointmentsModels = require('./../models/SP_appointmentsModels');
 var doctordetailsModel = require('./../models/doctordetailsModel');
-
+var vendordetailsModel = require('./../models/vendordetailsModel');
 
 router.post('/mobile/create', async function(req, res) {
   try{
         let display_date = req.body.date_and_time;
         let Appointmentid = "SP-" + new Date().getTime();
-        var doctordetailsModels = await doctordetailsModel.findOne({user_id:req.body.doctor_id});
+        var doctordetailsModels = await vendordetailsModel.findOne({user_id:req.body.sp_id});
         await SP_appointmentsModels.create({
             sp_id : req.body.sp_id,
             appointment_UID : Appointmentid,
@@ -39,7 +39,7 @@ router.post('/mobile/create', async function(req, res) {
             completed_at : req.body.completed_at,
             missed_at : req.body.missed_at,
             mobile_type : req.body.mobile_type,
-            sp_business_info : req.body.sp_business_info,
+            sp_business_info : doctordetailsModels,
             delete_status : false
         }, 
         function (err, user) {
@@ -60,6 +60,15 @@ catch(e){
       res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
 }
 });
+
+
+router.post('/mobile/fetch_appointment_id', function (req, res) {
+        SP_appointmentsModels.findOne({_id:req.body.apppointment_id}, function (err, StateList) {
+         res.json({Status:"Success",Message:"New Appointment List", Data : StateList ,Code:200});         
+        }).populate('user_id sp_id pet_id');
+});
+
+
 
 
 router.post('/mobile/sp_getlist/newapp', function (req, res) {
@@ -117,7 +126,7 @@ router.post('/filter_date', function (req, res) {
               res.json({Status:"Success",Message:"Demo screen  List", Data : final_Date ,Code:200});
             }
           }
-        }).populate('user_id sp_id pet_id');
+        }).populate('user_id pet_id');
 });
 
 
@@ -134,7 +143,7 @@ router.post('/mobile/sp_getlist/comapp', function (req, res) {
                return dateB - dateA;
                });
           res.json({Status:"Success",Message:"Completed Appointment List", Data : StateList ,Code:200});
-        }).populate('user_id sp_id pet_id');
+        }).populate('user_id  pet_id');
 });
 
 
@@ -151,8 +160,10 @@ router.post('/mobile/sp_getlist/missapp', function (req, res) {
                return dateB - dateA;
                });
           res.json({Status:"Success",Message:"Missed Appointment List", Data : StateList ,Code:200});
-        }).populate('user_id sp_id pet_id');
+        }).populate('user_id  pet_id');
 });
+
+
 
 
 router.post('/mobile/plove_getlist/newapp',async function (req, res) {
@@ -422,8 +433,21 @@ router.post('/edit', function (req, res) {
 });
 
 
-// // DELETES A USER FROM THE DATABASE
+
 router.post('/delete', function (req, res) {
+ let c = {
+    delete_status : true
+  }
+  SP_appointmentsModels.findByIdAndUpdate(req.body._id, c, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Location Deleted successfully", Data : UpdatedDetails ,Code:200});
+  });
+});
+
+
+
+// // DELETES A USER FROM THE DATABASE
+router.post('/admin_delete', function (req, res) {
       SP_appointmentsModels.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
           res.json({Status:"Success",Message:"Appointment Deleted successfully", Data : {} ,Code:200});
