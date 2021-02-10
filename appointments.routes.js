@@ -5,11 +5,9 @@ router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 var AppointmentsModel = require('./../models/AppointmentsModel');
 var SP_appointmentsModels = require('./../models/SP_appointmentsModels');
+
+
 var doctordetailsModel = require('./../models/doctordetailsModel');
-
-
-var reviewdetailsModel = require('./../models/reviewdetailsModel');
-
 
 var userdetailsModel = require('./../models/userdetailsModel');
 var request = require("request");
@@ -179,15 +177,8 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
           res.json({Status:"Success",Message:"New Appointment List", Data : final_appointment_list ,Code:200});
        }else{
         for(let b = 0 ; b < doctor_appointmentlist.length ; b ++){
-           var oldDateObj = new Date(doctor_appointmentlist[b].display_date);
-           console.log(oldDateObj);
-           var s = new Date(doctor_appointmentlist[b].display_date);
-           console.log(s)
-           s.setMinutes(s.getMinutes()+45);
-           var curr = new Date(req.body.current_time);
-           console.log("30 mins",s);
-           console.log("current_Date",curr);
-           if(s > curr){
+          let dates =  new Date(doctor_appointmentlist[b].Booked_at);
+          console.log(dates);
             let fin = {
           "_id" : doctor_appointmentlist[b]._id,
           "Booking_Id":doctor_appointmentlist[b].appointment_UID,
@@ -216,17 +207,6 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
           "appoint_patient_st" : doctor_appointmentlist[b].appoint_patient_st || "",
         }
         final_appointment_list.push(fin);
-         } 
-           else {
-             let c = {
-                missed_at : doctor_appointmentlist[b].booking_date_time,
-                appoinment_status : "Missed",
-                appoint_patient_st : "Doctor missed appointment"
-              }
-             AppointmentsModel.findByIdAndUpdate(doctor_appointmentlist[b]._id, c, {new: true}, function (err, UpdatedDetails) {
-            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500}); 
-            });
-           }
         if(b == doctor_appointmentlist.length - 1){
            final_appointment_list.sort(function compare(a, b) {
                var dateA = new Date(a.updatedAt);
@@ -241,21 +221,10 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
        }
     }
   }
-  }
-   else
+  } else
   {
   for(let b = 0 ; b < doctor_appointmentlist.length ; b ++){
-           var oldDateObj = new Date(doctor_appointmentlist[b].display_date);
-           console.log(oldDateObj);
-           var s = new Date(doctor_appointmentlist[b].display_date);
-           console.log(s)
-           s.setMinutes(s.getMinutes()+30);
-           var curr = new Date(req.body.current_time);
-           console.log("30 mins",s);
-           console.log("current_Date",curr);
-           if(s > curr){
-          console.log("not Completed");
-          let fin = {
+        let fin = {
           "_id" : doctor_appointmentlist[b]._id,
           "Booking_Id":doctor_appointmentlist[b].appointment_UID,
           "appointment_for" : "Doctor",
@@ -283,17 +252,6 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
            "appoint_patient_st" : doctor_appointmentlist[b].appoint_patient_st || "",
         }
         final_appointment_list.push(fin);
-           } 
-           else {
-             let c = {
-                missed_at : s,
-                appoinment_status : "Missed",
-                appoint_patient_st : "Doctor missed appointment"
-              }
-             AppointmentsModel.findByIdAndUpdate(doctor_appointmentlist[b]._id, c, {new: true}, function (err, UpdatedDetails) {
-            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500}); 
-            });
-           }
         if(b == doctor_appointmentlist.length - 1){
 
           final_appointment_list.sort(function compare(a, b) {
@@ -460,12 +418,58 @@ router.post('/mobile/plove_getlist/comapp1',async function (req, res) {
 router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
  var sp_appointmentlist =  await SP_appointmentsModels.find({user_id:req.body.user_id,appoinment_status:"Missed"}).populate('user_id sp_id pet_id');
  var doctor_appointmentlist =  await AppointmentsModel.find({user_id:req.body.user_id,appoinment_status:"Missed"}).populate('user_id doctor_id pet_id');
+ var noshow_appointmentlist =  await AppointmentsModel.find({user_id:req.body.user_id,appoinment_status:"No Show"}).populate('user_id doctor_id pet_id');
 
  console.log(doctor_appointmentlist.length);
   console.log(sp_appointmentlist.length);
   var final_appointment_list = [];
   if(doctor_appointmentlist.length == 0 && sp_appointmentlist.length == 0){
+
+    if(noshow_appointmentlist.length !== 0){
+    for(let d = 0 ; d < noshow_appointmentlist.length ; d ++){
+          let fin = {
+          "_id" : noshow_appointmentlist[d]._id,
+          "Booking_Id":noshow_appointmentlist[d].appointment_UID,
+          "appointment_for" : "Doctor",
+          "photo" : noshow_appointmentlist[d].doc_business_info[0].clinic_pic[0].clinic_pic,
+          "clinic_name" :  noshow_appointmentlist[d].doc_business_info[0].clinic_name,
+          "pet_name" : noshow_appointmentlist[d].pet_id.pet_name,
+          "appointment_type" : noshow_appointmentlist[d].appointment_types,
+          "cost" : noshow_appointmentlist[d].amount,
+          "appointment_time" : noshow_appointmentlist[d].booking_date_time,
+          "createdAt" :  noshow_appointmentlist[d].createdAt,
+          "updatedAt" :  noshow_appointmentlist[d].updatedAt,
+          "pet_type" : noshow_appointmentlist[d].pet_id.pet_type,
+          "type" : "" ,
+          "service_provider_name" :"",
+          "Service_name" : "",
+          "service_cost" : "",
+          "Booked_at" : noshow_appointmentlist[d].booking_date_time,
+          "missed_at" : noshow_appointmentlist[d].missed_at || "",
+          "completed_at" : noshow_appointmentlist[d].completed_at || "",
+          "user_rate" : noshow_appointmentlist[d].user_rate|| "",
+          "user_feedback" : noshow_appointmentlist[d].user_feedback|| "",   
+          "status" : noshow_appointmentlist[d].appoinment_status,
+        }
+        final_appointment_list.push(fin);
+
+         final_appointment_list.sort(function compare(a, b) {
+
+               var dateA = new Date(a.updatedAt);
+               var dateB = new Date(b.updatedAt);
+               console.log(dateA,dateB);
+               return dateB - dateA;
+               });
+
+           res.json({Status:"Success",Message:"Missed Appointment List", Data : final_appointment_list ,Code:200});
+
+           
+        }
+      }else{
          res.json({Status:"Success",Message:"Missed Appointment List", Data : final_appointment_list ,Code:200});
+      }
+
+
   } else {
   if(sp_appointmentlist.length !== 0){
    for(let a = 0 ; a < sp_appointmentlist.length ; a ++){
@@ -495,18 +499,49 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
         }
         final_appointment_list.push(fin);
     if(a == sp_appointmentlist.length - 1){
+       if(doctor_appointmentlist.length == 0){
 
+        for(let d = 0 ; d < noshow_appointmentlist.length ; d ++){
+          let fin = {
+          "_id" : noshow_appointmentlist[d]._id,
+          "Booking_Id":noshow_appointmentlist[d].appointment_UID,
+          "appointment_for" : "Doctor",
+          "photo" : noshow_appointmentlist[d].doc_business_info[0].clinic_pic[0].clinic_pic,
+          "clinic_name" :  noshow_appointmentlist[d].doc_business_info[0].clinic_name,
+          "pet_name" : noshow_appointmentlist[d].pet_id.pet_name,
+          "appointment_type" : noshow_appointmentlist[d].appointment_types,
+           "communication_type" : noshow_appointmentlist[d].communication_type,
+          "cost" : noshow_appointmentlist[d].amount,
+          "appointment_time" : noshow_appointmentlist[d].booking_date_time,
+          "createdAt" :  noshow_appointmentlist[d].createdAt,
+          "updatedAt" :  noshow_appointmentlist[d].updatedAt,
+          "pet_type" : noshow_appointmentlist[d].pet_id.pet_type,
+          "type" : "" ,
+          "service_provider_name" :"",
+          "start_appointment_status" : noshow_appointmentlist[d].start_appointment_status,
+          "Service_name" : "",
+          "service_cost" : "",
+          "Booked_at" : noshow_appointmentlist[d].booking_date_time,
+          "missed_at" : noshow_appointmentlist[d].missed_at || "",
+          "completed_at" : noshow_appointmentlist[d].completed_at || "",
+          "user_rate" : noshow_appointmentlist[d].user_rate|| "",
+          "user_feedback" : noshow_appointmentlist[d].user_feedback|| "",   
+          "status" : noshow_appointmentlist[d].appoinment_status,
+          "appoint_patient_st" : noshow_appointmentlist[d].appoint_patient_st || "",
+        }
+        final_appointment_list.push(fin);
+        }
 
-         if(doctor_appointmentlist.length == 0){
-          
+         final_appointment_list.sort(function compare(a, b) {
+
+               var dateA = new Date(a.updatedAt);
+               var dateB = new Date(b.updatedAt);
+               console.log(dateA,dateB);
+               return dateB - dateA;
+               });
           res.json({Status:"Success",Message:"Missed Appointment List", Data : final_appointment_list ,Code:200});
-
-         } else {
-
-          for(let b = 0 ; b < doctor_appointmentlist.length ; b ++){
-
+       }else{
         for(let b = 0 ; b < doctor_appointmentlist.length ; b ++){
-
           console.log(doctor_appointmentlist[b]);
             let fin = {
           "_id" : doctor_appointmentlist[b]._id,
@@ -532,28 +567,60 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
           "missed_at" : doctor_appointmentlist[b].missed_at || "",
           "completed_at" : doctor_appointmentlist[b].completed_at || "",
           "user_rate" : doctor_appointmentlist[b].user_rate|| "",
-          "user_feedback" : doctor_appointmentlist[b].user_feedback|| "",   
+                    "user_feedback" : doctor_appointmentlist[b].user_feedback|| "",   
           "status" : doctor_appointmentlist[b].appoinment_status,
         }
         final_appointment_list.push(fin);
         if(b == doctor_appointmentlist.length - 1){
-          final_appointment_list.sort(function compare(a, b) {
+
+          for(let d = 0 ; d < noshow_appointmentlist.length ; d ++){
+          let fin = {
+          "_id" : noshow_appointmentlist[d]._id,
+          "Booking_Id":noshow_appointmentlist[d].appointment_UID,
+          "appointment_for" : "Doctor",
+          "photo" : noshow_appointmentlist[d].doc_business_info[0].clinic_pic[0].clinic_pic,
+          "clinic_name" :  noshow_appointmentlist[d].doc_business_info[0].clinic_name,
+          "pet_name" : noshow_appointmentlist[d].pet_id.pet_name,
+          "appointment_type" : noshow_appointmentlist[d].appointment_types,
+          "communication_type" : noshow_appointmentlist[d].communication_type,
+          "cost" : noshow_appointmentlist[d].amount,
+          "appointment_time" : noshow_appointmentlist[d].booking_date_time,
+          "start_appointment_status" : noshow_appointmentlist[d].start_appointment_status || "",
+          "appoint_patient_st" : noshow_appointmentlist[d].appoint_patient_st || "",
+          "createdAt" :  noshow_appointmentlist[d].createdAt,
+          "updatedAt" :  noshow_appointmentlist[d].updatedAt,
+          "pet_type" : noshow_appointmentlist[d].pet_id.pet_type,
+          "type" : "" ,
+          "service_provider_name" :"",
+          "Service_name" : "",
+          "service_cost" : "",
+          "Booked_at" : noshow_appointmentlist[d].booking_date_time,
+          "missed_at" : noshow_appointmentlist[d].missed_at || "",
+          "completed_at" : noshow_appointmentlist[d].completed_at || "",
+          "user_rate" : noshow_appointmentlist[d].user_rate|| "",
+          "user_feedback" : noshow_appointmentlist[d].user_feedback|| "",   
+          "status" : noshow_appointmentlist[d].appoinment_status,
+        }
+        final_appointment_list.push(fin);
+        }
+
+
+
+           final_appointment_list.sort(function compare(a, b) {
+
                var dateA = new Date(a.updatedAt);
                var dateB = new Date(b.updatedAt);
                console.log(dateA,dateB);
                return dateB - dateA;
-          });
-        res.json({Status:"Success",Message:"Missed Appointment List", Data : final_appointment_list ,Code:200});
+               });
+           res.json({Status:"Success",Message:"Missed Appointment List", Data : final_appointment_list ,Code:200});
         }
        }
 
-
-         }
-
-
+       }
     }
   }
-  }else
+  } else
   {
   for(let b = 0 ; b < doctor_appointmentlist.length ; b ++){
         let fin = {
@@ -585,18 +652,51 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
         }
         final_appointment_list.push(fin);
         if(b == doctor_appointmentlist.length - 1){
+
+          for(let d = 0 ; d < noshow_appointmentlist.length ; d ++){
+          let fin = {
+          "_id" : noshow_appointmentlist[d]._id,
+          "Booking_Id":noshow_appointmentlist[d].appointment_UID,
+          "appointment_for" : "Doctor",
+          "photo" : noshow_appointmentlist[d].doc_business_info[0].clinic_pic[0].clinic_pic,
+          "clinic_name" :  noshow_appointmentlist[d].doc_business_info[0].clinic_name,
+          "pet_name" : noshow_appointmentlist[d].pet_id.pet_name,
+          "appointment_type" : noshow_appointmentlist[d].appointment_types,
+          "communication_type" : noshow_appointmentlist[d].communication_type,
+          "cost" : noshow_appointmentlist[d].amount,
+          "appointment_time" : noshow_appointmentlist[d].booking_date_time,
+          "createdAt" :  noshow_appointmentlist[d].createdAt,
+          "updatedAt" :  noshow_appointmentlist[d].updatedAt,
+          "pet_type" : noshow_appointmentlist[d].pet_id.pet_type,
+          "start_appointment_status" : noshow_appointmentlist[d].start_appointment_status || "",
+          "appoint_patient_st" : noshow_appointmentlist[d].appoint_patient_st || "",
+          "type" : "" ,
+          "service_provider_name" :"",
+          "Service_name" : "",
+          "service_cost" : "",
+          "Booked_at" : noshow_appointmentlist[d].booking_date_time,
+          "missed_at" : noshow_appointmentlist[d].missed_at || "",
+          "completed_at" : noshow_appointmentlist[d].completed_at || "",
+          "user_rate" : noshow_appointmentlist[d].user_rate|| "",
+          "user_feedback" : noshow_appointmentlist[d].user_feedback|| "",   
+          "status" : noshow_appointmentlist[d].appoinment_status,
+        }
+        final_appointment_list.push(fin);
+        }
+
           final_appointment_list.sort(function compare(a, b) {
+
                var dateA = new Date(a.updatedAt);
                var dateB = new Date(b.updatedAt);
                console.log(dateA,dateB);
                return dateB - dateA;
                });
+
            res.json({Status:"Success",Message:"Missed Appointment List", Data : final_appointment_list ,Code:200});
         }
   }
   }
-  } 
-}       
+  }        
 });
 
 
@@ -611,13 +711,12 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
 
 router.post('/mobile/fetch_appointment_id', function (req, res) {
         AppointmentsModel.findOne({_id:req.body.apppointment_id}, function (err, StateList) {
-         res.json({Status:"Success",Message:"New Appointment List", Data : StateList ,Code:200});         
+         res.json({Status:"Success",Message:"New Appointment List", Data : sort_data ,Code:200});         
         }).populate('user_id doctor_id pet_id');
 });
 
 
 router.post('/mobile/doc_getlist/newapp', function (req, res) {
-  console.log(req.body);
         AppointmentsModel.find({doctor_id:req.body.doctor_id,appoinment_status:"Incomplete"}, function (err, StateList) {
           console.log(StateList);
            StateList.sort(function compare(a, b) {
@@ -678,13 +777,6 @@ router.get('/listing_cancelled', function (req, res) {
           for(let a  = 0 ; a < StateList.length ; a ++){
                console.log(StateList[a].user_id.first_name);
                let c = {
-                "appointment_id" : StateList[a]._id,
-                "appointment_key" : StateList[a].appointment_UID,
-                "appointment_type" :StateList[a].appointment_types,
-                "appointment_date" :StateList[a].booking_date_time,
-                "appointment_price" : StateList[a].amount,
-                "doctor_name" : StateList[a].doctor_id.first_name,
-                "doctor_id" : StateList[a].doctor_id._id,
                 "_id": StateList[a].user_id._id,
                 "first_name": StateList[a].user_id.first_name,
                 "last_name": StateList[a].user_id.last_name,
@@ -697,9 +789,6 @@ router.get('/listing_cancelled', function (req, res) {
                if(a == StateList.length - 1){
                  res.json({Status:"Success",Message:"Missed Appointment List", Data : final_Date ,Code:200});
                }
-          }
-          if(StateList.length == 0){
-             res.json({Status:"Success",Message:"Missed Appointment List", Data : [] ,Code:200});
           }
         }).populate('user_id doctor_id pet_id');
 });
@@ -748,7 +837,6 @@ router.post('/mobile/doc_getlist/comapp', function (req, res) {
 
 
 router.post('/mobile/doc_getlist/missapp', function (req, res) {
-  console.log(req.body);
         AppointmentsModel.find({doctor_id:req.body.doctor_id,appoinment_status:"Missed"}, function (err, StateList) {
           console.log(StateList);
            StateList.sort(function compare(a, b) {
@@ -1025,43 +1113,12 @@ router.post('/mobile/user/edit', function (req, res) {
 });
 
 
-
-router.post('/reviews/update',async function (req, res) {
-        var Appointment_details = await AppointmentsModel.findOne({_id:req.body._id});
-        var doctor_details = await doctordetailsModel.findOne({user_id:Appointment_details.doctor_id});
-        await reviewdetailsModel.create({
-            doctor_id:  Appointment_details.doctor_id,
-            user_id : Appointment_details.user_id,
-            rating : req.body.user_rate,
-            reviews : req.body.user_feedback
-        },async function (err, user) {
-          console.log(user)
-        var test_rat_count = 0; 
-        var review_details = await reviewdetailsModel.find({doctor_id:Appointment_details.doctor_id});
-        for(let a = 0 ; a < review_details.length ; a++){
-            test_rat_count = +review_details[a].rating + test_rat_count;
-         }
-         var final_rat_count = test_rat_count / review_details.length;
-        let c = {
-        comments : review_details.length,
-        rating : final_rat_count
-        } 
-        console.log(c);
-        doctordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
-            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
-             // res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
-               console.log("DAtA updated in Doctor Details");
-        });
+router.post('/reviews/update', function (req, res) {
         AppointmentsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
-             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
-             res.json({Status:"Success",Message:"Feedback updated successfully", Data : UpdatedDetails ,Code:200});
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Appointment Updated", Data : UpdatedDetails ,Code:200});
         });
-
-        });    
 });
-
-
-
 
 
 
