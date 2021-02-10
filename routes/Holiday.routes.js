@@ -4,12 +4,17 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 var HolidayModel = require('./../models/HolidayModel');
+var AppointmentsModel = require('./../models/AppointmentsModel');
 
 
 router.post('/create', async function(req, res) {
+  console.log(req.body);
   try{
     var datas = await HolidayModel.findOne({user_id:req.body.user_id,Date:req.body.Date});
-    if(datas == null){
+    var Appointments_Details = await AppointmentsModel.find({doctor_id:req.body.user_id,booking_date:req.body.Date,appoinment_status:"Incomplete"});
+    console.log("Appointmnet Details",Appointments_Details);
+    if(Appointments_Details.length == 0){
+        if(datas == null){
               await HolidayModel.create({
             user_id:  req.body.user_id,
             Date : req.body.Date,
@@ -24,6 +29,10 @@ router.post('/create', async function(req, res) {
             else{
               res.json({Status:"Failed",Message:"Already added", Data : {} ,Code:404}); 
             }
+
+    }else{
+            res.json({Status:"Failed",Message:"You have "+Appointments_Details.length+" appointments on the selected date. Please cancel your appointments for this day before marking your calender", Data : {} ,Code:404}); 
+    } 
 }
 catch(e){
       res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
@@ -79,7 +88,20 @@ router.post('/edit', function (req, res) {
         });
 });
 
+
+// router.post('/delete', function (req, res) {
+//  let c = {
+//     delete_status : true
+//   }
+//   HolidayModel.findByIdAndUpdate(req.body._id, c, {new: true}, function (err, UpdatedDetails) {
+//             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+//              res.json({Status:"Success",Message:"Location Deleted successfully", Data : UpdatedDetails ,Code:200});
+//   });
+// });
+
+
 // // DELETES A USER FROM THE DATABASE
+
 router.post('/delete', function (req, res) {
       HolidayModel.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});

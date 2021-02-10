@@ -79,8 +79,20 @@ router.post('/edit', function (req, res) {
         });
 });
 
-// // DELETES A USER FROM THE DATABASE
+
 router.post('/delete', function (req, res) {
+ let c = {
+    delete_status : true
+  }
+  SP_HolidayModel.findByIdAndUpdate(req.body._id, c, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Location Deleted successfully", Data : UpdatedDetails ,Code:200});
+  });
+});
+
+
+// // DELETES A USER FROM THE DATABASE
+router.post('/admin_delete', function (req, res) {
       SP_HolidayModel.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
           console.log(err);

@@ -59,7 +59,7 @@ var product_details = require('./routes/product_details.routes');
 
 /*Database connectivity*/
 
-var BaseUrl = "http://52.25.163.13:3000/api"; 
+var BaseUrl = "http://54.212.108.156:3000/api"; 
 const mongoose = require('mongoose'); 
 mongoose.connect('mongodb://localhost:27017/Salveo'); 
 var db = mongoose.connection; 
@@ -221,7 +221,6 @@ app.use('/api/product_details',product_details);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
-
 });
 
 // error handler

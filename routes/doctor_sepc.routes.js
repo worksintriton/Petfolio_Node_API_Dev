@@ -91,8 +91,21 @@ router.post('/edit', function (req, res) {
              res.json({Status:"Success",Message:"specialization Updated", Data : UpdatedDetails ,Code:200});
         });
 });
-// // DELETES A USER FROM THE DATABASE
+
+
 router.post('/delete', function (req, res) {
+ let c = {
+    delete_status : true
+  }
+  doctor_specModel.findByIdAndUpdate(req.body._id, c, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Location Deleted successfully", Data : UpdatedDetails ,Code:200});
+  });
+});
+
+
+// // DELETES A USER FROM THE DATABASE
+router.post('/admin_delete', function (req, res) {
       doctor_specModel.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
           res.json({Status:"Success",Message:"specialization Deleted successfully", Data : {} ,Code:200});

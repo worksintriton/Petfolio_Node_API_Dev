@@ -54,6 +54,7 @@ var appointmentSchema = new mongoose.Schema({
   mobile_type : String,
   doc_business_info : Array,
   delete_status : Boolean,
+  appoint_patient_st : String,
 
   
 });

@@ -23,11 +23,12 @@ router.post('/create', async function(req, res) {
      //console.log("Create",req.body);
      var Prescription_data = req.body.Prescription_data || "";
      var doctor_commeents = req.body.Doctor_Comments || "";
-     var doctorDetails = await doctordetailsModel.findById(req.body.Doctor_ID);
-     var MeditationDetails = await AppointmentModel.findById(req.body.Appointment_ID);
-     var PetDetails = await PetdetailsModel.findById(req.body.Pet_ID);
-     var pdfpath = await pdfgeneratorHelper.pdfgenerator(doctorDetails,PetDetails,MeditationDetails,Prescription_data,doctor_commeents);
-     console.log(pdfpath)
+     var doctorDetails = await doctordetailsModel.findOne({user_id:req.body.doctor_id});
+     console.log(doctorDetails);
+     var MeditationDetails = await AppointmentModel.findOne({_id:req.body.Appointment_ID});
+     // var PetDetails = await PetdetailsModel.findById(req.body.Pet_ID);
+     var pdfpath = await pdfgeneratorHelper.pdfgenerator(doctorDetails,Prescription_data,doctor_commeents);
+     console.log("Prescription",pdfpath);
      // if(req.body.Treatment_Done_by == 'Self'){
      //   var patientDetails = await PatientModel.findById(req.body.Patient_ID).select('Name Age Gender Height Weight');
      //  var pdfpath = await pdfgeneratorHelper.pdfgenerator(doctorDetails,patientDetails,MeditationDetails,Prescription_data,doctor_commeents);
@@ -65,13 +66,21 @@ router.post('/getlist', function (req, res) {
         });
 });
 
+
+router.post('/fetch_by_appointment_id', function (req, res) {
+      Prescription.findOne({Appointment_ID:req.body.Appointment_ID}, function (err, Prescriptiondetails) {
+      res.json({Status:"Success",Message:"Prescriptiondetails", Data : Prescriptiondetails ,Code:200});
+        });
+});
+
+
 router.get('/getlist', function (req, res) {
       Prescription.find({}, function (err, Prescriptiondetails) {
       res.json({Status:"Success",Message:"Prescriptiondetails", Data : Prescriptiondetails ,Code:200});
         });
 })
 
-router.delete('/deletes', function (req, res) {
+router.get('/deletes', function (req, res) {
       Prescription.remove({}, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");
              res.json({Status:"Success",Message:"Prescription Details Deleted", Data : {} ,Code:200});     
@@ -162,8 +171,22 @@ else{
       res.status(500).send("Internal server error");
     }
 });
-// // DELETES A USER FROM THE DATABASE
+
+
 router.post('/delete', function (req, res) {
+ let c = {
+    delete_status : true
+  }
+  Prescription.findByIdAndUpdate(req.body._id, c, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Location Deleted successfully", Data : UpdatedDetails ,Code:200});
+  });
+});
+
+
+
+// // DELETES A USER FROM THE DATABASE
+router.post('/admin_delete', function (req, res) {
       Prescription.findByIdAndRemove(req.body.Prescription_id, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");
           res.json({Status:"Success",Message:"Prescription Deleted successfully", Data : {} ,Code:200});

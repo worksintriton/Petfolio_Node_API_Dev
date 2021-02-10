@@ -17,13 +17,18 @@ var product_categoriesModel = require('./../models/product_categoriesModel');
 var SP_servicesMode = require('./../models/SP_servicesModel');
 
 
+var AppointmentsModel = require('./../models/AppointmentsModel');
+var SP_appointmentsModels = require('./../models/SP_appointmentsModels');
+
+
+
 router.post('/create', async function(req, res) {
   try{
-       let random = Math.floor(Math.random() * 899999 + 100000);
+       let random = 123456;
        let phone  =  await userdetailsModel.findOne({user_phone : req.body.user_phone});
-       // console.log(phone);
+
        if(phone !== null){
-        // console.log('This phone number already registered');
+
         if(phone.user_status == 'Incomplete'){
            let a  = {
             user_details : phone
@@ -51,10 +56,10 @@ router.post('/create', async function(req, res) {
           dumbell +
           "&type=" +
           tye;
-        console.log(baseurls);
+
         requestss(baseurls, { json: true }, async (err, response, body) => {
            if (err) {
-            return console.log(err);
+            return 
           }
           else{
         res.json({Status:"Success",Message:"Sign up successfully! welcome to petfolio",Data : a , Code:200}); 
@@ -77,6 +82,7 @@ router.post('/create', async function(req, res) {
             user_status : "Incomplete",
             otp : random,
             profile_img : "",
+            user_email_verification : req.body.user_email_verification,
             fb_token : "",
             device_id : "",
             device_type : "",
@@ -84,7 +90,7 @@ router.post('/create', async function(req, res) {
             delete_status : false
         }, 
         function (err, user) {
-          // console.log(user)
+         
         let a  = {
             user_details : user
         }
@@ -111,7 +117,7 @@ router.post('/create', async function(req, res) {
           dumbell +
           "&type=" +
           tye;
-        // console.log(baseurls);
+        
         requestss(baseurls, { json: true }, async (err, response, body) => {
            if (err) {
             return console.log(err);
@@ -129,6 +135,95 @@ catch(e){
 });
 
 
+
+router.post('/send/emailotp',async function (req, res) {
+   let phone  =  await userdetailsModel.findOne({user_email:req.body.user_email,user_email_verification:true});
+  
+   if(phone !== null){
+      res.json({Status:"Failed",Message:"This email Id already Exist", Data : {} ,Code:404});     
+   }
+   else
+   {
+    let random = 123456;
+    var nodemailer = require('nodemailer');
+    var transporter = nodemailer.createTransport({
+  service: 'gmail',
+  host: 'smtp.gmail.com',
+  auth: {
+    user: 'carpeinfinitus@gmail.com',
+    pass: 'Petfolio@123'
+  }
+});
+
+var mailOptions = {
+  from: 'carpeinfinitus@gmail.com',
+  to: req.body.user_email,
+  subject: "Email verification OTP",
+  text: "Hi, Your OTP is " + random + ". Petfolio OTP for Signup."
+};
+
+transporter.sendMail(mailOptions, function(error, info){
+  if (error) {
+   
+  } else {
+   
+    res.json({Status:"Success",Message:"Eamil id Send successfully",Data : {
+      'email_id': req.body.user_email,
+      'otp' : random
+    } , Code:200}); 
+
+  }
+});
+
+   }   
+});
+
+
+
+router.get('/sendtestsms', function (req, res) {
+
+        var json = "";
+        var username = "tritonitsolutionstrans";
+        var password = 20145;
+        var mobilno = req.body.user_phone;
+        var message =
+          "Hi, Your OTP is " + random + ". Petfolio OTP for Signup.";
+        // var dumbell = "DUMBELL";
+        var dumbell = "VOXITW";
+        var tye = 0;
+        var baseurls =
+          "http://www.smsintegra.com/" +
+          "api/smsapi.aspx?uid=" +
+          username +
+          "&pwd=" +
+          password +
+          "&mobile=" +
+          mobilno +
+          "&msg=" +
+          message +
+          "&sid=" +
+          dumbell +
+          "&type=" +
+          tye;
+          requestss(baseurls, { json: true }, async (err, response, body) => {
+           if (err) {
+            return console.log(err);
+          }
+          else{
+        res.json({Status:"Success",Message:"Sign up successfully! welcome to petfolio",Data : a , Code:200}); 
+              }
+        });
+
+
+      // userdetailsModel.remove({}, function (err, user) {
+      //     if (err) return res.status(500).send("There was a problem deleting the user.");
+      //        res.json({Status:"Success",Message:"User Details Deleted", Data : {} ,Code:200});     
+      // });
+});
+
+
+
+
 router.get('/deletes', function (req, res) {
       userdetailsModel.remove({}, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");
@@ -144,7 +239,7 @@ router.post('/filter_date', function (req, res) {
             var fromdate = new Date(req.body.fromdate);
             var todate = new Date(req.body.todate);
             var checkdate = new Date(StateList[a].createdAt);
-            console.log(fromdate,todate,checkdate);
+          
             if(checkdate >= fromdate && checkdate <= todate){
               final_Date.push(StateList[a]);
             }
@@ -159,7 +254,7 @@ router.post('/filter_date', function (req, res) {
 
 
 router.post('/petlove/mobile/dashboard',async function (req, res) {
-  // console.log(req.body);
+ 
  let userdetails  =  await userdetailsModel.findOne({_id:req.body.user_id}); 
 
 
@@ -184,11 +279,11 @@ router.post('/petlove/mobile/dashboard',async function (req, res) {
  // dashboard_petlover.Banner_details = dashboard_petlover;
    let final_docdetails = [];
    for(let a = 0 ; a < tem_doctordetailsModel.length; a ++){
-    // console.log(tem_doctordetailsModel[a]);
+   
     var point1 = new GeoPoint(+req.body.lat, +req.body.long);
     var point2 = new GeoPoint(+tem_doctordetailsModel[a].clinic_lat,+tem_doctordetailsModel[a].clinic_long);
     var distance = point1.distanceTo(point2, true)//output in kilometers
-    // console.log(distance);
+   
     
     let dd = {
        '_id' : tem_doctordetailsModel[a].user_id,
@@ -227,10 +322,10 @@ router.post('/petlove/mobile/dashboard',async function (req, res) {
 
 
 router.post('/petlove/mobile/dashboard1',async function (req, res) {
-  // console.log(req.body);
+ 
  let userdetails  =  await userdetailsModel.findOne({_id:req.body.user_id});
  let SP_servicelist  =  await SP_servicesMode.find({});
- console.log(SP_servicelist);
+
  var SP_servicelist_final = [];
  for(let s = 0 ; s < SP_servicelist.length ; s ++){
   let q = {
@@ -241,11 +336,11 @@ router.post('/petlove/mobile/dashboard1',async function (req, res) {
     }
     SP_servicelist_final.push(q);
  }
- let location_details  =  await locationdetailsModel.find({user_id:req.body.user_id,default_status:true});
+ let location_details  =  await locationdetailsModel.find({user_id:req.body.user_id,default_status:true,delete_status:false});
  let tem_doctordetailsModel  =  await doctordetailsModel.find({});
  let Banner_details  =  await doctordetailsModel.find({});
  let product_categoriesModels  =  await product_categoriesModel.find({});
- let petdetailsModels  =  await petdetailsModel.find({user_id:req.body.user_id});
+ let petdetailsModels  =  await petdetailsModel.find({user_id:req.body.user_id,delete_status:false});
  let homebanner  =  await homebannerModel.find({});
  dashboard_petlover1.Service_details =  SP_servicelist_final;
  dashboard_petlover1.Products_details = product_categoriesModels;
@@ -262,11 +357,11 @@ router.post('/petlove/mobile/dashboard1',async function (req, res) {
  // dashboard_petlover1.Banner_details = dashboard_petlover1;
    let final_docdetails = [];
    for(let a = 0 ; a < tem_doctordetailsModel.length; a ++){
-    // console.log(tem_doctordetailsModel[a]);
+
     var point1 = new GeoPoint(+req.body.lat, +req.body.long);
     var point2 = new GeoPoint(+tem_doctordetailsModel[a].clinic_lat,+tem_doctordetailsModel[a].clinic_long);
     var distance = point1.distanceTo(point2, true)//output in kilometers
-    // console.log(distance);
+
     
     let dd = {
        '_id' : tem_doctordetailsModel[a].user_id,
@@ -321,6 +416,54 @@ router.post('/fetch_all_details',async function (req, res) {
 
 
 
+router.get('/fetch_payment_Details',async function (req, res) {
+
+  var final_details = [];
+  var Appointment_details = await AppointmentsModel.find({}).populate('user_id doctor_id pet_id');
+  var app_total_price = 0;
+  if(Appointment_details.length == 0){
+     app_total_price = 0;     
+  }
+  else{
+  for(let a = 0; a < Appointment_details.length ; a ++){
+     app_total_price =  +app_total_price + +Appointment_details[a].amount;
+     final_details.push(Appointment_details[a]);
+     if(a == Appointment_details.length - 1){
+       app_total_price = app_total_price;
+     }
+  }
+  }
+
+  var SP_appointmentsModelss = await SP_appointmentsModels.find({}).populate('user_id sp_id pet_id');
+  var sp_total_price = 0;
+  if(SP_appointmentsModelss.length == 0){
+    sp_total_price = 0;
+   res.json({Status:"Success",Message:"Appointment Calculations", Data : total_price ,Code:200});     
+  }
+  else{
+  for(let a = 0; a < SP_appointmentsModelss.length ; a ++){
+     sp_total_price =  +sp_total_price  +  +SP_appointmentsModelss[a].service_amount;
+     final_details.push(SP_appointmentsModelss[a]);
+     if(a == SP_appointmentsModelss.length - 1){
+      sp_total_price = sp_total_price;
+     }
+  }
+  }
+      let a = {
+        app_total_price : app_total_price,
+        doc_appoint_details : Appointment_details,
+        sp_total_price : sp_total_price,
+        sp_appoint_details : SP_appointmentsModelss,
+        vendor_total_price : 0,
+        vendor_order_details : [],
+        user_total_price : app_total_price + sp_total_price,
+        user_appoint_details : final_details
+      }
+      res.json({Status:"Success",Message:"User Details List", Data : a ,Code:200});
+      
+});
+
+
 
 
 router.post('/mobile/login',async function (req, res) {
@@ -329,14 +472,14 @@ router.post('/mobile/login',async function (req, res) {
       res.json({Status:"Failed",Message:"Invalid Account",Data : {},Code:404}); 
     } else 
     {
-     // console.log(userdetails);
+
      if(userdetails.user_type == 1){
-     let random = Math.floor(Math.random() * 899999 + 100000);
+     let random = 123456;
      let updatedata = {otp:random}
      var updatedetails = await userdetailsModel.findByIdAndUpdate({_id:userdetails._id},updatedata,{
        new: true
      });
-     // console.log(updatedetails);
+
       let a  = {
             user_details : updatedetails
         }
@@ -363,22 +506,22 @@ router.post('/mobile/login',async function (req, res) {
           dumbell +
           "&type=" +
           tye;
-        console.log(baseurls);
+
         requestss(baseurls, { json: true }, async (err, response, body) => {
           if (err) {
-            return console.log(err);
+            return 
           }
           else{
              res.json({Status:"Success",Message:"OTP Send to your mobile number",Data : a , Code:200}); 
               }
          });
      }else if(userdetails.user_type == 4){
-     let random = Math.floor(Math.random() * 899999 + 100000);
+     let random = 123456;
      let updatedata = {otp:random}
      var updatedetails = await userdetailsModel.findByIdAndUpdate({_id:userdetails._id},updatedata,{
        new: true
      });
-     // console.log(updatedetails);
+    
       let a  = {
             user_details : updatedetails
         }
@@ -405,7 +548,7 @@ router.post('/mobile/login',async function (req, res) {
           dumbell +
           "&type=" +
           tye;
-        // console.log(baseurls);
+       
         requestss(baseurls, { json: true }, async (err, response, body) => {
           if (err) {
             return console.log(err);
@@ -415,12 +558,12 @@ router.post('/mobile/login',async function (req, res) {
               }
          });
      }else if(userdetails.user_type == 2){
-     let random = Math.floor(Math.random() * 899999 + 100000);
+     let random = 123456;
      let updatedata = {otp:random}
      var updatedetails = await userdetailsModel.findByIdAndUpdate({_id:userdetails._id},updatedata,{
        new: true
      });
-     // console.log(updatedetails);
+     
       let a  = {
             user_details : updatedetails
         }
@@ -447,10 +590,10 @@ router.post('/mobile/login',async function (req, res) {
           dumbell +
           "&type=" +
           tye;
-        console.log(baseurls);
+
         requestss(baseurls, { json: true }, async (err, response, body) => {
           if (err) {
-            return console.log(err);
+            return 
           }
           else{
              res.json({Status:"Success",Message:"OTP Send to your mobile number",Data : a , Code:200}); 
@@ -502,10 +645,10 @@ router.post('/mobile/resendotp', function (req, res) {
           dumbell +
           "&type=" +
           tye;
-        console.log(baseurls);
+       
         requestss(baseurls, { json: true }, async (err, response, body) => {
            if (err) {
-            return console.log(err);
+            return 
           }
           else{
           res.json({Status:"Success",Message:"OTP sent successfully! welcome to petfolio", Data : a ,Code:200});
@@ -531,12 +674,17 @@ router.get('/getlist', function (req, res) {
 router.get('/adminpanel/Dashboard/count',async function (req, res) {    
     let petloverdetails  =  await userdetailsModel.find({user_type:1});
     let doctordetails  =  await userdetailsModel.find({user_type:4});
-    // console.log(petloverdetails,doctordetails);
+    let sp  =  await userdetailsModel.find({user_type:2});
+    let vendor  =  await userdetailsModel.find({user_type:3});
      let a  = {
        petloverdetails : petloverdetails,
        petloverdetails_count : petloverdetails.length,
        doctordetails : doctordetails,
-       doctordetails_count : doctordetails.length
+       doctordetails_count : doctordetails.length,
+       sp : sp,
+       sp_count : sp.length,
+       vendordetails : vendor,
+       vendor_count : vendor.length
      } 
 res.json({Status:"Success",Message:"Dashboard Details", Data : a ,Code:200});
 });
@@ -544,9 +692,12 @@ res.json({Status:"Success",Message:"Dashboard Details", Data : a ,Code:200});
 
 
 router.post('/mobile/update/fb_token', function (req, res) {
+  console.log(req.body);
         userdetailsModel.findByIdAndUpdate(req.body.user_id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+            console.log(err);
              res.json({Status:"Success",Message:"FB Updated", Data : UpdatedDetails ,Code:200});
+             console.log(req.body);
         });
 });
 
@@ -593,9 +744,22 @@ router.post('/delete_by_phone',async function (req, res) {
 });
 
 
+router.post('/delete', function (req, res) {
+ let c = {
+    delete_status : true
+  }
+  locationdetailsModel.findByIdAndUpdate(req.body._id, c, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Location Deleted successfully", Data : UpdatedDetails ,Code:200});
+  });
+});
+
+
+
+
 
 // // DELETES A USER FROM THE DATABASE
-router.post('/delete', function (req, res) {
+router.post('/admin_delete', function (req, res) {
       userdetailsModel.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
           res.json({Status:"Success",Message:"User Details Deleted successfully", Data : {} ,Code:200});

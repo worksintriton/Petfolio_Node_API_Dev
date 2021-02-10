@@ -30,6 +30,7 @@ router.post('/mobile/create', async function(req, res) {
             default_status : req.body.default_status,
             date_and_time : req.body.date_and_time,
             mobile_type : req.body.mobile_type,
+            delete_status : false,
         }, 
         function (err, user) {
           console.log(user)
@@ -80,7 +81,8 @@ router.post('/create', async function(req, res) {
             pet_age : req.body.pet_age,
             vaccinated : req.body.vaccinated,
             last_vaccination_date : req.body.last_vaccination_date,
-            default_status : req.body.default_status,
+            default_status : false,
+            delete_status : false,
             date_and_time : req.body.date_and_time,
             mobile_type : req.body.mobile_type,
         }, 
@@ -121,8 +123,7 @@ final_data1.push(u);
   let b = [];
   let c = [
      {gender : "Male"},
-     {gender : "Female"},
-     {gender : "Others"},
+     {gender : "Female"}
   ];
    let d = [
      {color : "red"},
@@ -192,8 +193,22 @@ router.post('/edit', function (req, res) {
              res.json({Status:"Success",Message:"pet details Updated", Data : UpdatedDetails ,Code:200});
         });
 });
-// // DELETES A USER FROM THE DATABASE
+
+
 router.post('/delete', function (req, res) {
+ let c = {
+    delete_status : true
+  }
+  petdetailsModel.findByIdAndUpdate(req.body._id, c, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Location Deleted successfully", Data : UpdatedDetails ,Code:200});
+  });
+});
+
+
+
+// // DELETES A USER FROM THE DATABASE
+router.post('/admin_delete', function (req, res) {
       petdetailsModel.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
           res.json({Status:"Success",Message:"pet details Deleted successfully", Data : {} ,Code:200});

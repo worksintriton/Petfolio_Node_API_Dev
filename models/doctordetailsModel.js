@@ -33,6 +33,9 @@ var doctordetailsSchema = new mongoose.Schema({
   live_by : String,
   consultancy_fees : Number, 
   calender_status : Boolean,
+  comments : Number,
+  rating : Number,
+  doctor_exp : Number,
 });
 doctordetailsSchema.plugin(timestamps);
 mongoose.model('doctordetails', doctordetailsSchema);

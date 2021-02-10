@@ -7,6 +7,7 @@ var userdetailsSchema = new mongoose.Schema({
   first_name:  String,
   last_name : String,
   user_email : String,
+  user_email_verification : Boolean,
   user_phone : String,
   date_of_reg : String,
   profile_img : String,
