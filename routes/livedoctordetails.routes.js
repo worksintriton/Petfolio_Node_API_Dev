@@ -3,15 +3,22 @@ var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
-var livedoctordetailsModel = require('./../models/livedoctordetailsModel');
+var doctordetailsModel = require('./../models/livedoctordetailsModel');
 var locationdetailsModel = require('./../models/locationdetailsModel');
 var GeoPoint = require('geopoint');
 
 
 router.post('/create', async function(req, res) {
+ console.log(req.body);
+ console.log(req.body.experience_details);
+ var exp = 0;
+ for(let a = 0 ; a  < req.body.experience_details.length ; a ++){
+      exp = exp + req.body.experience_details[a].yearsofexperience;
+ }
+ console.log("Expr",exp);
   try{
     console.log(req.body);
-        await livedoctordetailsModel.create({
+        await doctordetailsModel.create({
             user_id:  req.body.user_id,
             dr_title : req.body.dr_title,
             dr_name : req.body.dr_name,
@@ -34,9 +41,14 @@ router.post('/create', async function(req, res) {
             signature : req.body.signature,
             mobile_type : req.body.mobile_type,
             communication_type : req.body.communication_type,
-            delete_status : false,
+            live_status : req.body.live_status,
+            live_by : req.body.live_by,
+            delete_status : req.body.delete_status,
             consultancy_fees : req.body.consultancy_fees,
-            calender_status : false
+            calender_status : req.body.calender_status,
+            comments : req.body.comments,
+            rating : req.body.rating,
+            doctor_exp : exp || 0
         }, 
         function (err, user) {
           console.log(err);
@@ -51,7 +63,7 @@ catch(e){
 
 
 router.post('/filter_date', function (req, res) {
-        livedoctordetailsModel.find({}, function (err, StateList) {
+        doctordetailsModel.find({}, function (err, StateList) {
           var final_Date = [];
           for(let a = 0; a < StateList.length; a ++){
             var fromdate = new Date(req.body.fromdate);
@@ -70,7 +82,7 @@ router.post('/filter_date', function (req, res) {
 
 
 router.get('/deletes', function (req, res) {
-      livedoctordetailsModel.remove({}, function (err, user) {
+      doctordetailsModel.remove({}, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");
              res.json({Status:"Success",Message:"Docotor Details Deleted", Data : {} ,Code:200});     
       });
@@ -78,19 +90,27 @@ router.get('/deletes', function (req, res) {
 
 
 router.post('/getlist_id', function (req, res) {
-        livedoctordetailsModel.find({Person_id:req.body.Person_id}, function (err, StateList) {
+        doctordetailsModel.find({Person_id:req.body.Person_id}, function (err, StateList) {
           res.json({Status:"Success",Message:"Docotor Details List", Data : StateList ,Code:200});
+        });
+});
+
+
+router.post('/fetch_by_user_id', function (req, res) {
+        doctordetailsModel.find({user_id:req.body.user_id}, function (err, StateList) {
+          res.json({Status:"Success",Message:"Docotor Details", Data : StateList ,Code:200});
         });
 });
 
 
 
 router.post('/text_search',async function (req, res) {
+        console.log(req.body);
         let userlocation  =  await locationdetailsModel.findOne({user_id:req.body.user_id,default_status: true});
         var user_lat = userlocation.location_lat;
         var user_long = userlocation.location_long;
          console.log(user_lat,user_long);
-        livedoctordetailsModel.find({}, function (err, StateList) {
+        doctordetailsModel.find({}, function (err, StateList) {
         var final_data = [];
         var keyword = req.body.search_string.toLowerCase();
         for(let a = 0 ; a  < StateList.length ; a ++){
@@ -114,7 +134,8 @@ router.post('/text_search',async function (req, res) {
             "communication_type" : StateList[a].communication_type,
             "distance" : ""+distance.toFixed(2),
             "star_count" : 2.5,
-            "review_count" : 234
+            "review_count" : 234,
+            "amount" : StateList[a].consultancy_fees
           }
             final_data.push(d);
                   }      
@@ -132,7 +153,8 @@ router.post('/text_search',async function (req, res) {
             "communication_type" : StateList[a].communication_type,
             "distance" : ""+distance.toFixed(2),
             "star_count" : 2.5,
-            "review_count" : 234
+            "review_count" : 234,
+            "amount" : StateList[a].consultancy_fees
           }
             final_data.push(d);
                   }
@@ -157,7 +179,8 @@ router.post('/text_search',async function (req, res) {
             "communication_type" : StateList[a].communication_type,
             "distance" : ""+distance.toFixed(2),
             "star_count" : 2.5,
-            "review_count" : 234
+            "review_count" : 234,
+            "amount" : StateList[a].consultancy_fees,
           }
             final_data.push(d);
                   }      
@@ -175,7 +198,8 @@ router.post('/text_search',async function (req, res) {
             "communication_type" : StateList[a].communication_type,
             "distance" : ""+distance.toFixed(2),
             "star_count" : 2.5,
-            "review_count" : 234
+            "review_count" : 234,
+            "amount" : StateList[a].consultancy_fees,
           }
             final_data.push(d);
                   }
@@ -211,11 +235,11 @@ router.post('/text_search',async function (req, res) {
 
 
 
-router.post('/filter_doctor1',async function (req, res) {
+router.post('/filter_doctor',async function (req, res) {
       let userlocation  =  await locationdetailsModel.findOne({user_id:req.body.user_id,default_status: true});
       var user_lat = userlocation.location_lat;
       var user_long = userlocation.location_long;
-        livedoctordetailsModel.find({}, function (err, StateList) {
+        doctordetailsModel.find({}, function (err, StateList) {
         final_data = [];
         for(let a = 0 ; a < StateList.length ; a ++){
           var point1 = new GeoPoint(+user_lat, +user_long);
@@ -231,9 +255,10 @@ router.post('/filter_doctor1',async function (req, res) {
             "doctor_img": StateList[a].clinic_pic[0].clinic_pic,
             "clinic_loc" : StateList[a].clinic_loc,
             "communication_type" : StateList[a].communication_type,
-            "distance" : ""+distance,
+            "distance" : ""+distance.toFixed(2),
             "star_count" : 2.5,
-            "review_count" : 234
+            "review_count" : 234,
+            "amount" : StateList[a].consultancy_fees,
           }
           final_data.push(d);
          if(a == StateList.length - 1){
@@ -247,13 +272,15 @@ router.post('/filter_doctor1',async function (req, res) {
               star_count_filter_data = specialization_filter_data;
             res.json({Status:"Success",Message:"Filtered Doctor List", Data : star_count_filter_data ,Code:200});
             }else{
+              star_count_filter_data = [];
               for(let t = 0 ; t < specialization_filter_data.length ; t++){
                 console.log("in");
-                console.log(specialization_filter_data[t]);
-                 if(specialization_filter_data[t].review_count > req.body.Review_count){
+                console.log(specialization_filter_data[t].star_count,req.body.Review_count);
+                 if(specialization_filter_data[t].star_count <= req.body.Review_count){
                         star_count_filter_data.push(specialization_filter_data[t]);
                  }                  
                  if(t == specialization_filter_data.length - 1){
+                  console.log("Output");
                     res.json({Status:"Success",Message:"Filtered Doctor List", Data : star_count_filter_data ,Code:200});
 
                  }
@@ -302,40 +329,40 @@ router.post('/filter_doctor1',async function (req, res) {
 
 
 
-router.post('/filter_doctor', function (req, res) {
-        livedoctordetailsModel.find({}, function (err, StateList) {
-        // res.json({Status:"Success",Message:"Filtered Doctor List", Data : StateList ,Code:200});
-        final_data = [];
-        for(let a = 0 ; a < StateList.length ; a ++){
-          console.log(StateList[a]);
-          let d = {
-            "_id": StateList[a]._id,
-            "user_id": StateList[a].user_id,
-            "dr_title": StateList[a].dr_title,
-            "doctor_name": StateList[a].dr_name,
-            "clinic_name": StateList[a].clinic_name,
-            "specialization": StateList[a].specialization,
-            "doctor_img": StateList[a].clinic_pic[0].clinic_pic,
-            "clinic_loc" : StateList[a].clinic_loc,
-            "communication_type" : StateList[a].communication_type,
-            "distance" : "2" ,
-            "star_count" : 2.5,
-            "review_count" : 234
-          }
-          final_data.push(d);
-         if(a == StateList.length - 1){
-          res.json({Status:"Success",Message:"Filtered Doctor List", Data : final_data ,Code:200});
-         }
-        }
-        });
-});
+// router.post('/filter_doctor', function (req, res) {
+//         doctordetailsModel.find({}, function (err, StateList) {
+//         // res.json({Status:"Success",Message:"Filtered Doctor List", Data : StateList ,Code:200});
+//         final_data = [];
+//         for(let a = 0 ; a < StateList.length ; a ++){
+//           console.log(StateList[a]);
+//           let d = {
+//             "_id": StateList[a]._id,
+//             "user_id": StateList[a].user_id,
+//             "dr_title": StateList[a].dr_title,
+//             "doctor_name": StateList[a].dr_name,
+//             "clinic_name": StateList[a].clinic_name,
+//             "specialization": StateList[a].specialization,
+//             "doctor_img": StateList[a].clinic_pic[0].clinic_pic,
+//             "clinic_loc" : StateList[a].clinic_loc,
+//             "communication_type" : StateList[a].communication_type,
+//             "distance" : "2" ,
+//             "star_count" : 2.5,
+//             "review_count" : 234
+//           }
+//           final_data.push(d);
+//          if(a == StateList.length - 1){
+//           res.json({Status:"Success",Message:"Filtered Doctor List", Data : final_data ,Code:200});
+//          }
+//         }
+//         });
+// });
 
 
 
 
 
 router.post('/fetch_doctor_id', function (req, res) {
-        livedoctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
+        doctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
           console.log(StateList);
           console.log(err);
       let dd = {
@@ -365,6 +392,7 @@ router.post('/fetch_doctor_id', function (req, res) {
             "amount" : StateList.consultancy_fees,
             "mobile_type" : StateList.mobile_type,
             "communication_type" : StateList.communication_type,
+            "doctor_exp" : StateList.doctor_exp
           }
           res.json({Status:"Success",Message:"Docotor Details", Data : dd ,Code:200});
         });
@@ -372,7 +400,7 @@ router.post('/fetch_doctor_id', function (req, res) {
 
 
 router.post('/fetch_doctor_user_id', function (req, res) {
-        livedoctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
+        doctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
           console.log(StateList);
           res.json({Status:"Success",Message:"Docotor Details", Data : StateList ,Code:200});
         });
@@ -383,7 +411,7 @@ router.post('/fetch_doctor_user_id', function (req, res) {
 
 
 router.post('/check_status', function (req, res) {
-        livedoctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
+        doctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
           console.log(StateList);
           let message = "Dear Doctor, We appreciate your interest and look forward to have you as part of Petfolio Team. Our team is reviewing your profile and will get in touch with you to close the formalities. Your profile is pending verification.";
          if(StateList == null){
@@ -425,9 +453,9 @@ router.post('/check_status', function (req, res) {
 
 
 router.post('/update_calendar_status',async function (req, res) {
-        let doctordetails  =  await livedoctordetailsModel.findOne({user_id:req.body.user_id});
+        let doctordetails  =  await doctordetailsModel.findOne({user_id:req.body.user_id});
         console.log(doctordetails);
-        livedoctordetailsModel.findByIdAndUpdate(doctordetails._id, req.body, {new: true}, function (err, UpdatedDetails) {
+        doctordetailsModel.findByIdAndUpdate(doctordetails._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
         });
@@ -437,7 +465,7 @@ router.post('/update_calendar_status',async function (req, res) {
 
 
 router.get('/getlist', function (req, res) {
-        livedoctordetailsModel.find({}, function (err, Functiondetails) {
+        doctordetailsModel.find({}, function (err, Functiondetails) {
           res.json({Status:"Success",Message:"Docotor Details Details", Data : Functiondetails ,Code:200});
         });
 });
@@ -445,14 +473,14 @@ router.get('/getlist', function (req, res) {
 
 
 router.get('/admin/getlist', function (req, res) {
-        livedoctordetailsModel.find({}, function (err, Functiondetails) {
+        doctordetailsModel.find({}, function (err, Functiondetails) {
           res.json({Status:"Success",Message:"Docotor Details Details", Data : Functiondetails ,Code:200});
         }).populate('user_id');
 });
 
 
 router.get('/mobile/getlist', function (req, res) {
-        livedoctordetailsModel.find({}, function (err, Functiondetails) {
+        doctordetailsModel.find({}, function (err, Functiondetails) {
           let a = {
             usertypedata : Functiondetails
           }
@@ -461,18 +489,35 @@ router.get('/mobile/getlist', function (req, res) {
 });
 
 router.post('/edit', function (req, res) {
-        livedoctordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+ console.log(req.body);
+ console.log(req.body.experience_details);
+ var exp = 0;
+ for(let a = 0 ; a  < req.body.experience_details.length ; a ++){
+      exp = exp + req.body.experience_details[a].yearsofexperience;
+ }
+ console.log("Expr",exp);
+ req.body.doctor_exp = exp;
+  doctordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
         });
 });
 
 
+router.post('/adminedit', function (req, res) {
+  doctordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
+        });
+});
+
+
+
 router.post('/delete', function (req, res) {
  let c = {
     delete_status : true
   }
-  livedoctordetailsModel.findByIdAndUpdate(req.body._id, c, {new: true}, function (err, UpdatedDetails) {
+  doctordetailsModel.findByIdAndUpdate(req.body._id, c, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Location Deleted successfully", Data : UpdatedDetails ,Code:200});
   });
@@ -480,9 +525,10 @@ router.post('/delete', function (req, res) {
 
 
 
+
 // // DELETES A USER FROM THE DATABASE
 router.post('/admin_delete', function (req, res) {
-      livedoctordetailsModel.findByIdAndRemove(req.body._id, function (err, user) {
+      doctordetailsModel.findByIdAndRemove(req.body._id, function (err, user) {
           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
           res.json({Status:"Success",Message:"Docotor Details Deleted successfully", Data : {} ,Code:200});
       });

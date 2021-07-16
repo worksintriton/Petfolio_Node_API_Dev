@@ -10,10 +10,13 @@ var GeoPoint = require('geopoint');
 
 router.post('/create', async function(req, res) {
 
- // var exp = 0;
- // for(let a = 0 ; a  < req.body.education_details.length ; a ++){
- //      exp = exp + req.body.education_details[a].yearsofexperience;
- // }
+  console.log(req.body);
+  console.log(req.body.experience_details);
+ var exp = 0;
+ for(let a = 0 ; a  < req.body.experience_details.length ; a ++){
+      exp = exp + req.body.experience_details[a].yearsofexperience;
+ }
+ console.log("Expr",exp);
   try{
     console.log(req.body);
         await doctordetailsModel.create({
@@ -46,7 +49,7 @@ router.post('/create', async function(req, res) {
             calender_status : false,
             comments : 0,
             rating : 0,
-            // doctor_exp : exp || 0
+            doctor_exp : exp || 0
         }, 
         function (err, user) {
           console.log(err);
@@ -383,6 +386,7 @@ router.post('/fetch_doctor_id', function (req, res) {
             "amount" : StateList.consultancy_fees,
             "mobile_type" : StateList.mobile_type,
             "communication_type" : StateList.communication_type,
+            "doctor_exp" : StateList.doctor_exp
           }
           res.json({Status:"Success",Message:"Docotor Details", Data : dd ,Code:200});
         });
@@ -479,11 +483,28 @@ router.get('/mobile/getlist', function (req, res) {
 });
 
 router.post('/edit', function (req, res) {
+ console.log(req.body);
+ console.log(req.body.experience_details);
+ var exp = 0;
+ for(let a = 0 ; a  < req.body.experience_details.length ; a ++){
+      exp = exp + req.body.experience_details[a].yearsofexperience;
+ }
+ console.log("Expr",exp);
+ req.body.doctor_exp = exp;
   doctordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
         });
 });
+
+
+router.post('/adminedit', function (req, res) {
+  doctordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
+        });
+});
+
 
 
 router.post('/delete', function (req, res) {

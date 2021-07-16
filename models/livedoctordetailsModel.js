@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var timestamps = require('mongoose-timestamp');
 const Schema = mongoose.Schema; 
 
-var livedoctordetailsSchema = new mongoose.Schema({  
+var live_doctordetailsSchema = new mongoose.Schema({  
   user_id  : {  
        type: Schema.Types.ObjectId,
        ref: 'userdetails',
@@ -29,9 +29,14 @@ var livedoctordetailsSchema = new mongoose.Schema({
   mobile_type : String,
   communication_type : String,
   delete_status : Boolean,
+  live_status : String,
+  live_by : String,
   consultancy_fees : Number, 
   calender_status : Boolean,
+  comments : Number,
+  rating : Number,
+  doctor_exp : Number,
 });
-livedoctordetailsSchema.plugin(timestamps);
-mongoose.model('livedoctordetails', livedoctordetailsSchema);
-module.exports = mongoose.model('livedoctordetails');
+live_doctordetailsSchema.plugin(timestamps);
+mongoose.model('live_doctordetails', live_doctordetailsSchema);
+module.exports = mongoose.model('live_doctordetails');

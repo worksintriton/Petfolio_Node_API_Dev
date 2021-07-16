@@ -10,7 +10,7 @@ const puppeteer = require('puppeteer');
 const { v4: uuidv4 } = require('uuid');
 var fs = require('fs');
 var pug = require ('pug');
-var BaseUrl = "http://54.212.108.156:3000";
+var BaseUrl = "http://52.25.163.13:3000";
 var app = express();
 app.use('/api/', express.static(path.join(__dirname, 'public')));
 
@@ -55,10 +55,11 @@ exports.pdfgenerator = async function (doctordata,Prescription_data,doctor_comme
      //console.log("What is the path" , __dirname)
         var options = { format: 'Letter', height: "20.5in",
   width: "18in"};
-        var filepath = __dirname + '/public/prescriptions/' + uuidv4() + '.pdf' ;
-        var filepart = filepath.slice(52,94);
-        console.log("filepart",filepath)
-        var Finalpath = BaseUrl +'/api/public/prescriptions/' + filepart;
+        var filepath = __dirname + '/public/' + uuidv4() + '.pdf' ;
+        console.log("beffore PDF TRm",filepath);
+        var filepart = filepath.slice(52,110);
+        console.log("filepart_1",filepath)
+        var Finalpath = BaseUrl +'/api/public/' + filepart;
         console.log("Finalpath",Finalpath)
          return new Promise(async function (resolve, reject) {
                  await pdf.create(html, options).toFile(filepath, function(err, response) {

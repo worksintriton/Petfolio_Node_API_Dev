@@ -149,7 +149,8 @@ router.post('/get_time_Details',async function (req, res) {
           datasss = date_datas.fiftymin;       
     res.json({Status:"Success",Message:"Time list Details", Data : datasss ,Code:200});
    }else {
-     let times = date_details.Doctor_time;
+    console.log("ASDFASDFASdf",date_details.sp_time);
+     let times = date_details.sp_time;
      for(let a  = 0 ; a < times.length ; a ++){
       if(times[a].Title == req.body.Day){
          res.json({Status:"Success",Message:"Time list Details", Data : times[a].Time ,Code:200});
@@ -530,7 +531,8 @@ router.post('/get_sp_new',async function (req, res) {
                    for(let c = 0 ; c < times.length ; c ++){
                     if(times[c].Status == true){
                       let d = {
-                        time : times[c].Time
+                        time : times[c].Time,
+                        twentyfour : times[c].format
                       }
                       finaltime.push(d);
                     }
@@ -554,27 +556,23 @@ router.post('/get_sp_new',async function (req, res) {
                         let check = 1;
                         for(let a  = 0 ; a < finaltime.length ; a ++)
                         {
-                          // console.log("Testing",finaltime[a].time)
-                          let cur_time = finaltime[a].time.split(":");
-                          let cur_time1 = req.body.cur_time.split(":");
-                          let cur_time2 = finaltime[a].time.split(" ");
-                          let cur_time3 = req.body.cur_time.split(" ");
-                          if(cur_time2[1] == cur_time3[1]){
-                          if(+cur_time[0] >= +cur_time1[0]){
-                             if(cur_time2[1] == 'PM' && +cur_time[0] == 12){
-                             }else {
-                            check = 0;
-                            console.log("AMS",cur_time2[1] ,cur_time3[1]);
-                            console.log("Status True",+cur_time[0] , +cur_time1[0]);
-                             }
-                           }
-                           }
-                          if(check == 0){
+
+                          let cur_time = req.body.cur_date.split("-");
+                          let correct_date = cur_time[2]+"-"+cur_time[1]+"-"+cur_time[0]+" "+finaltime[a].twentyfour;
+                          console.log("Marked date time",correct_date);
+                          // console.log("Current Dates time",req.body.current_time);
+                          var marked_time = new Date(correct_date);
+                          var current_time = new Date(req.body.current_time);
+                          console.log(marked_time);
+                          console.log(current_time);
+                          if(current_time < marked_time){
+                            console.log("true");
                             let d = {
                             time : finaltime[a].time
                             }
                             datas.push(d);
-
+                          }else {
+                            console.log("false");
                           }
                           if(a == finaltime.length - 1){
                             if(datas.length == 0){
@@ -583,36 +581,76 @@ router.post('/get_sp_new',async function (req, res) {
                               finaltime = [];
                               var com = [];
                                      console.log(datas);
-                                     let cur_time3 = req.body.cur_time.split(" ");
-                                     let cur_time1 = cur_time3[0].split(":");
-                                     let cur_time2 = datas[0].time.split(" ");
-                                     let cur_time4 = cur_time2[0].split(":");
-                                     // if(+cur_time1[1] > 0 &&  cur_time1[0] == cur_time4[0]){
-                                     //     datas.splice(0, 1);
-                                     // }
-                                    let fifteenmin = date_datas.fiftymin;
-
-                                    // for(let v = 0 ; v < datas.length ; v ++){
-                                    //    let datas_15_spa = datas[v].time.split(" ");
-                                    //    let datas_15_col = datas_15_spa[0].split(":");
-                                    //  for(let y = 0 ; y < fifteenmin.length ; y ++){
-                                    //  let time_15_spa = fifteenmin[y].Time.split(" ");
-                                    //  let time_15_col = time_15_spa[0].split(":");
-                                    //  // console.log(datas_15_spa[1],datas_15_col[0],datas_15_col[1]);
-                                    //  // console.log(time_15_spa[1],time_15_col[0],time_15_col[1]);
-                                    //  if(datas_15_spa[1] == time_15_spa[1] && datas_15_col[0] == time_15_col[0]){
-                        
-                                    //       let d = {
-                                    //        time : fifteenmin[y].Time
-                                    //        }
-                                    //     com.push(d);
-                                    //  }
-                                    //  }
-                                    // }
-                                    
-                            finaltime = datas;
+                                     // let cur_time3 = req.body.cur_time.split(" ");
+                                     // let cur_time1 = cur_time3[0].split(":");
+                                     // let cur_time2 = datas[0].time.split(" ");
+                                     // let cur_time4 = cur_time2[0].split(":");
+                                     let fifteenmin = date_datas.fiftymin;   
+                                     finaltime = datas;
                             }
                           }
+
+
+
+                          // // console.log("Testing",finaltime[a].time)
+                          // let cur_time = finaltime[a].time.split(":");
+                          // let cur_time1 = req.body.cur_time.split(":");
+                          // let cur_time2 = finaltime[a].time.split(" ");
+                          // let cur_time3 = req.body.cur_time.split(" ");
+                          // if(cur_time2[1] == cur_time3[1]){
+                          // if(+cur_time[0] >= +cur_time1[0]){
+                          //    if(cur_time2[1] == 'PM' && +cur_time[0] == 12){
+                          //    }else {
+                          //   check = 0;
+                          //   console.log("AMS",cur_time2[1] ,cur_time3[1]);
+                          //   console.log("Status True",+cur_time[0] , +cur_time1[0]);
+                          //    }
+                          //  }
+                          //  }
+                          // if(check == 0){
+                          //   let d = {
+                          //   time : finaltime[a].time
+                          //   }
+                          //   datas.push(d);
+
+                          // }
+                          // if(a == finaltime.length - 1){
+                          //   if(datas.length == 0){
+                          //     finaltime = [];
+                          //   }else{
+                          //     finaltime = [];
+                          //     var com = [];
+                          //            console.log(datas);
+                          //            let cur_time3 = req.body.cur_time.split(" ");
+                          //            let cur_time1 = cur_time3[0].split(":");
+                          //            let cur_time2 = datas[0].time.split(" ");
+                          //            let cur_time4 = cur_time2[0].split(":");
+                          //            // if(+cur_time1[1] > 0 &&  cur_time1[0] == cur_time4[0]){
+                          //            //     datas.splice(0, 1);
+                          //            // }
+                          //           let fifteenmin = date_datas.fiftymin;
+
+                          //           // for(let v = 0 ; v < datas.length ; v ++){
+                          //           //    let datas_15_spa = datas[v].time.split(" ");
+                          //           //    let datas_15_col = datas_15_spa[0].split(":");
+                          //           //  for(let y = 0 ; y < fifteenmin.length ; y ++){
+                          //           //  let time_15_spa = fifteenmin[y].Time.split(" ");
+                          //           //  let time_15_col = time_15_spa[0].split(":");
+                          //           //  // console.log(datas_15_spa[1],datas_15_col[0],datas_15_col[1]);
+                          //           //  // console.log(time_15_spa[1],time_15_col[0],time_15_col[1]);
+                          //           //  if(datas_15_spa[1] == time_15_spa[1] && datas_15_col[0] == time_15_col[0]){
+                        
+                          //           //       let d = {
+                          //           //        time : fifteenmin[y].Time
+                          //           //        }
+                          //           //     com.push(d);
+                          //           //  }
+                          //           //  }
+                          //           // }
+                                    
+                          //   finaltime = datas;
+                          //   }
+                          // }
                         }
                       }
                       console.log(finaltime);
@@ -665,6 +703,15 @@ router.post('/get_sp_new',async function (req, res) {
    }
 });
 
+
+
+
+router.post('/delete', function (req, res) {
+      SP_available_timeModel.findByIdAndRemove(req.body._id, function (err, user) {
+          if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+          res.json({Status:"Success",Message:"Holiday Deleted successfully", Data : {} ,Code:200});
+      });
+});
 
 
 

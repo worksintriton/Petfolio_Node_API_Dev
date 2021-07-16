@@ -6,12 +6,17 @@ router.use(bodyParser.json());
 var SP_appointmentsModels = require('./../models/SP_appointmentsModels');
 var doctordetailsModel = require('./../models/doctordetailsModel');
 var vendordetailsModel = require('./../models/vendordetailsModel');
+var userdetailsModel = require('./../models/userdetailsModel');
+
+var request = require("request");
 
 router.post('/mobile/create', async function(req, res) {
   try{
         let display_date = req.body.date_and_time;
         let Appointmentid = "SP-" + new Date().getTime();
         var doctordetailsModels = await vendordetailsModel.findOne({user_id:req.body.sp_id});
+        var doctor_token =  await userdetailsModel.findOne({_id:req.body.sp_id});
+        var user_token = await userdetailsModel.findOne({_id:req.body.user_id});
         await SP_appointmentsModels.create({
             sp_id : req.body.sp_id,
             appointment_UID : Appointmentid,
@@ -52,6 +57,47 @@ router.post('/mobile/create', async function(req, res) {
           SP_appointmentsModels.findByIdAndUpdate(data._id, data, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.status(500).send("There was a problem updating the user.");
              // res.json({Status:"Success",Message:"Appointmentdetails Updated", Data : UpdatedDetails ,Code:200});
+
+ var params = {
+            "user_id":  user_token._id,
+            "notify_title" : "New Appointment",
+            "notify_descri" : "Your Appointment Booked successfully " + Appointmentid + " at " + req.body.booking_date,
+            "notify_img" : "",
+            "notify_time" : "",
+            "date_and_time" : req.body.booking_date,
+            "user_token" : user_token.fb_token,
+}
+
+var params1 = {
+            "user_token" : doctor_token.fb_token,
+            "notify_title" : "New Appointment",
+            "notify_descri" : "Your Appointment Booked successfully " + Appointmentid + " at " + req.body.booking_date,
+            "notify_img" : "",
+            "notify_time" : "",
+            "date_and_time" : req.body.booking_date,
+            "user_id" : doctor_token._id
+}
+
+request.post(
+    'http://52.25.163.13:3000/api/notification/send_notifiation',
+    { json: params },
+    function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            console.log(body);
+        }
+    }
+);
+
+request.post(
+    'http://52.25.163.13:3000/api/notification/send_notifiation',
+    { json: params1 },
+    function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            console.log(body);
+        }
+    }
+);
+
         res.json({Status:"Success",Message:"SP Appointment Added successfully", Data : user ,Code:200}); 
         });
         });
@@ -425,8 +471,23 @@ router.post('/reviews/update', function (req, res) {
 
 
 
-router.post('/edit', function (req, res) {
-        SP_appointmentsModels.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+router.post('/edit',async function (req, res) {
+console.log("SP Edit Details XYZ",req.body.appoinment_status);
+console.log("SP Edit Details XYZS",req.body);
+if(req.body.appoinment_status == "Completed"){
+var appoint_details = await SP_appointmentsModels.findOne({_id:req.body._id});
+let d = {"appointment_UID":appoint_details.appointment_UID,"date":req.body.completed_at,"sp_id":appoint_details.sp_id,"status":"Appointment Completed","user_id":appoint_details.user_id}
+request.post(
+    'http://52.25.163.13:3000/api/notification/mobile/alert/sp_notification',
+    { json: d },
+    function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            console.log(body);
+        }
+    }
+);
+}
+       SP_appointmentsModels.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Appointment Updated", Data : UpdatedDetails ,Code:200});
         });

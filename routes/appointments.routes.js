@@ -26,7 +26,7 @@ router.post('/mobile/create', async function(req, res) {
         let display_date = req.body.date_and_time;
         let Appointmentid = "PET-" + new Date().getTime();
         var doctordetailsModels = await doctordetailsModel.findOne({user_id:req.body.doctor_id});
-        var  doctor_token =  await userdetailsModel.findOne({_id:req.body.doctor_id});
+        var doctor_token =  await userdetailsModel.findOne({_id:req.body.doctor_id});
         var user_token = await userdetailsModel.findOne({_id:req.body.user_id});
         await AppointmentsModel.create({
             doctor_id : req.body.doctor_id,
@@ -76,27 +76,24 @@ router.post('/mobile/create', async function(req, res) {
           AppointmentsModel.findByIdAndUpdate(data._id, data, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.status(500).send("There was a problem updating the user.");
 var params = {
-    "user_token" : user_token.fb_token,
-    "name" : user_token.first_name,
-    "title" : "New Appointment",
-    "message" : "Your Appointment Booked successfully",
-    "subtitle" : "New Appointment",
-    "notify_time" : req.body.booking_date,
-    "message_status" :"unread",
-    "status" : "0",
-    "user_id" : user_token._id
+
+            "user_id":  user_token._id,
+            "notify_title" : "New Appointment",
+            "notify_descri" : "Your Appointment Booked successfully " + Appointmentid + " at " + req.body.booking_date,
+            "notify_img" : "",
+            "notify_time" : "",
+            "date_and_time" : req.body.booking_date,
+            "user_token" : user_token.fb_token,
 }
 
 var params1 = {
-    "user_token" : doctor_token.fb_token,
-    "name" : doctor_token.first_name,
-    "title" : "New Appointment",
-    "message" : "Your Appointment Booked successfully",
-    "subtitle" : "New Appointment",
-    "notify_time" : req.body.booking_date,
-    "message_status" :"unread",
-    "status" : "0",
-    "user_id" : doctor_token._id
+            "user_token" : doctor_token.fb_token,
+            "notify_title" : "New Appointment",
+            "notify_descri" : "Your Appointment Booked successfully " + Appointmentid  + " at " + req.body.booking_date,
+            "notify_img" : "",
+            "notify_time" : "",
+            "date_and_time" : req.body.booking_date,
+            "user_id" : doctor_token._id
 }
 
 request.post(
@@ -133,6 +130,7 @@ catch(e){
 ///////////////////////PET Lover Appointment List///////////
 
 router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
+  console.log("Dinesh",req.body);
  var sp_appointmentlist =  await SP_appointmentsModels.find({user_id:req.body.user_id,appoinment_status:"Incomplete"}).populate('user_id sp_id pet_id');
  var doctor_appointmentlist =  await AppointmentsModel.find({user_id:req.body.user_id,appoinment_status:"Incomplete"}).populate('user_id doctor_id pet_id');
  console.log(doctor_appointmentlist.length);
@@ -166,6 +164,13 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
           "user_rate" : sp_appointmentlist[a].user_rate|| "",
           "user_feedback" : sp_appointmentlist[a].user_feedback|| "",          
           "status" : sp_appointmentlist[a].appoinment_status,
+          "appoint_patient_st": "",
+          "communication_type": "",
+          "doctor_name": "",
+          "start_appointment_status": "",
+          "user_id" : sp_appointmentlist[a].user_id._id,
+          "sp_id" : sp_appointmentlist[a].sp_id._id,
+          "doctor_id": "",
         }
         final_appointment_list.push(fin);
     if(a == sp_appointmentlist.length - 1){
@@ -190,7 +195,7 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
            if(s > curr){
             let fin = {
           "_id" : doctor_appointmentlist[b]._id,
-          "Booking_Id":doctor_appointmentlist[b].appointment_UID,
+          "Booking_Id": doctor_appointmentlist[b].appointment_UID,
           "appointment_for" : "Doctor",
           "photo" : doctor_appointmentlist[b].doc_business_info[0].clinic_pic[0].clinic_pic,
           "clinic_name" :  doctor_appointmentlist[b].doc_business_info[0].clinic_name,
@@ -204,6 +209,7 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
           "pet_type" : doctor_appointmentlist[b].pet_id.pet_type,
           "start_appointment_status" : doctor_appointmentlist[b].start_appointment_status,
           "type" : "" ,
+          "doctor_name" : doctor_appointmentlist[b].doctor_id.first_name+" "+doctor_appointmentlist[b].doctor_id.last_name,
           "service_provider_name" :"",
           "Service_name" : "",
           "service_cost" : "",
@@ -214,10 +220,29 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
           "user_feedback" : doctor_appointmentlist[b].user_feedback|| "",   
           "status" : doctor_appointmentlist[b].appoinment_status|| "",
           "appoint_patient_st" : doctor_appointmentlist[b].appoint_patient_st || "",
+          "user_id" : doctor_appointmentlist[b].user_id._id || "",
+          "doctor_id": doctor_appointmentlist[b].doctor_id._id || "",
+          "sp_id" : "",
         }
         final_appointment_list.push(fin);
          } 
            else {
+               var params = {
+              "status":"No show",
+              "date" : doctor_appointmentlist[b].booking_date_time,
+              "appointment_UID" : doctor_appointmentlist[b].appointment_UID,
+              "user_id" : doctor_appointmentlist[b].doctor_id._id,
+              "doctor_id" : doctor_appointmentlist[b].user_id._id
+              }
+            request.post(
+                'http://52.25.163.13:3000/api/notification/mobile/alert/notification',
+                { json: params },
+                function (error, response, body) {
+                    if (!error && response.statusCode == 200) {
+                        console.log(body);
+                    }
+                }
+            );
              let c = {
                 missed_at : doctor_appointmentlist[b].booking_date_time,
                 appoinment_status : "Missed",
@@ -271,6 +296,7 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
           "updatedAt" :  doctor_appointmentlist[b].updatedAt,
           "pet_type" : doctor_appointmentlist[b].pet_id.pet_type,
           "type" : "" ,
+          "doctor_name" : doctor_appointmentlist[b].doctor_id.first_name+" "+doctor_appointmentlist[b].doctor_id.last_name,
           "service_provider_name" :"",
           "Service_name" : "",
           "service_cost" : "",
@@ -280,7 +306,10 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
           "user_rate" : doctor_appointmentlist[b].user_rate|| "",
           "user_feedback" : doctor_appointmentlist[b].user_feedback|| "",   
           "status" : doctor_appointmentlist[b].appoinment_status ,
-           "appoint_patient_st" : doctor_appointmentlist[b].appoint_patient_st || "",
+          "appoint_patient_st" : doctor_appointmentlist[b].appoint_patient_st || "",
+          "user_id" : doctor_appointmentlist[b].user_id._id || "",
+          "doctor_id": doctor_appointmentlist[b].doctor_id._id || "",
+          "sp_id" : "",
         }
         final_appointment_list.push(fin);
            } 
@@ -350,6 +379,13 @@ router.post('/mobile/plove_getlist/comapp1',async function (req, res) {
           "user_rate" : sp_appointmentlist[a].user_rate|| "",
           "user_feedback" : sp_appointmentlist[a].user_feedback|| "",   
           "status" : sp_appointmentlist[a].appoinment_status,
+          "appoint_patient_st": "",
+          "communication_type": "",
+          "doctor_name": "",
+          "start_appointment_status": "",
+          "user_id" : sp_appointmentlist[a].user_id._id,
+          "sp_id" : sp_appointmentlist[a].sp_id._id,
+          "doctor_id": "",
         }
         final_appointment_list.push(fin);
     if(a == sp_appointmentlist.length - 1){
@@ -384,6 +420,7 @@ router.post('/mobile/plove_getlist/comapp1',async function (req, res) {
           "service_provider_name" :"",
           "Service_name" : "",
           "service_cost" : "",
+          "doctor_name" : doctor_appointmentlist[b].doctor_id.first_name+" "+doctor_appointmentlist[b].doctor_id.last_name,
           "Booked_at" : doctor_appointmentlist[b].booking_date_time,
           "appoint_patient_st" : doctor_appointmentlist[b].appoint_patient_st || "",
           "missed_at" : doctor_appointmentlist[b].missed_at || "",
@@ -391,6 +428,9 @@ router.post('/mobile/plove_getlist/comapp1',async function (req, res) {
           "user_rate" : doctor_appointmentlist[b].user_rate|| "",
           "user_feedback" : doctor_appointmentlist[b].user_feedback|| "",   
           "status" : doctor_appointmentlist[b].appoinment_status,
+           "user_id" : doctor_appointmentlist[b].user_id._id || "",
+          "doctor_id": doctor_appointmentlist[b].doctor_id._id || "",
+          "sp_id" : "",
         }
         final_appointment_list.push(fin);
         if(b == doctor_appointmentlist.length - 1){
@@ -419,14 +459,15 @@ router.post('/mobile/plove_getlist/comapp1',async function (req, res) {
           "clinic_name" :  doctor_appointmentlist[b].doc_business_info[0].clinic_name,
           "pet_name" : doctor_appointmentlist[b].pet_id.pet_name,
           "appointment_type" : doctor_appointmentlist[b].appointment_types,
-           "communication_type" : doctor_appointmentlist[b].communication_type,
+          "communication_type" : doctor_appointmentlist[b].communication_type,
           "cost" : doctor_appointmentlist[b].amount,
           "appointment_time" : doctor_appointmentlist[b].booking_date_time,
-           "start_appointment_status" : doctor_appointmentlist[b].start_appointment_status,
+          "start_appointment_status" : doctor_appointmentlist[b].start_appointment_status,
           "createdAt" :  doctor_appointmentlist[b].createdAt,
           "updatedAt" :  doctor_appointmentlist[b].updatedAt,
           "pet_type" : doctor_appointmentlist[b].pet_id.pet_type,
           "type" : "" ,
+          "doctor_name" : doctor_appointmentlist[b].doctor_id.first_name+" "+doctor_appointmentlist[b].doctor_id.last_name,
           "service_provider_name" :"",
           "appoint_patient_st" : doctor_appointmentlist[b].appoint_patient_st || "",
           "Service_name" : "",
@@ -435,8 +476,11 @@ router.post('/mobile/plove_getlist/comapp1',async function (req, res) {
           "missed_at" : doctor_appointmentlist[b].missed_at || "",
           "completed_at" : doctor_appointmentlist[b].completed_at || "",
           "user_rate" : doctor_appointmentlist[b].user_rate|| "",
-                    "user_feedback" : doctor_appointmentlist[b].user_feedback|| "",   
-          "status" : doctor_appointmentlist[b].appoinment_status 
+          "user_feedback" : doctor_appointmentlist[b].user_feedback|| "",   
+          "status" : doctor_appointmentlist[b].appoinment_status,
+          "user_id" : doctor_appointmentlist[b].user_id._id || "",
+          "doctor_id": doctor_appointmentlist[b].doctor_id._id || "",
+          "sp_id" : "",
         }
         final_appointment_list.push(fin);
         if(b == doctor_appointmentlist.length - 1){
@@ -490,12 +534,18 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
           "missed_at" : sp_appointmentlist[a].missed_at|| "",
           "completed_at" : sp_appointmentlist[a].completed_at|| "",
           "user_rate" : sp_appointmentlist[a].user_rate|| "",
-                    "user_feedback" : sp_appointmentlist[a].user_feedback|| "",   
+          "user_feedback" : sp_appointmentlist[a].user_feedback|| "",   
           "status" : sp_appointmentlist[a].appoinment_status,
+          "appoint_patient_st": "",
+          "communication_type": "",
+          "doctor_name": "",
+          "start_appointment_status": "",
+          "user_id" : sp_appointmentlist[a].user_id._id,
+          "sp_id" : sp_appointmentlist[a].sp_id._id,
+          "doctor_id": "",
         }
         final_appointment_list.push(fin);
     if(a == sp_appointmentlist.length - 1){
-
 
          if(doctor_appointmentlist.length == 0){
           
@@ -504,14 +554,12 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
          } else {
 
           for(let b = 0 ; b < doctor_appointmentlist.length ; b ++){
-
-        for(let b = 0 ; b < doctor_appointmentlist.length ; b ++){
-
           console.log(doctor_appointmentlist[b]);
             let fin = {
           "_id" : doctor_appointmentlist[b]._id,
           "Booking_Id":doctor_appointmentlist[b].appointment_UID,
           "appointment_for" : "Doctor",
+          "doctor_name" : doctor_appointmentlist[b].doctor_id.first_name+" "+doctor_appointmentlist[b].doctor_id.last_name,
           "photo" : doctor_appointmentlist[b].doc_business_info[0].clinic_pic[0].clinic_pic,
           "clinic_name" :  doctor_appointmentlist[b].doc_business_info[0].clinic_name,
           "pet_name" : doctor_appointmentlist[b].pet_id.pet_name,
@@ -534,6 +582,9 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
           "user_rate" : doctor_appointmentlist[b].user_rate|| "",
           "user_feedback" : doctor_appointmentlist[b].user_feedback|| "",   
           "status" : doctor_appointmentlist[b].appoinment_status,
+          "user_id" : doctor_appointmentlist[b].user_id._id || "",
+          "doctor_id": doctor_appointmentlist[b].doctor_id._id || "",
+          "sp_id" : "",
         }
         final_appointment_list.push(fin);
         if(b == doctor_appointmentlist.length - 1){
@@ -547,19 +598,18 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
         }
        }
 
-
          }
-
 
     }
   }
-  }else
+  } else
   {
   for(let b = 0 ; b < doctor_appointmentlist.length ; b ++){
         let fin = {
           "_id" : doctor_appointmentlist[b]._id,
           "Booking_Id":doctor_appointmentlist[b].appointment_UID,
           "appointment_for" : "Doctor",
+          "doctor_name" : doctor_appointmentlist[b].doctor_id.first_name+" "+doctor_appointmentlist[b].doctor_id.last_name,
           "photo" : doctor_appointmentlist[b].doc_business_info[0].clinic_pic[0].clinic_pic,
           "clinic_name" :  doctor_appointmentlist[b].doc_business_info[0].clinic_name,
           "pet_name" : doctor_appointmentlist[b].pet_id.pet_name,
@@ -580,8 +630,11 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
           "missed_at" : doctor_appointmentlist[b].missed_at || "",
           "completed_at" : doctor_appointmentlist[b].completed_at || "",
           "user_rate" : doctor_appointmentlist[b].user_rate|| "",
-                    "user_feedback" : doctor_appointmentlist[b].user_feedback|| "",   
-          "status" : doctor_appointmentlist[b].appoinment_status 
+          "user_feedback" : doctor_appointmentlist[b].user_feedback|| "",   
+          "status" : doctor_appointmentlist[b].appoinment_status ,
+           "user_id" : doctor_appointmentlist[b].user_id._id || "",
+          "doctor_id": doctor_appointmentlist[b].doctor_id._id || "",
+          "sp_id" : "",
         }
         final_appointment_list.push(fin);
         if(b == doctor_appointmentlist.length - 1){
@@ -595,8 +648,7 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
         }
   }
   }
-  } 
-}       
+  }        
 });
 
 
@@ -1065,11 +1117,26 @@ router.post('/reviews/update',async function (req, res) {
 
 
 
-router.post('/edit', function (req, res) {
-        AppointmentsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
-            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
-             res.json({Status:"Success",Message:"Appointment Updated", Data : UpdatedDetails ,Code:200});
-        });
+router.post('/edit',async function (req, res) {
+console.log("Edit Details XYZ",req.body.appoinment_status);
+console.log("Edit Details XYZS",req.body);
+if(req.body.appoinment_status == "Completed"){
+var appoint_details = await AppointmentsModel.findOne({_id:req.body._id});
+let d = {"appointment_UID":appoint_details.appointment_UID,"date":req.body.completed_at,"doctor_id":appoint_details.doctor_id,"status":"Appointment Completed","user_id":appoint_details.user_id}
+request.post(
+    'http://52.25.163.13:3000/api/notification/mobile/alert/notification',
+    { json: d },
+    function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            console.log(body);
+        }
+    }
+);
+} 
+AppointmentsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+  if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+  res.json({Status:"Success",Message:"Appointment Updated", Data : UpdatedDetails ,Code:200});
+});
 });
 
 
