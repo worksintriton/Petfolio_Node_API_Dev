@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 var pettypeModel = require('./../models/pettypeModel');
+var product_categoriesModel = require('./../models/product_categoriesModel');
 
 
 router.post('/create', async function(req, res) {
@@ -14,6 +15,7 @@ router.post('/create', async function(req, res) {
     await pettypeModel.create({
             pet_type_title:  req.body.pet_type_title,
             user_type_value : req.body.user_type_value,
+            pet_type_img : req.body.pet_type_img || "",
             date_and_time : req.body.date_and_time,
             delete_status : false
         }, 
@@ -34,7 +36,7 @@ catch(e){
 
 
 router.post('/filter_date', function (req, res) {
-        pettypeModel.find({}, function (err, StateList) {
+        pettypeModel.find({delete_status : false}, function (err, StateList) {
           var final_Date = [];
           for(let a = 0; a < StateList.length; a ++){
             var fromdate = new Date(req.body.fromdate);
@@ -70,18 +72,26 @@ router.post('/getlist_id', function (req, res) {
 
 
 router.get('/getlist', function (req, res) {
-        pettypeModel.find({}, function (err, Functiondetails) {
+        pettypeModel.find({delete_status : false}, function (err, Functiondetails) {
           res.json({Status:"Success",Message:"PET type Details", Data : Functiondetails ,Code:200});
         });
 });
 
 
-router.get('/mobile/getlist', function (req, res) {
-        pettypeModel.find({}, function (err, Functiondetails) {
+router.get('/mobile/getlist',async function (req, res) {
+        let product_categories  =  await product_categoriesModel.find({delete_status : false});
+        console.log(product_categories);
+        pettypeModel.find({delete_status : false}, function (err, Functiondetails) {
+          Functiondetails.sort(function(a, b){
+          if(a.pet_type_title < b.pet_type_title) { return -1; }
+          if(a.pet_type_title > b.pet_type_title) { return 1; }
+          return 0;
+          });
           let a = {
-            usertypedata : Functiondetails
+            usertypedata : Functiondetails,
+            product_categories : product_categories
           }
-          res.json({Status:"Success",Message:"PET type Details", Data : a ,Code:200});
+          res.json({Status:"Success",Message:"Pet type details", Data : a ,Code:200});
         });
 });
 

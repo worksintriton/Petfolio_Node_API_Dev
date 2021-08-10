@@ -131,7 +131,7 @@ router.post('/fetch_dates',async function(req, res) {
         }, 
         function (err, user) {
           if (err) res.json({Status:"Failed",Message:"Failed to Insert", Data : {},Code:300});
-          res.json({Status:"Success",Message:"Data Insert successfully", Data : user.Doctor_date_time,Code:200});
+          res.json({Status:"Success",Message:"Time added successfully", Data : user.Doctor_date_time,Code:200});
         });
   }else {
     res.json({Status:"Success",Message:"Data Fetched successfully", Data : date_details.Doctor_date_time,Code:200});

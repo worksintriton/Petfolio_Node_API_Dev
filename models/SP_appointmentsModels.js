@@ -40,6 +40,10 @@ var sp_appointmentSchema = new mongoose.Schema({
   mobile_type : String,
   sp_business_info : Array,
   delete_status : Boolean,
+
+  date_and_time : String,
+
+
 });
 sp_appointmentSchema.plugin(timestamps);
 mongoose.model('sp_appointment', sp_appointmentSchema);

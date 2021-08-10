@@ -14,6 +14,7 @@ var vendordetailsSchema = new mongoose.Schema({
   bus_service_gall : Array,
   bus_profile : String,
   bus_proof : String,
+  thumbnail_image : String,
   bus_certif : Array,
   sp_loc : String,
   sp_lat : Number,
@@ -24,6 +25,11 @@ var vendordetailsSchema = new mongoose.Schema({
   profile_verification_status : String,
   delete_status : Boolean,
   calender_status : Boolean,
+  city_name : String,
+  comments : Number,
+  rating : Number,
+  sp_info : String,
+
 });
 vendordetailsSchema.plugin(timestamps);
 mongoose.model('vendordetails', vendordetailsSchema);

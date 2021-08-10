@@ -31,7 +31,6 @@ catch(e){
    else{
             res.json({Status:"Failed",Message:"This Service already added", Data : {} ,Code:404}); 
    }
-
 });
 
 router.post('/filter_date', function (req, res) {
@@ -74,6 +73,29 @@ router.get('/getlist', function (req, res) {
           res.json({Status:"Success",Message:"product categories screen  Details", Data : Functiondetails ,Code:200});
         });
 });
+
+
+router.get('/getlist_cat', function (req, res) {
+        product_categoriesModel.find({}, function (err, StateList) {
+          if(StateList.length == 0){
+            res.json({Status:"Success",Message:"product categories screen  List", Data : [] ,Code:200});
+          }else{
+            let final_data = [];
+            for(let a = 0 ; a < StateList.length ; a ++){
+                    let c = {
+                      _id : StateList[a]._id,
+                      product_cate_name : StateList[a].product_cate,
+                    }
+                    final_data.push(c);
+                    if(a == StateList.length - 1){
+                    res.json({Status:"Success",Message:"product categories screen  List", Data : final_data ,Code:200});
+                    }
+            }
+          }
+        });
+});
+
+
 
 
 router.get('/mobile/getlist', function (req, res) {

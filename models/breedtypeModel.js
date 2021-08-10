@@ -8,6 +8,7 @@ var breedtypeSchema = new mongoose.Schema({
        ref: 'pettype',
       },
   pet_breed : String,
+  pet_breed_img : String,
   pet_breed_value : Number,
   date_and_time : String,
     delete_status : Boolean,

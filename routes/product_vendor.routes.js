@@ -16,6 +16,7 @@ var SP_specialationsMode = require('./../models/SP_servicesModel');
 
 
 router.post('/create', async function(req, res) {
+  console.log("Vendor Details",req.body);
   try{
         await product_vendorModel.create({
             user_id:  req.body.user_id,
@@ -41,6 +42,7 @@ router.post('/create', async function(req, res) {
         }, 
         function (err, user) {
           console.log(user)
+            console.log(err)
         res.json({Status:"Success",Message:"Vendor Added successfully", Data : user ,Code:200}); 
         });
 }
@@ -123,7 +125,13 @@ router.post('/getlist_id', function (req, res) {
 router.get('/getlist', function (req, res) {
         product_vendorModel.find({}, function (err, Functiondetails) {
           res.json({Status:"Success",Message:"Vendor Details", Data : Functiondetails ,Code:200});
-        });
+        }).populate('user_id');
+});
+
+router.get('/getlist_list', function (req, res) {
+        product_vendorModel.find({}, function (err, Functiondetails) {
+          res.json({Status:"Success",Message:"Vendor Details", Data : Functiondetails ,Code:200});
+        }).populate('user_id');
 });
 
 
@@ -186,9 +194,10 @@ router.get('/sp_dropdown',async function (req, res) {
 
 
 router.post('/check_status', function (req, res) {
+  console.log("sadfasdfasdf");
         product_vendorModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
           console.log(StateList);
-          let message = "Dear Service Provider, We appreciate your interest and look forward to have you as part of Petfolio Team. Our team is reviewing your profile and will get in touch with you to close the formalities. Your profile is pending verification.";
+          let message = "Dear Vendor, We appreciate your interest and look forward to have you as part of Petfolio Team. Our team is reviewing your profile and will get in touch with you to close the formalities. Your profile is pending verification.";
          if(StateList == null){
           let dd = {
             'user_id' : req.body.user_id,

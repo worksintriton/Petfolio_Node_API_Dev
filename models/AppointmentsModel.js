@@ -55,6 +55,19 @@ var appointmentSchema = new mongoose.Schema({
   doc_business_info : Array,
   delete_status : Boolean,
   appoint_patient_st : String,
+  date_and_time : String,
+
+  pervious_app_date : String,
+  reshedule_status : String,
+  location_id : String,
+  visit_type : String,
+
+  doctor_comment : String,
+  diagnosis : String,
+  sub_diagnosis : String,
+
+  health_issue_title : String,
+
 
   
 });

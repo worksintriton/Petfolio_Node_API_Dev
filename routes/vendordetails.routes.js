@@ -11,35 +11,42 @@ var locationdetailsModel = require('./../models/locationdetailsModel');
 var SP_specialationsMode = require('./../models/SP_servicesModel');
 var SP_servicesMode = require('./../models/SP_servicesModel');
 var GeoPoint = require('geopoint');
+var doctor_specModel = require('./../models/sp_specModel');
+var Sp_favModel = require('./../models/Sp_favModel');
+
 
 router.post('/create', async function(req, res) {
-  console.log(req.body);
   try{
         await vendordetailsModel.create({
-            user_id:  req.body.user_id,
-            bus_user_name : req.body.bus_user_name,
-            bus_user_email : req.body.bus_user_email,
-            bussiness_name : req.body.bussiness_name,
-            bus_user_phone : req.body.bus_user_phone,
-            bus_service_list : req.body.bus_service_list,
-            bus_spec_list : req.body.bus_spec_list,
-            bus_service_gall : req.body.bus_service_gall,
-            bus_profile : req.body.bus_profile,
-            bus_proof : req.body.bus_proof,
-            bus_certif : req.body.bus_certif,
-            date_and_time : req.body.date_and_time,
-            mobile_type : req.body.mobile_type,
-            profile_status : req.body.profile_status,
-            profile_verification_status : req.body.profile_verification_status,
-            sp_loc : req.body.sp_loc,
-            sp_lat : req.body.sp_lat,
-            sp_long : req.body.sp_long,
+            user_id:  req.body.user_id  || "",
+            bus_user_name : req.body.bus_user_name || "",
+            bus_user_email : req.body.bus_user_email || "",
+            bussiness_name : req.body.bussiness_name || "",
+            bus_user_phone : req.body.bus_user_phone || "",
+            bus_service_list : req.body.bus_service_list || [],
+            bus_spec_list : req.body.bus_spec_list || [],
+            bus_service_gall : req.body.bus_service_gall || [],
+            bus_profile : req.body.bus_profile || "",
+            bus_proof : req.body.bus_proof || "",
+            bus_certif : req.body.bus_certif || [],
+            date_and_time : req.body.date_and_time || "",
+            mobile_type : req.body.mobile_type || "",
+            profile_status : req.body.profile_status || false,
+            profile_verification_status : req.body.profile_verification_status || "",
+            thumbnail_image : req.body.thumbnail_image || "",
+            sp_loc : req.body.sp_loc || "",
+            sp_lat : req.body.sp_lat || 0,
+            sp_long : req.body.sp_long || 0,
+            city_name : req.body.city_name || "",
             delete_status : false,
-            calender_status : false
+            calender_status : false,
+            comments : 0,
+            rating : 5,
+            sp_info : req.body.sp_info,
         }, 
         function (err, user) {
      
-        res.json({Status:"Success",Message:"SP Added successfully", Data : user ,Code:200}); 
+        res.json({Status:"Success",Message:"Service provider added successfully", Data : user ,Code:200}); 
         });
 }
 catch(e){
@@ -50,10 +57,9 @@ catch(e){
 
 
 router.post('/mobile/dashboard',async function (req, res) {
-    console.log(req.body);
  let userdetails  =  await userdetailsModel.findOne({_id:req.body.user_id});
  let location_details  =  await locationdetailsModel.find({user_id:req.body.user_id,default_status:true});
- let homebanner  =  await homebannerModel.find({});
+ let homebanner  =  await homebannerModel.find({delete_status : false});
     dashboard_sp.Banner_details = []
     for(let c = 0 ; c < homebanner.length; c ++){
        let gg = {
@@ -83,9 +89,8 @@ router.post('/mobile/dashboard',async function (req, res) {
 
 
 router.post('/mobile/service_cat',async function (req, res) {
-  console.log(req.body);
  let location_details  =  await locationdetailsModel.findOne({user_id:req.body.user_id,default_status:true});
-  let services_details  =  await SP_servicesMode.find({});
+  let services_details  =  await SP_servicesMode.find({delete_status : false});
   var final_Data = [];
    for(let a = 0 ; a < services_details.length; a ++){
      let c = {
@@ -109,14 +114,50 @@ router.post('/mobile/service_cat',async function (req, res) {
 
 
 router.post('/mobile/servicedetails',async function (req, res) {
-    console.log(req.body);
+    console.log("Service Product  *******",req.body);
+    let banner = [
+        { 
+          title : "title1",
+          image_path :"http://54.212.108.156:3000/api/uploads/1625687015621.png",
+        },
+         { 
+          title : "title1",
+          image_path :"http://54.212.108.156:3000/api/uploads/1625687032584.png",
+        },
+         { 
+          title : "title1",
+          image_path :"http://54.212.108.156:3000/api/uploads/1625687050185.png",
+        },
+         { 
+          title : "title1",
+          image_path :"http://54.212.108.156:3000/api/uploads/1625687064021.png",
+        },
+        { 
+          title : "title1",
+          image_path :"http://54.212.108.156:3000/api/uploads/1625687086700.png",
+        },
+        ];
  let location_details  =  await locationdetailsModel.findOne({user_id:req.body.user_id,default_status:true});
   var user_lat = location_details.location_lat;
   var user_long = location_details.location_long;
   let services_details  =  await SP_servicesMode.findOne({_id:req.body.cata_id});
-  let vendordetailsModels  =  await vendordetailsModel.find({});
+  let vendordetailsModels  =  await vendordetailsModel.find({delete_status : false});
     var final_Data = [];
-   for(let x = 0 ; x < vendordetailsModels.length; x ++){
+    let c = {
+    Service_Details : {
+      "_id": services_details._id,
+      "image_path" :services_details.img_path,
+      "title" : services_details.img_title,
+      "count" : 0
+     },
+     Service_provider : []
+    }
+    if(vendordetailsModels.length == 0){
+    res.json({Status:"Success",Message:"Service Provider List",alert_msg : "", Data : c ,banner :  banner,Code:200});
+    }
+   for(let x = 0 ; x < vendordetailsModels.length; x ++)
+   {
+    console.log(vendordetailsModels[x]);
     var point1 = new GeoPoint(+user_lat, +user_long);
     var point2 = new GeoPoint(+vendordetailsModels[x].sp_lat,+vendordetailsModels[x].sp_long);
     var distance = point1.distanceTo(point2, true)//output in kilometers
@@ -128,20 +169,26 @@ router.post('/mobile/servicedetails',async function (req, res) {
                        service_prices = vendordetailsModels[x].bus_service_list[c].amount;     
                 }   
       }
+      console.log("Testing 1");
     if(req.body.distance == 0){
-         if(distance < 15){
+         if(distance < 2000){
          let c =  {
         "_id" : vendordetailsModels[x]._id,
         "image": vendordetailsModels[x].bus_service_gall[0].bus_service_gall,
+        'thumbnail_image' : vendordetailsModels[x].thumbnail_image || 'http://54.212.108.156:3000/api/uploads/Pic_empty.jpg',
         "service_provider_name": vendordetailsModels[x].bussiness_name,
         "service_price": +service_prices,
         "service_offer": 0,
+        "city_name" : vendordetailsModels[x].city_name || "",
+        "bus_service_list" : vendordetailsModels[x].bus_service_list,
         "service_place":vendordetailsModels[x].sp_loc,
         "distance": +distance.toFixed(2),
         "rating_count" : 5,
-        "comments_count":12,
-      }
-     final_Data.push(c);
+        "comments_count" : 0,
+       }
+       if(service_prices !== 0){
+        final_Data.push(c);
+       }     
          }
     }
     else {
@@ -149,16 +196,22 @@ router.post('/mobile/servicedetails',async function (req, res) {
         "_id" : vendordetailsModels[x]._id,
         "image": vendordetailsModels[x].bus_service_gall[0].bus_service_gall,
         "service_provider_name": vendordetailsModels[x].bussiness_name,
+        'thumbnail_image' : vendordetailsModels[x].thumbnail_image || 'http://54.212.108.156:3000/api/uploads/Pic_empty.jpg',
         "service_price": +service_prices,
         "service_offer": 0,
+        "city_name" : vendordetailsModels[x].city_name || "",
+        "bus_service_list" : vendordetailsModels[x].bus_service_list,
         "service_place":vendordetailsModels[x].sp_loc,
         "distance": +distance.toFixed(2),
         "rating_count" : 5,
-        "comments_count":12,
+        "comments_count":0,
       }
-     final_Data.push(c);
+      if(service_prices !== 0){
+        final_Data.push(c);
+       } 
     }
      if(x == vendordetailsModels.length - 1 ){
+      console.log("Testing1");
       // res.json({Status:"Success",Message:"Service Cat List", Data : final_Data ,Code:200});
    let a = {
     Service_Details : {
@@ -172,19 +225,19 @@ router.post('/mobile/servicedetails',async function (req, res) {
    if(req.body.distance == 1){
 
     if(a.Service_provider.length == 0){
-    res.json({Status:"Failed",Message:"Service Provider List",alert_msg : "Around 15 kms no recorde found, shall i show above 15 kms", Data : a ,Code:404});
+    res.json({Status:"Failed",Message:"Service Provider List",alert_msg : "No records found. Expanding search.", Data : a ,banner : banner,Code:404});
     }else{
-             res.json({Status:"Success",Message:"Service Provider List",alert_msg : "Around 15 kms no recorde found, shall i show above 15 kms", Data : a ,Code:200});
+             res.json({Status:"Success",Message:"Service Provider List",alert_msg : "No records found. Expanding search.", Data : a ,banner : banner,Code:200});
     }
    }else{
-       res.json({Status:"Success",Message:"Service Provider List",alert_msg : "Around 15 kms no recorde found, shall i show above 15 kms", Data : a ,Code:200});
+       res.json({Status:"Success",Message:"Service Provider List",alert_msg : "No records found. Expanding search.", Data : a ,banner : banner,Code:200});
    }
      }
    }
    else
    { 
   if(req.body.distance == 0){
-         if(distance < 15){
+         if(distance < 2000){
            let service_prices = 0;
             for(let c = 0; c < vendordetailsModels[x].bus_service_list.length ; c ++){
               if(vendordetailsModels[x].bus_service_list[c].bus_service_list == services_details.img_title)
@@ -198,14 +251,19 @@ router.post('/mobile/servicedetails',async function (req, res) {
         "_id" : vendordetailsModels[x]._id,
         "image": vendordetailsModels[x].bus_service_gall[0].bus_service_gall,
         "service_provider_name": vendordetailsModels[x].bussiness_name,
+        'thumbnail_image' : vendordetailsModels[x].thumbnail_image || 'http://54.212.108.156:3000/api/uploads/Pic_empty.jpg',
         "service_price": +service_prices,
+        "city_name" : vendordetailsModels[x].city_name || "",
         "service_offer": 0,
+        "bus_service_list" : vendordetailsModels[x].bus_service_list,
         "service_place":vendordetailsModels[x].sp_loc,
         "distance": +distance.toFixed(2),
         "rating_count" : 5,
-        "comments_count":12,
+        "comments_count":0,
       }
-     final_Data.push(c);
+     if(service_prices !== 0){
+        final_Data.push(c);
+       } 
            }        
          }
     }
@@ -223,14 +281,19 @@ router.post('/mobile/servicedetails',async function (req, res) {
         "_id" : vendordetailsModels[x]._id,
         "image": vendordetailsModels[x].bus_service_gall[0].bus_service_gall,
         "service_provider_name": vendordetailsModels[x].bussiness_name,
+        'thumbnail_image' : vendordetailsModels[x].thumbnail_image || 'http://54.212.108.156:3000/api/uploads/Pic_empty.jpg',
         "service_price": +service_prices,
+        "bus_service_list" : vendordetailsModels[x].bus_service_list,
+        "city_name" : vendordetailsModels[x].city_name,
         "service_offer": 0,
         "service_place":vendordetailsModels[x].sp_loc,
         "distance": +distance.toFixed(2),
         "rating_count" : 5,
-        "comments_count":12,
+        "comments_count":0,
       }
-     final_Data.push(c);
+     if(service_prices !== 0){
+        final_Data.push(c);
+       } 
            }
     }
      if(x == vendordetailsModels.length - 1 ){
@@ -245,11 +308,11 @@ router.post('/mobile/servicedetails',async function (req, res) {
      Service_provider : final_Data
    }
    if(a.Service_provider.length == 0){
-    res.json({Status:"Failed",Message:"Service Provider List",alert_msg : "Around 15 kms no recorde found, shall i show above 15 kms", Data : a ,Code:404});
+    res.json({Status:"Failed",Message:"Service Provider List",alert_msg : "No records found. Expanding search.", Data : a ,banner:banner,Code:404});
    }else{
-    res.json({Status:"Success",Message:"Service Provider List",alert_msg : "Around 15 kms no recorde found, shall i show above 15 kms", Data : a ,Code:200});
+    res.json({Status:"Success",Message:"Service Provider List",alert_msg : "No records found. Expanding search.", Data : a ,banner : banner,Code:200});
    }
-  // res.json({Status:"Success",Message:"Service Provider List",alert_msg : "Around 15 kms no recorde found, shall i show above 15 kms", Data : a ,Code:200});
+  // res.json({Status:"Success",Message:"Service Provider List",alert_msg : "No records found. Expanding search.", Data : a ,Code:200});
     }
 
    }
@@ -261,7 +324,7 @@ router.post('/mobile/servicedetails',async function (req, res) {
 
 router.post('/filter_date', function (req, res) {
     console.log(req.body);
-        vendordetailsModel.find({}, function (err, StateList) {
+        vendordetailsModel.find({delete_status : false}, function (err, StateList) {
           var final_Date = [];
           for(let a = 0; a < StateList.length; a ++){
             var fromdate = new Date(req.body.fromdate);
@@ -407,13 +470,13 @@ router.get('/calendar_timelist', function (req, res) {
 router.post('/getlist_id', function (req, res) {
     console.log(req.body);
         vendordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
-          res.json({Status:"Success",Message:"User type List", Data : StateList ,Code:200});
-        });
+          res.json({Status:"Success",Message:"Service provider details", Data : StateList ,Code:200});
+        }).populate('user_id');
 });
 
 router.post('/mobile/sp_fetch_by_id',async function (req, res) {
     console.log(req.body);
-    let services_details  =  await SP_servicesMode.findOne({_id:req.body.cata_id});
+    let services_details  =  await SP_servicesMode.findOne({_id:req.body.cata_id,delete_status : false});
     let Details = {
       "_id": services_details._id,
       "image_path" : services_details.img_path,
@@ -422,8 +485,18 @@ router.post('/mobile/sp_fetch_by_id',async function (req, res) {
       "amount" : 200,
       "time" : "15 mins"
      }
-        vendordetailsModel.findOne({_id:req.body.sp_id}, function (err, StateList) {
-
+      vendordetailsModel.findOne({_id:req.body.sp_id},async function (err, StateList) {
+      console.log("SP DETAILS",StateList);
+      for(let c = 0 ; c < StateList.bus_service_list.length ; c ++){
+         if(StateList.bus_service_list[c].bus_service_list ==  Details.title){
+          Details.amount = StateList.bus_service_list[c].amount;
+         }
+      }
+      var pro_fav = await Sp_favModel.findOne({user_id:req.body.user_id,sp_id:StateList._id,delete_status : false});
+        var temp_fav = false;
+        if(pro_fav !==  null){
+               temp_fav = true;
+        }
        let a =  {
         "bus_service_list": StateList.bus_service_list,
         "bus_spec_list":  StateList.bus_spec_list,
@@ -450,7 +523,8 @@ router.post('/mobile/sp_fetch_by_id',async function (req, res) {
         "__v": StateList.__v,
         "distance": 0 ,
         "rating" : 0,
-        "comments" : 0
+        "comments" : 0,
+        "fav" : temp_fav
     }
           res.json({Status:"Success",Message:"SP Details", Data : a, Details : Details ,Code:200});
         });
@@ -458,20 +532,37 @@ router.post('/mobile/sp_fetch_by_id',async function (req, res) {
 
 router.get('/getlist', function (req, res) {
         vendordetailsModel.find({}, function (err, Functiondetails) {
-          res.json({Status:"Success",Message:"User type Details", Data : Functiondetails ,Code:200});
+          res.json({Status:"Success",Message:"SP Details", Data : Functiondetails ,Code:200});
         });
 });
+
+
+router.get('/getlist_sp_id', function (req, res) {
+        vendordetailsModel.find({}, function (err, Functiondetails) {
+          res.json({Status:"Success",Message:"SP Details", Data : Functiondetails ,Code:200});
+        }).populate('user_id');
+})
 
 
 
 router.get('/sp_dropdown',async function (req, res) {
 
-   let SP_specialationsModess  =  await SP_specialationsMode.find({});
-   var service_list = []
+
+var doctor_specModel = require('./../models/sp_specModel');
+
+   let Specialization_list  =  await doctor_specModel.find({delete_status : false});
+   let SP_specialationsModess  =  await SP_specialationsMode.find({delete_status : false});
+   var service_list = [];
+   var Specialization = [];
    for(let a = 0 ; a < SP_specialationsModess.length ; a ++ ){
         let t = {"service_list":SP_specialationsModess[a].img_title}
         service_list.push(t);
    }
+
+    for(let b = 0 ; b < Specialization_list.length ; b ++ ){
+        let t = {"Specialization":Specialization_list[b].specialzation}
+        Specialization.push(t);
+    }
    // var service_list = [
    // {
    //  "service_list":"Service - 1"
@@ -492,26 +583,20 @@ router.get('/sp_dropdown',async function (req, res) {
    //  "service_list":"Service - 6"
    // }
    // ];
-    var Specialization = [
-   {
-    "Specialization":"Specialization - 1"
-   },
-   {
-    "Specialization":"Specialization - 2"
-   },
-   {
-    "Specialization":"Specialization - 3"
-   },
-   {
-    "Specialization":"Specialization - 4"
-   },
-   {
-    "Specialization":"Specialization - 5"
-   },
-   {
-    "Specialization":"Specialization - 6"
-   }
-   ];
+   //  var Specialization = [
+   // {
+   //  "Specialization":"Kennel Cut"
+   // },
+   // {
+   //  "Specialization":"Teddy Bear Trim"
+   // },
+   // {
+   //  "Specialization":"Breed Trims"
+   // },
+   // {
+   //  "Specialization":"Full Coat / Show Trims"
+   // },
+   // ];
    var times = [
    {
     "time":"15 mins"
@@ -540,7 +625,7 @@ router.get('/sp_dropdown',async function (req, res) {
       "time" : times
     }
    
-  res.json({Status:"Success",Message:"SP Service List", Data : c ,Code:200});
+  res.json({Status:"Success",Message:"SP dropdown List", Data : c ,Code:200});
 });
 
 
@@ -598,7 +683,7 @@ router.post('/edit', function (req, res) {
     console.log(req.body);
         vendordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
-             res.json({Status:"Success",Message:"User type Updated", Data : UpdatedDetails ,Code:200});
+             res.json({Status:"Success",Message:"Service Provider Updated", Data : UpdatedDetails ,Code:200});
         });
 });
 

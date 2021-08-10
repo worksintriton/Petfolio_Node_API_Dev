@@ -33,11 +33,15 @@ catch(e){
 
 
 router.post('/filter_date', function (req, res) {
-        doctor_specModels.find({}, function (err, StateList) {
+       // console.log(req.body);
+        doctor_specModel.find({delete_status : false}, function (err, StateList) {
+          console.log(err);
+          // console.log("StateList",StateList);
           var final_Date = [];
           for(let a = 0; a < StateList.length; a ++){
             var fromdate = new Date(req.body.fromdate);
             var todate = new Date(req.body.todate);
+            console.log(StateList[a].createdAt);
             var checkdate = new Date(StateList[a].createdAt);
             console.log(fromdate,todate,checkdate);
             if(checkdate >= fromdate && checkdate <= todate){
@@ -62,7 +66,7 @@ router.get('/deletes', function (req, res) {
 
 
 router.post('/getlist_id', function (req, res) {
-        doctor_specModel.find({Person_id:req.body.Person_id}, function (err, StateList) {
+        doctor_specModel.find({Person_id:req.body.Person_id,delete_status : false}, function (err, StateList) {
           res.json({Status:"Success",Message:"specialization List", Data : StateList ,Code:200});
         });
 });
@@ -70,14 +74,14 @@ router.post('/getlist_id', function (req, res) {
 
 
 router.get('/getlist', function (req, res) {
-        doctor_specModel.find({}, function (err, Functiondetails) {
+        doctor_specModel.find({delete_status : false}, function (err, Functiondetails) {
           res.json({Status:"Success",Message:"specialization Details", Data : Functiondetails ,Code:200});
         });
 });
 
 
 router.get('/mobile/getlist', function (req, res) {
-        doctor_specModel.find({}, function (err, Functiondetails) {
+        doctor_specModel.find({delete_status:false}, function (err, Functiondetails) {
           let a = {
             usertypedata : Functiondetails
           }
@@ -99,7 +103,7 @@ router.post('/delete', function (req, res) {
   }
   doctor_specModel.findByIdAndUpdate(req.body._id, c, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
-             res.json({Status:"Success",Message:"Location Deleted successfully", Data : UpdatedDetails ,Code:200});
+             res.json({Status:"Success",Message:"Deleted successfully", Data : UpdatedDetails ,Code:200});
   });
 });
 

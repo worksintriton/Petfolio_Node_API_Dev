@@ -6,16 +6,17 @@ router.use(bodyParser.json());
 var AppointmentsModel = require('./../models/AppointmentsModel');
 var SP_appointmentsModels = require('./../models/SP_appointmentsModels');
 var doctordetailsModel = require('./../models/doctordetailsModel');
-
-
+var locationdetailsModel = require('./../models/locationdetailsModel');
 var reviewdetailsModel = require('./../models/reviewdetailsModel');
-
-
 var userdetailsModel = require('./../models/userdetailsModel');
 var request = require("request");
 
+
+var walkinappointmentsModel = require('./../models/walkin_appointmentModel');
+
 router.post('/mobile/create', async function(req, res) {
   try{
+    console.log("appointment_input",req.body);
     var Appointment_details = await AppointmentsModel.findOne({doctor_id:req.body.doctor_id,booking_date:req.body.booking_date,booking_time:req.body.booking_time});
     if(Appointment_details !== null){
       console.log("Appointment Already Booked",Appointment_details);
@@ -31,40 +32,49 @@ router.post('/mobile/create', async function(req, res) {
         await AppointmentsModel.create({
             doctor_id : req.body.doctor_id,
             appointment_UID : Appointmentid,
-            booking_date : req.body.booking_date,
-            booking_time : req.body.booking_time,
-            booking_date_time : req.body.booking_date_time,
-            communication_type : req.body.communication_type,
-            msg_id : Appointmentid,
-            video_id : req.body.video_id,
-            user_id : req.body.user_id,
-            pet_id : req.body.pet_id,
-            problem_info : req.body.problem_info,
-            doc_attched : req.body.doc_attched,
+            booking_date : req.body.booking_date || "",
+            booking_time : req.body.booking_time || "",
+            booking_date_time : req.body.booking_date_time || "",
+            communication_type : req.body.communication_type || "",
+            msg_id : Appointmentid || "",
+            video_id : req.body.video_id || "",
+            user_id : req.body.user_id || "",
+            pet_id : req.body.pet_id || "",
+            problem_info : req.body.problem_info || "",
+            doc_attched : req.body.doc_attched || [],
             appoinment_status : "Incomplete",
             start_appointment_status : "Not Started",
             end_appointment_status : "Not End",
-            doc_feedback : req.body.doc_feedback,
-            doc_rate : req.body.doc_rate,
-            user_feedback : req.body.user_feedback,
-            user_rate : req.body.user_rate,
-            display_date : req.body.display_date,
-            server_date_time : req.body.server_date_time,
-            payment_method : req.body.payment_method,
+            doc_feedback : req.body.doc_feedback || "",
+            doc_rate : req.body.doc_rate || "",
+            user_feedback : req.body.user_feedback || "",
+            user_rate : req.body.user_rate || "0",
+            display_date : req.body.display_date || "",
+            server_date_time : req.body.server_date_time || "",
+            payment_method : req.body.payment_method || "",
             prescription_details : "",
             vaccination_details :"",
-            appointment_types : req.body.appointment_types,
-            allergies : req.body.allergies,
-            payment_id : req.body.payment_id,
-            amount : req.body.amount,
-            service_name :  req.body.service_name,
-            service_amount :  req.body.service_amount,
+            appointment_types : req.body.appointment_types || "",
+            allergies : req.body.allergies || "",
+            payment_id : req.body.payment_id || "",
+            amount : req.body.amount || "0",
+            service_name :  req.body.service_name || "",
+            service_amount :  req.body.service_amount || "",
             completed_at : "",
             missed_at : "",
-            mobile_type : req.body.mobile_type,
-            doc_business_info : doctordetailsModels,
+            mobile_type : req.body.mobile_type || "",
+            doc_business_info : doctordetailsModels || [],
             delete_status : false,
             appoint_patient_st : "",
+            date_and_time : req.body.date_and_time,
+            pervious_app_date : "",
+            reshedule_status : "",
+            location_id : req.body.location_id || "",
+            visit_type : req.body.visit_type || "",
+            doctor_comment : req.body.doctor_comment || "",
+            diagnosis :  req.body.diagnosis || "",
+            sub_diagnosis : req.body.sub_diagnosis || "",
+            health_issue_title : req.body.health_issue_title || "",
         }, 
         function (err, user) {
           console.log(user)
@@ -78,26 +88,36 @@ router.post('/mobile/create', async function(req, res) {
 var params = {
 
             "user_id":  user_token._id,
-            "notify_title" : "New Appointment",
-            "notify_descri" : "Your Appointment Booked successfully " + Appointmentid + " at " + req.body.booking_date,
+            "notify_title" : "Doctor New Appointment",
+            "notify_descri" : "Your Appointment Booked successfully " + Appointmentid + " at " + req.body.booking_date_time,
             "notify_img" : "",
             "notify_time" : "",
-            "date_and_time" : req.body.booking_date,
+            "date_and_time" : req.body.booking_date_time,
             "user_token" : user_token.fb_token,
+            "data_type" : {
+            "usertype":"1",
+            "appintments":"New",
+            "orders":""
+             }
 }
 
 var params1 = {
             "user_token" : doctor_token.fb_token,
-            "notify_title" : "New Appointment",
-            "notify_descri" : "Your Appointment Booked successfully " + Appointmentid  + " at " + req.body.booking_date,
+            "notify_title" : "Doctor New Appointment",
+            "notify_descri" : "You have an appointment " + Appointmentid  + " at " + req.body.booking_date_time,
             "notify_img" : "",
             "notify_time" : "",
-            "date_and_time" : req.body.booking_date,
-            "user_id" : doctor_token._id
+            "date_and_time" : req.body.booking_date_time,
+            "user_id" : doctor_token._id,
+            "data_type" : {
+            "usertype":"4",
+            "appintments":"New",
+            "orders":""
+             }
 }
 
 request.post(
-    'http://52.25.163.13:3000/api/notification/send_notifiation',
+    'http://54.212.108.156:3000/api/notification/send_notifiation',
     { json: params },
     function (error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -107,7 +127,7 @@ request.post(
 );
 
 request.post(
-    'http://52.25.163.13:3000/api/notification/send_notifiation',
+    'http://54.212.108.156:3000/api/notification/send_notifiation',
     { json: params1 },
     function (error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -145,7 +165,7 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
           "_id" : sp_appointmentlist[a]._id,
           "Booking_Id":sp_appointmentlist[a].appointment_UID,
           "appointment_for" : "SP",
-          "photo" : sp_appointmentlist[a].sp_business_info[0].bus_service_gall[0].bus_service_gall,
+          "photo" : sp_appointmentlist[a].sp_business_info[0].thumbnail_image || '',
           "clinic_name" :   "",
           "pet_name" :  sp_appointmentlist[a].pet_id.pet_name,
           "appointment_type" : "",
@@ -197,7 +217,7 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
           "_id" : doctor_appointmentlist[b]._id,
           "Booking_Id": doctor_appointmentlist[b].appointment_UID,
           "appointment_for" : "Doctor",
-          "photo" : doctor_appointmentlist[b].doc_business_info[0].clinic_pic[0].clinic_pic,
+          "photo" : doctor_appointmentlist[b].doc_business_info[0].thumbnail_image || '',
           "clinic_name" :  doctor_appointmentlist[b].doc_business_info[0].clinic_name,
           "pet_name" : doctor_appointmentlist[b].pet_id.pet_name,
           "appointment_type" : doctor_appointmentlist[b].appointment_types,
@@ -222,6 +242,10 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
           "appoint_patient_st" : doctor_appointmentlist[b].appoint_patient_st || "",
           "user_id" : doctor_appointmentlist[b].user_id._id || "",
           "doctor_id": doctor_appointmentlist[b].doctor_id._id || "",
+          "location_id": doctor_appointmentlist[b].location_id || "",
+          "visit_type": doctor_appointmentlist[b].visit_type || "", 
+
+
           "sp_id" : "",
         }
         final_appointment_list.push(fin);
@@ -235,7 +259,7 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
               "doctor_id" : doctor_appointmentlist[b].user_id._id
               }
             request.post(
-                'http://52.25.163.13:3000/api/notification/mobile/alert/notification',
+                'http://54.212.108.156:3000/api/notification/mobile/alert/notification',
                 { json: params },
                 function (error, response, body) {
                     if (!error && response.statusCode == 200) {
@@ -284,7 +308,7 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
           "_id" : doctor_appointmentlist[b]._id,
           "Booking_Id":doctor_appointmentlist[b].appointment_UID,
           "appointment_for" : "Doctor",
-          "photo" : doctor_appointmentlist[b].doc_business_info[0].clinic_pic[0].clinic_pic,
+          "photo" : doctor_appointmentlist[b].doc_business_info[0].thumbnail_image || '',
           "clinic_name" :  doctor_appointmentlist[b].doc_business_info[0].clinic_name,
           "pet_name" : doctor_appointmentlist[b].pet_id.pet_name,
           "appointment_type" : doctor_appointmentlist[b].appointment_types,
@@ -309,13 +333,15 @@ router.post('/mobile/plove_getlist/newapp1',async function (req, res) {
           "appoint_patient_st" : doctor_appointmentlist[b].appoint_patient_st || "",
           "user_id" : doctor_appointmentlist[b].user_id._id || "",
           "doctor_id": doctor_appointmentlist[b].doctor_id._id || "",
+          "location_id": doctor_appointmentlist[b].location_id || "",
+          "visit_type": doctor_appointmentlist[b].visit_type || "",      
           "sp_id" : "",
         }
         final_appointment_list.push(fin);
            } 
            else {
              let c = {
-                missed_at : s,
+                missed_at :  doctor_appointmentlist[b].booking_date_time,
                 appoinment_status : "Missed",
                 appoint_patient_st : "Doctor missed appointment"
               }
@@ -360,7 +386,7 @@ router.post('/mobile/plove_getlist/comapp1',async function (req, res) {
           "_id" : sp_appointmentlist[a]._id,
           "Booking_Id":sp_appointmentlist[a].appointment_UID,
           "appointment_for" : "SP",
-          "photo" : sp_appointmentlist[a].sp_business_info[0].bus_service_gall[0].bus_service_gall,
+          "photo" : sp_appointmentlist[a].sp_business_info[0].thumbnail_image || '',
           "clinic_name" :   "",
           "pet_name" :  sp_appointmentlist[a].pet_id.pet_name,
           "appointment_type" : "",
@@ -405,7 +431,7 @@ router.post('/mobile/plove_getlist/comapp1',async function (req, res) {
           "_id" : doctor_appointmentlist[b]._id,
           "Booking_Id":doctor_appointmentlist[b].appointment_UID,
           "appointment_for" : "Doctor",
-          "photo" : doctor_appointmentlist[b].doc_business_info[0].clinic_pic[0].clinic_pic,
+          "photo" : doctor_appointmentlist[b].doc_business_info[0].thumbnail_image || '',
           "clinic_name" :  doctor_appointmentlist[b].doc_business_info[0].clinic_name,
           "pet_name" : doctor_appointmentlist[b].pet_id.pet_name,
           "appointment_type" : doctor_appointmentlist[b].appointment_types,
@@ -430,6 +456,8 @@ router.post('/mobile/plove_getlist/comapp1',async function (req, res) {
           "status" : doctor_appointmentlist[b].appoinment_status,
            "user_id" : doctor_appointmentlist[b].user_id._id || "",
           "doctor_id": doctor_appointmentlist[b].doctor_id._id || "",
+          "location_id": doctor_appointmentlist[b].location_id || "",
+          "visit_type": doctor_appointmentlist[b].visit_type || "",      
           "sp_id" : "",
         }
         final_appointment_list.push(fin);
@@ -455,7 +483,7 @@ router.post('/mobile/plove_getlist/comapp1',async function (req, res) {
           "_id" : doctor_appointmentlist[b]._id,
           "Booking_Id":doctor_appointmentlist[b].appointment_UID,
           "appointment_for" : "Doctor",
-          "photo" : doctor_appointmentlist[b].doc_business_info[0].clinic_pic[0].clinic_pic,
+          "photo" : doctor_appointmentlist[b].doc_business_info[0].thumbnail_image || '',
           "clinic_name" :  doctor_appointmentlist[b].doc_business_info[0].clinic_name,
           "pet_name" : doctor_appointmentlist[b].pet_id.pet_name,
           "appointment_type" : doctor_appointmentlist[b].appointment_types,
@@ -480,6 +508,8 @@ router.post('/mobile/plove_getlist/comapp1',async function (req, res) {
           "status" : doctor_appointmentlist[b].appoinment_status,
           "user_id" : doctor_appointmentlist[b].user_id._id || "",
           "doctor_id": doctor_appointmentlist[b].doctor_id._id || "",
+          "location_id": doctor_appointmentlist[b].location_id || "",
+          "visit_type": doctor_appointmentlist[b].visit_type || "",     
           "sp_id" : "",
         }
         final_appointment_list.push(fin);
@@ -501,6 +531,9 @@ router.post('/mobile/plove_getlist/comapp1',async function (req, res) {
 
 
 
+
+
+
 router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
  var sp_appointmentlist =  await SP_appointmentsModels.find({user_id:req.body.user_id,appoinment_status:"Missed"}).populate('user_id sp_id pet_id');
  var doctor_appointmentlist =  await AppointmentsModel.find({user_id:req.body.user_id,appoinment_status:"Missed"}).populate('user_id doctor_id pet_id');
@@ -517,7 +550,7 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
           "_id" : sp_appointmentlist[a]._id,
           "Booking_Id":sp_appointmentlist[a].appointment_UID,
           "appointment_for" : "SP",
-          "photo" : sp_appointmentlist[a].sp_business_info[0].bus_service_gall[0].bus_service_gall,
+          "photo" : sp_appointmentlist[a].sp_business_info[0].thumbnail_image || '',
           "clinic_name" :   "",
           "pet_name" :  sp_appointmentlist[a].pet_id.pet_name,
           "appointment_type" : "",
@@ -560,7 +593,7 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
           "Booking_Id":doctor_appointmentlist[b].appointment_UID,
           "appointment_for" : "Doctor",
           "doctor_name" : doctor_appointmentlist[b].doctor_id.first_name+" "+doctor_appointmentlist[b].doctor_id.last_name,
-          "photo" : doctor_appointmentlist[b].doc_business_info[0].clinic_pic[0].clinic_pic,
+          "photo" : doctor_appointmentlist[b].doc_business_info[0].thumbnail_image || '',
           "clinic_name" :  doctor_appointmentlist[b].doc_business_info[0].clinic_name,
           "pet_name" : doctor_appointmentlist[b].pet_id.pet_name,
           "appointment_type" : doctor_appointmentlist[b].appointment_types,
@@ -584,6 +617,8 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
           "status" : doctor_appointmentlist[b].appoinment_status,
           "user_id" : doctor_appointmentlist[b].user_id._id || "",
           "doctor_id": doctor_appointmentlist[b].doctor_id._id || "",
+          "location_id": doctor_appointmentlist[b].location_id || "",
+          "visit_type": doctor_appointmentlist[b].visit_type || "",     
           "sp_id" : "",
         }
         final_appointment_list.push(fin);
@@ -610,7 +645,7 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
           "Booking_Id":doctor_appointmentlist[b].appointment_UID,
           "appointment_for" : "Doctor",
           "doctor_name" : doctor_appointmentlist[b].doctor_id.first_name+" "+doctor_appointmentlist[b].doctor_id.last_name,
-          "photo" : doctor_appointmentlist[b].doc_business_info[0].clinic_pic[0].clinic_pic,
+          "photo" : doctor_appointmentlist[b].doc_business_info[0].thumbnail_image || '',
           "clinic_name" :  doctor_appointmentlist[b].doc_business_info[0].clinic_name,
           "pet_name" : doctor_appointmentlist[b].pet_id.pet_name,
           "appointment_type" : doctor_appointmentlist[b].appointment_types,
@@ -634,6 +669,8 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
           "status" : doctor_appointmentlist[b].appoinment_status ,
            "user_id" : doctor_appointmentlist[b].user_id._id || "",
           "doctor_id": doctor_appointmentlist[b].doctor_id._id || "",
+          "location_id": doctor_appointmentlist[b].location_id || "",
+          "visit_type": doctor_appointmentlist[b].visit_type || "",     
           "sp_id" : "",
         }
         final_appointment_list.push(fin);
@@ -654,6 +691,103 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
 
 
 
+router.post('/mobile/noshownotification', function (req, res) {
+        AppointmentsModel.find({display_date:req.body.display_date,appoinment_status : "Incomplete"}, function (err, doctor_appointmentlist) {
+          if(doctor_appointmentlist.length == 0){
+           res.json({Status:"Success",Message:"No Show Notification Send", Data : {} ,Code:200});   
+        }
+        for(let b = 0 ; b < doctor_appointmentlist.length ; b ++){
+          // var oldDateObj = new Date(doctor_appointmentlist[b].display_date);
+          //  console.log(oldDateObj);
+          //  var s = new Date(doctor_appointmentlist[b].display_date);
+          //  console.log(s)
+          //  s.setMinutes(s.getMinutes()+45);
+          //  var curr = new Date(req.body.current_time);
+          //  console.log("30 mins",s);
+          //  console.log("current_Date",curr);
+          //  if(s > curr){
+          //  }else {
+               var params = {
+              "status":"No show",
+              "date" : doctor_appointmentlist[b].booking_date_time,
+              "appointment_UID" : doctor_appointmentlist[b].appointment_UID,
+              "user_id" : doctor_appointmentlist[b].doctor_id._id,
+              "doctor_id" : doctor_appointmentlist[b].user_id._id
+              }
+            request.post(
+                'http://54.212.108.156:3000/api/notification/mobile/alert/notification',
+                { json: params },
+                function (error, response, body) {
+                    if (!error && response.statusCode == 200) {
+                        console.log(body);
+                    }
+                }
+            );
+             let c = {
+                missed_at : doctor_appointmentlist[b].booking_date_time,
+                appoinment_status : "Missed",
+                appoint_patient_st : "Doctor missed appointment"
+              }
+             AppointmentsModel.findByIdAndUpdate(doctor_appointmentlist[b]._id, c, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500}); 
+            });
+           // }
+
+           if(b == doctor_appointmentlist.length - 1){
+            res.json({Status:"Success",Message:"No Show Notification Send", Data : {} ,Code:200});   
+           }
+
+         }
+         // res.json({Status:"Success",Message:"New Appointment List", Data : StateList ,Code:200});         
+        }).populate('user_id doctor_id pet_id');
+});
+
+
+
+router.post('/mobile/remaindernotification', function (req, res) {
+        AppointmentsModel.find({display_date:req.body.display_date,appoinment_status : "Incomplete"}, function (err, doctor_appointmentlist) {
+
+        if(doctor_appointmentlist.length == 0){
+           res.json({Status:"Success",Message:"No Remainder Notification Send", Data : {} ,Code:200});   
+        }
+        for(let b = 0 ; b < doctor_appointmentlist.length ; b ++){
+          // var oldDateObj = new Date(doctor_appointmentlist[b].display_date);
+          //  console.log(oldDateObj);
+          //  var s = new Date(doctor_appointmentlist[b].display_date);
+          //  console.log(s)
+          //  s.setMinutes(s.getMinutes()+45);
+          //  var curr = new Date(req.body.current_time);
+          //  console.log("30 mins",s);
+          //  console.log("current_Date",curr);
+          //  if(s > curr){
+           // }else {
+               var params = {
+              "status":"Appointment Remainder",
+              "date" : doctor_appointmentlist[b].booking_date_time,
+              "appointment_UID" : doctor_appointmentlist[b].appointment_UID,
+              "user_id" : doctor_appointmentlist[b].doctor_id._id,
+              "doctor_id" : doctor_appointmentlist[b].user_id._id
+              }
+            request.post(
+                'http://54.212.108.156:3000/api/notification/mobile/alert/notification',
+                { json: params },
+                function (error, response, body) {
+                    if (!error && response.statusCode == 200) {
+                        console.log(body);
+                    }
+                }
+            );
+           // }
+
+
+           if(b == doctor_appointmentlist.length - 1){
+            res.json({Status:"Success",Message:"Remainder Notification Send", Data : {} ,Code:200});   
+           }
+         }
+         // res.json({Status:"Success",Message:"New Appointment List", Data : StateList ,Code:200});         
+        }).populate('user_id doctor_id pet_id');
+});
+
 
 
 
@@ -662,8 +796,15 @@ router.post('/mobile/plove_getlist/missapp1',async function (req, res) {
 
 
 router.post('/mobile/fetch_appointment_id', function (req, res) {
-        AppointmentsModel.findOne({_id:req.body.apppointment_id}, function (err, StateList) {
-         res.json({Status:"Success",Message:"New Appointment List", Data : StateList ,Code:200});         
+        AppointmentsModel.findOne({_id:req.body.apppointment_id},async function (err, StateList) {
+          console.log("appointment_details",StateList);
+           // console.log("location_details",location_details);
+         if(StateList.visit_type == "Home"){
+           let location_details  =  await locationdetailsModel.findOne({_id:StateList.location_id});
+          res.json({Status:"Success",Message:"Appointment details", Data : StateList , Address:location_details,Code:200});   
+         }else{
+          res.json({Status:"Success",Message:"Appointment details", Data : StateList , Address : {},Code:200});   
+         }
         }).populate('user_id doctor_id pet_id');
 });
 
@@ -995,7 +1136,7 @@ router.post('/check', async function(req, res) {
     await AppointmentsModel.findOne({doctor_id:req.body.doctor_id,booking_date:req.body.Booking_Date,booking_time:req.body.Booking_Time}, function (err, Appointmentdetails) {
           console.log("APAD",Appointmentdetails);
           if(Appointmentdetails!== null){
-            res.json({Status:"Failed",Message:"Slot not Available",Data : {} ,Code:300});
+            res.json({Status:"Failed",Message:"Slot not available",Data : {} ,Code:300});
           }
           else{
             res.json({Status:"Success",Message:"Available",Data : {} ,Code:200});
@@ -1044,6 +1185,13 @@ router.post('/getlist_id', function (req, res) {
 
 
 
+router.post('/getlist_doctor_id', function (req, res) {
+        AppointmentsModel.find({doctor_id:req.body.doctor_id}, function (err, Functiondetails) {
+          res.json({Status:"Success",Message:"Appointment Details", Data : Functiondetails ,Code:200});
+        }).populate('user_id doctor_id pet_id');
+});
+
+
 router.get('/getlist', function (req, res) {
         AppointmentsModel.find({}, function (err, Functiondetails) {
           res.json({Status:"Success",Message:"Appointment Details", Data : Functiondetails ,Code:200});
@@ -1061,6 +1209,156 @@ router.get('/mobile/getlist', function (req, res) {
 });
 
 
+
+
+router.post('/doctor_payment', function (req, res) {
+        AppointmentsModel.find({doctor_id:req.body.doctor_id}, function (err, Functiondetails) {
+         if(Functiondetails.length == 0){
+          res.json({Status:"Success",Message:"No appointment found", Data : [] ,Code:200});
+        } else
+        {
+          let final_data = [];
+              for(let a  = 0 ; a < Functiondetails.length ; a ++ ){
+                     let c = {
+            "_id": Functiondetails[a]._id,
+            "doctor_id": Functiondetails[a].doctor_id,
+            "appointment_UID":Functiondetails[a].appointment_UID,
+            "booking_date_time": Functiondetails[a].booking_date_time,
+            "appoinment_status": Functiondetails[a].appoinment_status,
+            "communication_type": Functiondetails[a].communication_type,
+            "display_date":Functiondetails[a].display_date,
+            "payment_id": Functiondetails[a].payment_id,
+            "amount": Functiondetails[a].amount,
+            "mobile_type": Functiondetails[a].mobile_type,
+            "reshedule_status": Functiondetails[a].reshedule_status,
+                     }
+                     final_data.push(c);
+                     if(a == Functiondetails.length - 1){
+                      res.json({Status:"Success",Message:"Appointment details", Data : final_data ,Code:200});
+                     }
+              }
+        }
+          // res.json({Status:"Success",Message:"Appointment Details", Data : Functiondetails ,Code:200});
+        });
+});
+
+
+router.post('/admin_doctor_payment', function (req, res) {
+        AppointmentsModel.find({doctor_id:req.body.doctor_id,"appoinment_status": "Completed"}, function (err, Functiondetails) {
+         if(Functiondetails.length == 0){
+          res.json({Status:"Success",Message:"No appointment found", Data : [] ,Code:200});
+        } else
+        {
+          res.json({Status:"Success",Message:"Appointment Details", Data : Functiondetails ,Code:200});
+        }
+          // res.json({Status:"Success",Message:"Appointment Details", Data : Functiondetails ,Code:200});
+        }).populate('user_id');
+});
+
+
+
+router.post('/admin_doctor_payment1', function (req, res) {
+        walkinappointmentsModel.find({doctor_id:req.body.doctor_id,"appoinment_status": "Completed"}, function (err, Functiondetails) {
+         if(Functiondetails.length == 0){
+          res.json({Status:"Success",Message:"No appointment found", Data : [] ,Code:200});
+        } else
+        {
+          res.json({Status:"Success",Message:"Appointment Details", Data : Functiondetails ,Code:200});
+        }
+          // res.json({Status:"Success",Message:"Appointment Details", Data : Functiondetails ,Code:200});
+        }).populate('user_id');
+});
+
+
+
+router.post('/doctor/petlover_payment', function (req, res) {
+        AppointmentsModel.find({user_id:req.body.user_id}, function (err, Functiondetails) {
+         if(Functiondetails.length == 0){
+          res.json({Status:"Success",Message:"No appointment found", Data : [] ,Code:200});
+        } else
+        {
+          let final_data = [];
+              for(let a  = 0 ; a < Functiondetails.length ; a ++ ){
+                     let c = {
+            "_id": Functiondetails[a]._id,
+            "doctor_id": Functiondetails[a].doctor_id,
+            "appointment_UID":Functiondetails[a].appointment_UID,
+            "booking_date_time": Functiondetails[a].booking_date_time,
+            "appoinment_status": Functiondetails[a].appoinment_status,
+            "communication_type": Functiondetails[a].communication_type,
+            "display_date":Functiondetails[a].display_date,
+            "payment_id": Functiondetails[a].payment_id,
+            "amount": Functiondetails[a].amount,
+            "mobile_type": Functiondetails[a].mobile_type,
+            "reshedule_status": Functiondetails[a].reshedule_status,
+                     }
+                     final_data.push(c);
+                     if(a == Functiondetails.length - 1){
+                      res.json({Status:"Success",Message:"Appointment Details", Data : final_data ,Code:200});
+                     }
+              }
+        }
+          // res.json({Status:"Success",Message:"Appointment Details", Data : Functiondetails ,Code:200});
+        });
+});
+
+
+
+router.post('/reshedule_list', function (req, res) {
+        AppointmentsModel.find({doctor_id:req.body.doctor_id,reshedule_status:"Yes"}, function (err, Functiondetails) {
+         if(Functiondetails.length == 0){
+          res.json({Status:"Success",Message:"Appointment Details", Data : [] ,Code:200});
+        } else
+        {
+          let final_data = [];
+              for(let b  = 0 ; b < Functiondetails.length ; b ++ ){
+      let c = {
+          "_id" : Functiondetails[b]._id,
+          "Booking_Id": Functiondetails[b].appointment_UID,
+          "video_id" :  Functiondetails[b].video_id,
+          "appointment_for" : "Doctor",
+          "photo" : Functiondetails[b].doc_business_info[0].thumbnail_image || '',
+          "clinic_name" :  Functiondetails[b].doc_business_info[0].clinic_name,
+          "pet_name" : Functiondetails[b].pet_id.pet_name,
+          "appointment_type" : Functiondetails[b].appointment_types,
+          "communication_type" : Functiondetails[b].communication_type,
+          "cost" : Functiondetails[b].amount,
+           "start_appointment_status" : Functiondetails[b].start_appointment_status,
+          "appointment_time" : Functiondetails[b].booking_date_time,
+          "createdAt" :  Functiondetails[b].createdAt,
+          "updatedAt" :  Functiondetails[b].updatedAt,
+          "pet_type" : Functiondetails[b].pet_id.pet_type,
+          "type" : "" ,
+          "service_provider_name" :"",
+          "Service_name" : "",
+          "service_cost" : "",
+          "doctor_name" : Functiondetails[b].doctor_id.first_name+" "+Functiondetails[b].doctor_id.last_name,
+          "Booked_at" : Functiondetails[b].booking_date_time,
+          "appoint_patient_st" : Functiondetails[b].appoint_patient_st || "",
+          "missed_at" : Functiondetails[b].missed_at || "",
+          "completed_at" : Functiondetails[b].completed_at || "",
+          "user_rate" : Functiondetails[b].user_rate|| "",
+          "user_feedback" : Functiondetails[b].user_feedback|| "",   
+          "status" : Functiondetails[b].appoinment_status,
+           "user_id" : Functiondetails[b].user_id._id || "",
+          "doctor_id": Functiondetails[b].doctor_id._id || "",
+          "sp_id" : "",
+        }
+                     final_data.push(c);
+                     if(b == Functiondetails.length - 1){
+                      res.json({Status:"Success",Message:"Resudule Appointment Details", Data : final_data ,Code:200});
+                     }
+              }
+        }
+          // res.json({Status:"Success",Message:"Appointment Details", Data : Functiondetails ,Code:200});
+        }).populate('user_id doctor_id pet_id');
+});
+
+
+
+
+
+
 router.post('/mobile/doctor/app_edit', function (req, res) {
         AppointmentsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
@@ -1071,7 +1369,7 @@ router.post('/mobile/doctor/app_edit', function (req, res) {
 
 router.post('/mobile/user/edit', function (req, res) {
         AppointmentsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
-            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error, Try later", Data : {},Code:500});
              res.json({Status:"Success",Message:"Appointment Updated", Data : UpdatedDetails ,Code:200});
         });
 });
@@ -1099,7 +1397,7 @@ router.post('/reviews/update',async function (req, res) {
         rating : final_rat_count
         } 
         console.log(c);
-        doctordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+        doctordetailsModel.findByIdAndUpdate(doctor_details._id, c, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              // res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
                console.log("DAtA updated in Doctor Details");
@@ -1116,6 +1414,69 @@ router.post('/reviews/update',async function (req, res) {
 
 
 
+router.post('/reshedule_appointment',async function (req, res) {
+  let a = {
+    pervious_app_date : req.body.already_booked_date,
+    reshedule_status : "Yes",
+    booking_date_time : req.body.reschedule_date,
+    booking_date: req.body.booking_date,
+    booking_time: req.body.booking_time,
+  }
+AppointmentsModel.findByIdAndUpdate(req.body._id, a, {new: true}, function (err, UpdatedDetails) {
+  if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+  res.json({Status:"Success",Message:"Appointment reshedule successfully", Data : UpdatedDetails ,Code:200});
+});
+});
+
+
+
+
+router.post('/update/doctorcomment', function (req, res) {
+  AppointmentsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Doctor Comment Update successfully", Data : {} ,Code:200});
+  });
+});
+
+
+
+
+
+router.post('/medical_history',async function (req, res) {
+ AppointmentsModel.find({user_id:req.body.user_id,pet_id:req.body.pet_id}, function (err, Functiondetails) {
+  if(Functiondetails.length == 0){
+    res.json({Status:"Success",Message:"No medical history", Data : [] ,Code:200});
+  } else {
+     let final_Data = [];
+     for(let a  = 0 ; a < Functiondetails.length ; a++){
+      let c = {
+         vet_image : Functiondetails[a].doctor_id.profile_img,
+         vet_name : Functiondetails[a].doctor_id.first_name+ " " +Functiondetails[a].doctor_id.last_name,
+         vet_spec : Functiondetails[a].doc_business_info[0].specialization,
+         pet_name : Functiondetails[a].pet_id.pet_name,
+         pet_id : Functiondetails[a].pet_id._id,
+         appointement_id : Functiondetails[a]._id,
+         appointment_date : Functiondetails[a].booking_date_time,
+         allergies : Functiondetails[a].allergies,
+         vacination : Functiondetails[a].pet_id.vaccinated,
+         communication_type : Functiondetails[a].communication_type,
+         prescrip_type : "PDF",
+      }
+      final_Data.push(c);
+      if(a == Functiondetails.length - 1){
+         res.json({Status:"Success",Message:"Medical history Details", Data : final_Data,Code:200});
+      }
+     }
+  }
+    }).populate('doctor_id pet_id');
+});
+
+
+
+
+
+
+
 
 router.post('/edit',async function (req, res) {
 console.log("Edit Details XYZ",req.body.appoinment_status);
@@ -1124,7 +1485,7 @@ if(req.body.appoinment_status == "Completed"){
 var appoint_details = await AppointmentsModel.findOne({_id:req.body._id});
 let d = {"appointment_UID":appoint_details.appointment_UID,"date":req.body.completed_at,"doctor_id":appoint_details.doctor_id,"status":"Appointment Completed","user_id":appoint_details.user_id}
 request.post(
-    'http://52.25.163.13:3000/api/notification/mobile/alert/notification',
+    'http://54.212.108.156:3000/api/notification/mobile/alert/notification',
     { json: d },
     function (error, response, body) {
         if (!error && response.statusCode == 200) {

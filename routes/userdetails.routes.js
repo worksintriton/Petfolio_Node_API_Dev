@@ -5,27 +5,49 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 var GeoPoint = require('geopoint');
+var process = require('process');
+
+
 var userdetailsModel = require('./../models/userdetailsModel');
 var locationdetailsModel = require('./../models/locationdetailsModel');
 var dashboard_petlover1 = require('./dashboard_petlover1.json');
 var dashboard_petlover = require('./dashboard_petlover.json');
+var minibannerModel = require('./../models/minibannerModel');
+
+
+var Doctor_favModel = require('./../models/Doctor_favModel');
+var Product_favModel = require('./../models/Product_favModel');
+
 var doctordetailsModel = require('./../models/doctordetailsModel');
 var petdetailsModel = require('./../models/petdetailsModel');
 var homebannerModel = require('./../models/homebannerModel');
 var AppointmentsModel = require('./../models/AppointmentsModel');
 var product_categoriesModel = require('./../models/product_categoriesModel');
 var SP_servicesMode = require('./../models/SP_servicesModel');
-
-
 var AppointmentsModel = require('./../models/AppointmentsModel');
 var SP_appointmentsModels = require('./../models/SP_appointmentsModels');
-
+var product_detailsModel = require('./../models/product_detailsModel');
 
 
 router.post('/create', async function(req, res) {
   try{
+
+       if(req.body.ref_code !== ''){
+       var ref_code_details  =  await userdetailsModel.findOne({my_ref_code:req.body.ref_code});
+       console.log(ref_code_details);
+       if(ref_code_details == null ){
+        res.json({Status:"Failed",Message:"Referrel code not found",Data : {},Code:404});
+        process.exit(1);
+       }
+       }
+    
        let random = 123456;
        let phone  =  await userdetailsModel.findOne({user_phone : req.body.user_phone});
+          var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+          var result = '';
+          for ( var i = 0; i < 7; i++ ) {
+           result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+          }
 
        if(phone !== null){
 
@@ -73,20 +95,22 @@ router.post('/create', async function(req, res) {
        }else
        {
           await userdetailsModel.create({
-            first_name:  req.body.first_name,
-            last_name : req.body.last_name,
-            user_email : req.body.user_email,
-            user_phone : req.body.user_phone,
-            date_of_reg : req.body.date_of_reg,
+            first_name:  req.body.first_name || "",
+            last_name : req.body.last_name || "",
+            user_email : req.body.user_email || "",
+            user_phone : req.body.user_phone || "",
+            date_of_reg : req.body.date_of_reg || "",
             user_type : req.body.user_type,
+            ref_code : req.body.ref_code || "",
+            my_ref_code : result || "0000000",
             user_status : "Incomplete",
-            otp : random,
+            otp : random || 0,
             profile_img : "",
-            user_email_verification : req.body.user_email_verification,
+            user_email_verification : req.body.user_email_verification || false,
             fb_token : "",
             device_id : "",
             device_type : "",
-            mobile_type : req.body.mobile_type,
+            mobile_type : req.body.mobile_type || "",
             delete_status : false
         }, 
         function (err, user) {
@@ -137,14 +161,20 @@ catch(e){
 
 
 router.post('/send/emailotp',async function (req, res) {
+  var randomChars = '0123456789';
+          var result = '';
+          for ( var i = 0; i < 6; i++ ) {
+           result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+          }
+
+   console.log(result);
    let phone  =  await userdetailsModel.findOne({user_email:req.body.user_email,user_email_verification:true});
-  
    if(phone !== null){
       res.json({Status:"Failed",Message:"This email Id already Exist", Data : {} ,Code:404});     
    }
    else
    {
-    let random = 123456;
+    let random = result;
     var nodemailer = require('nodemailer');
     var transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -167,7 +197,7 @@ transporter.sendMail(mailOptions, function(error, info){
    
   } else {
    
-    res.json({Status:"Success",Message:"Eamil id Send successfully",Data : {
+    res.json({Status:"Success",Message:"Eamil id sent successfully",Data : {
       'email_id': req.body.user_email,
       'otp' : random
     } , Code:200}); 
@@ -322,17 +352,19 @@ router.post('/petlove/mobile/dashboard',async function (req, res) {
 
 
 router.post('/petlove/mobile/dashboard1',async function (req, res) {
- 
+ console.log(req.body);
  let userdetails  =  await userdetailsModel.findOne({_id:req.body.user_id});
  let SP_servicelist  =  await SP_servicesMode.find({});
-
+ console.log(SP_servicelist);
+ let color_code = ['#F9A826','#FF7A7A','#9BD152','#009377','#FF0000','#FF6F00'];
+ let icon_list = ['http://54.212.108.156:3000/api/uploads/1617889303126.png','http://54.212.108.156:3000/api/uploads/1617889319529.png','http://54.212.108.156:3000/api/uploads/1617889353269.png','http://54.212.108.156:3000/api/uploads/1617889386383.png','http://54.212.108.156:3000/api/uploads/1617889386383.png','http://54.212.108.156:3000/api/uploads/1617889353269.png'];
  var SP_servicelist_final = [];
  for(let s = 0 ; s < SP_servicelist.length ; s ++){
   let q = {
               "_id" : SP_servicelist[s]._id,
               "service_icon":SP_servicelist[s].img_path,
               "service_title":SP_servicelist[s].img_title,
-              "background_color":"#00FFA2"
+              "background_color": color_code[s]
     }
     SP_servicelist_final.push(q);
  }
@@ -343,8 +375,8 @@ router.post('/petlove/mobile/dashboard1',async function (req, res) {
  let petdetailsModels  =  await petdetailsModel.find({user_id:req.body.user_id,delete_status:false});
  let homebanner  =  await homebannerModel.find({});
  dashboard_petlover1.Service_details =  SP_servicelist_final;
- dashboard_petlover1.Products_details = product_categoriesModels;
- dashboard_petlover1.Puppy_Products_details = product_categoriesModels;
+ dashboard_petlover1.Products_details =  dashboard_petlover1.Products_details;
+ dashboard_petlover1.Puppy_Products_details =  dashboard_petlover1.Products_details;
      dashboard_petlover1.Banner_details = []
     for(let c = 0 ; c < homebanner.length; c ++){
        let gg = {
@@ -362,15 +394,18 @@ router.post('/petlove/mobile/dashboard1',async function (req, res) {
     var point2 = new GeoPoint(+tem_doctordetailsModel[a].clinic_lat,+tem_doctordetailsModel[a].clinic_long);
     var distance = point1.distanceTo(point2, true)//output in kilometers
 
-    
+    console.log(tem_doctordetailsModel[a].rating);
+    console.log(tem_doctordetailsModel[a].comments);
     let dd = {
        '_id' : tem_doctordetailsModel[a].user_id,
        "doctor_name" : tem_doctordetailsModel[a].dr_name,
        "doctor_img" : tem_doctordetailsModel[a].clinic_pic[0].clinic_pic,
        "specialization" : tem_doctordetailsModel[a].specialization,
        "distance" : distance.toFixed(2),
-       "star_count" : 4,
-       "review_count": 223
+       // "star_count" : tem_doctordetailsModel[a].rating,
+       // "review_count": tem_doctordetailsModel[a].comments
+       "star_count" : 5,
+       "review_count": 22
     }
     final_docdetails.push(dd);
    }
@@ -399,10 +434,144 @@ router.post('/petlove/mobile/dashboard1',async function (req, res) {
 
 
 
+
+router.post('/petlove/mobile/dashboardtest',async function (req, res) {
+ console.log(req.body);
+ let userdetails  =  await userdetailsModel.findOne({_id:req.body.user_id});
+ let SP_servicelist  =  await SP_servicesMode.find({});
+ let homebanner  =  await homebannerModel.find({});
+ let minibanner  =  await minibannerModel.find({});
+
+ let banner_title = ["World's Best Dog and Cat Food - FLAT 5% Off","Information on Marketing a Pet Food Product","pet food product market: The truth about pet food","Pet food is an environmental disaster"];
+ let color_code = ['#F9A826','#FF7A7A','#9BD152','#009377','#FF0000','#FF6F00'];
+ let middle_image = ['http://54.212.108.156:3000/api/uploads/1620120025593.png','http://54.212.108.156:3000/api/uploads/1617964675541.png','http://54.212.108.156:3000/api/uploads/1620120025593.png','http://54.212.108.156:3000/api/uploads/1617964675541.png',]
+ let icon_list = ['http://54.212.108.156:3000/api/uploads/1617889303126.png','http://54.212.108.156:3000/api/uploads/1617889319529.png','http://54.212.108.156:3000/api/uploads/1617889353269.png','http://54.212.108.156:3000/api/uploads/1617889386383.png','http://54.212.108.156:3000/api/uploads/1617889386383.png','http://54.212.108.156:3000/api/uploads/1617889353269.png'];
+ var SP_servicelist_final = [];
+ for(let s = 0 ; s < SP_servicelist.length ; s ++){
+  let q = {
+              "_id" : SP_servicelist[s]._id,
+              "service_icon": SP_servicelist[s].img_path,
+              "service_title": SP_servicelist[s].img_title,
+              "background_color": color_code[s]
+    }
+    SP_servicelist_final.push(q);
+ }
+ let location_details  =  await locationdetailsModel.find({user_id:req.body.user_id,default_status:true,delete_status:false});
+ let tem_doctordetailsModel  =  await doctordetailsModel.find({}).limit(4);
+ let Banner_details  =  await doctordetailsModel.find({});
+ var product_list = await product_detailsModel.find({delete_status : false}).limit(4).populate('cat_id');
+ let product_categoriesModels  =  [];
+ console.log("*****product_list******",product_list);
+   for(let y = 0 ; y < product_list.length;y++) {
+        var pro_fav = await Product_favModel.findOne({user_id:req.body.user_id,product_id:product_list[y]._id});
+        var temp_fav = false;
+        if(pro_fav !==  null){
+               temp_fav = true;
+        }
+        let k = {
+                        "_id": product_list[y]._id,
+                        "product_img":  product_list[y].product_img[0],
+                        "cat_name" : product_list[y].cat_id.product_cate,
+                        "product_title":  product_list[y].product_name,
+                        "product_price":  +product_list[y].cost.toFixed(0),
+                        "thumbnail_image" : product_list[y].thumbnail_image,
+                        "product_discount":  product_list[y].discount,
+                        "product_fav": temp_fav,
+                        "product_rating": product_list[y].product_rating || 5 ,
+                        "product_review": product_list[y].product_review || 0 ,
+          }
+            product_categoriesModels.push(k);
+    }
+ let petdetailsModels  =  await petdetailsModel.find({user_id:req.body.user_id,delete_status:false});
+
+ dashboard_petlover1.Service_details =  SP_servicelist_final;
+ dashboard_petlover1.Products_details = product_categoriesModels;
+ dashboard_petlover1.Puppy_Products_details = product_categoriesModels;
+ dashboard_petlover1.Banner_details = []
+    for(let c = 0 ; c < homebanner.length; c ++){
+       let gg = {
+        '_id': homebanner[c]._id,
+        'title' :  homebanner[c].img_title,
+        'img_path' : homebanner[c].img_path,
+       }
+      dashboard_petlover1.Banner_details.push(gg);
+    }
+    dashboard_petlover1.middle_Banner_details = [];
+     for(let c = 0 ; c < minibanner.length; c ++){
+       let gg = {
+        '_id': minibanner[c]._id,
+        'title' :  minibanner[c].img_title,
+        'img_path' : minibanner[c].img_path,
+       }
+      dashboard_petlover1.middle_Banner_details.push(gg);
+    }
+
+
+
+ // dashboard_petlover1.Banner_details = dashboard_petlover1;
+   let final_docdetails = [];
+   for(let a = 0 ; a < tem_doctordetailsModel.length; a ++){
+
+    var point1 = new GeoPoint(+req.body.lat, +req.body.long);
+    var point2 = new GeoPoint(+tem_doctordetailsModel[a].clinic_lat,+tem_doctordetailsModel[a].clinic_long);
+    var distance = point1.distanceTo(point2, true)//output in kilometers
+
+    console.log(tem_doctordetailsModel[a]);
+    console.log(tem_doctordetailsModel[a].comments);
+    var doc_fav = await Doctor_favModel.findOne({user_id:req.body.user_id,doctor_id:tem_doctordetailsModel[a].user_id});
+      var temp_fav = false;
+        if(doc_fav !==  null){
+               temp_fav = true;
+        }
+    let dd = {
+       '_id' : tem_doctordetailsModel[a].user_id,
+       // 'fav_id' : tem_doctordetailsModel[a]._id,
+       "doctor_name" : tem_doctordetailsModel[a].dr_name,
+       "doctor_img" : tem_doctordetailsModel[a].clinic_pic[0].clinic_pic,
+       "thumbnail_image" : tem_doctordetailsModel[a].thumbnail_image || '',
+       "specialization" : tem_doctordetailsModel[a].specialization,
+       "distance" : distance.toFixed(2),
+       "clinic_name" : tem_doctordetailsModel[a].clinic_name,
+       "fav" : temp_fav,
+       // "star_count" : tem_doctordetailsModel[a].rating,
+       // "review_count": tem_doctordetailsModel[a].comments
+       "star_count" : tem_doctordetailsModel[a].rating || 5,
+       "review_count": tem_doctordetailsModel[a].comments || 0,
+    }
+    final_docdetails.push(dd);
+   }
+   var ascending = final_docdetails.sort((a, b) => Number(a.distance) - Number(b.distance));
+   dashboard_petlover1.Doctor_details = [];
+   dashboard_petlover1.Doctor_details = ascending;
+ if(userdetails.user_type == 1){
+    let a = {
+    SOS : [{Number:9876543210},{Number:9876543211},{Number:9876543212},{Number:9876543214}],
+    LocationDetails : location_details,
+    PetDetails : petdetailsModels,
+    userdetails : userdetails,
+    Dashboarddata : dashboard_petlover1,
+    messages : [
+    {'title':'Doctor','message':'Unable to find the doctor near your location can i show the doctor above the location'},
+    {'title':'Product','message':'Unable to find the Product near your location can i show the doctor above the location'},
+    {'title':'sercive','message':'Unable to find the Sercive near your location can i show the doctor above the location'}
+    ]
+    // homebanner : homebanner
+  }
+  res.json({Status:"Success",Message:"Pet Lover Dashboard Details", Data : a ,Code:200});
+}else{
+  res.json({Status:"Failed",Message:"Working on it !", Data : {},Code:404});
+}
+});
+
+
+
+
+
+
 router.post('/fetch_all_details',async function (req, res) {
       let userdetailsModels  =  await userdetailsModel.find({_id:req.body.user_id});
-      let petdetailsModels  =  await petdetailsModel.find({user_id:req.body.user_id});
-      let locationdetailsModels  =  await locationdetailsModel.find({user_id:req.body.user_id});
+      let petdetailsModels  =  await petdetailsModel.find({user_id:req.body.user_id,delete_status : false});
+      let locationdetailsModels  =  await locationdetailsModel.find({user_id:req.body.user_id,delete_status : false});
       let AppointmentsModels  =  await AppointmentsModel.find({user_id:req.body.user_id});
       let a = {
         userdetailsModels : userdetailsModels,
@@ -599,6 +768,48 @@ router.post('/mobile/login',async function (req, res) {
              res.json({Status:"Success",Message:"OTP Send to your mobile number",Data : a , Code:200}); 
               }
          });
+     }else if(userdetails.user_type == 3){
+     let random = 123456;
+     let updatedata = {otp:random}
+     var updatedetails = await userdetailsModel.findByIdAndUpdate({_id:userdetails._id},updatedata,{
+       new: true
+     });
+     
+      let a  = {
+            user_details : updatedetails
+        }
+        var json = "";
+        var username = "tritonitsolutionstrans";
+        var password = 20145;
+        var mobilno = req.body.user_phone;
+        var message =
+          "Hi, Your OTP is " + random + ". Petfolio OTP for Signup.";
+        // var dumbell = "DUMBELL";
+        var dumbell = "VOXITW";
+        var tye = 0;
+        var baseurls =
+          "http://www.smsintegra.com/" +
+          "api/smsapi.aspx?uid=" +
+          username +
+          "&pwd=" +
+          password +
+          "&mobile=" +
+          mobilno +
+          "&msg=" +
+          message +
+          "&sid=" +
+          dumbell +
+          "&type=" +
+          tye;
+
+        requestss(baseurls, { json: true }, async (err, response, body) => {
+          if (err) {
+            return 
+          }
+          else{
+             res.json({Status:"Success",Message:"OTP Send to your mobile number",Data : a , Code:200}); 
+              }
+         });
      }
     }
 });
@@ -658,6 +869,58 @@ router.post('/mobile/resendotp', function (req, res) {
         });
 });
 
+
+
+router.post('/check_user_admin', function (req, res) {
+        userdetailsModel.findOne({user_phone : req.body.user_phone},async function (err, Functiondetails) {
+          console.log(Functiondetails);
+          if(Functiondetails == null){
+         var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+          var result = '';
+          for ( var i = 0; i < 7; i++ ) {
+           result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+          }
+       await userdetailsModel.create({
+            first_name:  req.body.first_name || "",
+            last_name : req.body.last_name || "",
+            user_email : req.body.user_email || "",
+            user_phone : req.body.user_phone || "",
+            date_of_reg : req.body.date_of_reg || "",
+            user_type : req.body.user_type,
+            ref_code : req.body.ref_code || "",
+            my_ref_code : result || "0000000",
+            user_status : "Incomplete",
+            otp : 123456,
+            profile_img : "",
+            user_email_verification : req.body.user_email_verification || false,
+            fb_token : "",
+            device_id : "",
+            device_type : "",
+            mobile_type : req.body.mobile_type || "",
+            delete_status : false
+        }, 
+        function (err, user) {
+                    res.json({Status:"Success",Message:"New User", Data : user ,Code:200});
+        });
+          }else{
+          res.json({Status:"Success",Message:"Old User", Data : Functiondetails ,Code:200});
+          }
+        });
+});
+
+
+
+router.post('/check_user', function (req, res) {
+        userdetailsModel.findOne({user_phone : req.body.user_phone},async function (err, Functiondetails) {
+          console.log(Functiondetails);
+          if(Functiondetails == null) {
+            res.json({Status:"Success",Message:"New User", Data : Functiondetails ,Code:200});
+          }
+          else {
+          res.json({Status:"Success",Message:"Old User", Data : Functiondetails ,Code:200});
+          }
+        });
+});
 
 
 
@@ -726,6 +989,12 @@ router.post('/edit', function (req, res) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"User Details Updated", Data : UpdatedDetails ,Code:200});
         });
+});
+
+
+router.get('/community_text', function (req, res) {
+        let a = "Admit it – social media is a part of your daily life. Currently there are over 1.5 billion monthly Facebook users. Yes, you read that correctly. Billion. With social media platforms being such a big part of the average person’s life, it only makes sense that there are social media sites for pets! Over 75% of the US population considers their pets to be family. Combine this with social media user statistics, and you have a lot of people who care about their pets and making it known online! The perfect medium for pet loving social media users? The Pet Community! The Pet Community is a social network for pet owners. It’s a place where pet parents can share photos and videos of our pets with like minded individuals…without flooding our Facebook feed (although I have no shame in this)!";
+        res.json({Status:"Success",Message:"community_text", Data : a ,Code:200});
 });
 
 

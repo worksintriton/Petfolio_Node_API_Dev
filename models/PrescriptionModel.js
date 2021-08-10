@@ -12,7 +12,10 @@ var PrescriptionSchema = new mongoose.Schema({
   Doctor_Comments: String,
   Prescription_img : String,
   Prescription_type : String,
-    delete_status : Boolean,
+  delete_status : Boolean,
+  diagnosis : String,
+  sub_diagnosis : String,
+  Prescription_id : String,
 });
 PrescriptionSchema.plugin(timestamps);
 mongoose.model('Prescription', PrescriptionSchema);

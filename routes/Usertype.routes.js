@@ -91,6 +91,61 @@ router.get('/mobile/getlist', function (req, res) {
         });
 });
 
+
+router.get('/mobile/getlist1', function (req, res) {
+        UsertypeModel.find({}, function (err, Functiondetails) {
+          let a = {
+            usertypedata : [
+            {
+                "_id": "5fdc45ad1e5d8b0eb31c3693",
+                "user_type_title": "User",
+                "user_type_value": 1,
+                "user_type_img": "http://54.212.108.156:3000/api/uploads/1616135293952.jpeg",
+                "date_and_time": "2/5/2021, 6:29:14 PM",
+                "delete_status": false,
+                "updatedAt": "2021-02-05T12:59:14.760Z",
+                "createdAt": "2020-12-18T06:01:17.424Z",
+                "__v": 0
+            },
+            // {
+            //     "_id": "5fdc45e21e5d8b0eb31c3694",
+            //     "user_type_title": "Doctor",
+            //     "user_type_value": 4,
+            //     "user_type_img": "http://52.25.163.13:3000/api/uploads/New Project (3).jpg",
+            //     "date_and_time": "2/5/2021, 6:30:03 PM",
+            //     "delete_status": false,
+            //     "updatedAt": "2021-02-05T13:00:04.140Z",
+            //     "createdAt": "2020-12-18T06:02:10.794Z",
+            //     "__v": 0
+            // },
+            // {
+            //     "_id": "5fdc46011e5d8b0eb31c3695",
+            //     "user_type_title": "Service Provider",
+            //     "user_type_value": 2,
+            //     "user_type_img": "http://52.25.163.13:3000/api/uploads/New Project (4).jpg",
+            //     "date_and_time": "2/15/2021, 11:26:24 AM",
+            //     "delete_status": false,
+            //     "updatedAt": "2021-02-15T05:56:23.174Z",
+            //     "createdAt": "2020-12-18T06:02:41.979Z",
+            //     "__v": 0
+            // },
+            {
+                "_id": "5fdc46191e5d8b0eb31c3696",
+                "user_type_title": "Shop Owner",
+                "user_type_value": 3,
+                "user_type_img": "http://54.212.108.156:3000/api/uploads/1616135315212.jpeg",
+                "date_and_time": "2/5/2021, 6:34:22 PM",
+                "delete_status": false,
+                "updatedAt": "2021-02-05T13:04:22.971Z",
+                "createdAt": "2020-12-18T06:03:05.963Z",
+                "__v": 0
+            }
+        ]
+          }
+          res.json({Status:"Success",Message:"User type Details", Data : a ,Code:200});
+        });
+});
+
 router.post('/edit', function (req, res) {
         UsertypeModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});

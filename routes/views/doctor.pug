@@ -1,11 +1,13 @@
 doctype html
 head
+  link(rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css' integrity='sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z' crossorigin='anonymous')
+  script(src='https://code.jquery.com/jquery-3.5.1.slim.min.js' integrity='sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj' crossorigin='anonymous')
+  script(src='https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js' integrity='sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN' crossorigin='anonymous')
+  script(src='https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js' integrity='sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV' crossorigin='anonymous')
 style.
   .box-1 {
-  <!-- height: 842px; -->
   background-color: #fff;
   border: 1px solid #aaa8a8;
-  <!-- max-width: 900px; -->
   }
   .name {
   font-size: 18px;
@@ -19,16 +21,17 @@ style.
   margin-top: 2px;
   font-size: 13px;
   }
-  h6{
+  h6 {
   margin-top: 0px;
   }
   .logo {
   background: #fff;
   padding: 10px;
+  width: 100px;
   }
   .row1 {
   padding: 10px;
-  background: #2996bd;
+  background: #009377;
   }
   .row1 p {
   color: #eaeaea;
@@ -37,20 +40,21 @@ style.
   font-size: 14px;
   text-decoration: underline;
   }
-  .row2{
-  display: -webkit-inline-box;
+  .row2 {
+  /* display: -webkit-inline-box; */
   }
   .row2 h5 {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   }
   .row2 h5 span {
-  color: #1a88b5;
+  color: #8a8a8a;
+  font-weight: 500;
   }
   h3 {
   font-size: 17px;
   font-weight: 600;
-  color: #000;
+  color: #3050ff;
   margin-top: 30px;
   }
   table,
@@ -67,86 +71,92 @@ style.
   td {
   color: #6a6969;
   }
-  .line-1{
+  .line-1 {
   display: -webkit-inline-box;
   width: 98.3%;
   }
-  .name-line{
-  width:70%;
+  .name-line {
+  width: 70%;
   }
-  .name-line-2{
-  width:30%;
+  .name-line-2 {
+  width: 30%;
   }
-section(style='padding: 50px 0px; margin: 0px 10%;')
+section(style='padding: 50px 0px;')
   .container.box-1
-    .row.row1.line-1(style='padding: 10px;')
-      .col-md-7.doc.name-line
+    .row.row1(style='padding: 10px;')
+      .col-md-7.doc
         h5.name Dr. #{doctorname}
         p #{doctorsepecilization}
-        p KMC Number: #{KMSnumber}
-      .col-md-5.name-line-2(style='display: flex;')
+      .col-md-5(style='display: flex;')
         div(style='flex-basis: 70%; ')
           .power
             h6(style='font-weight:600;font-size:13px;margin-bottom: 0px;') Powered By:
             p
-              a www.mysalveo.com
-            p
-              a dr@mysalveo.com
-            p(style='font-size:14px') Phone: +91 7892976253
+              a www.petpolio.com
+            p(style='font-size:14px') Phone: +91 9876543210
         div(style='flex-basis: 30%;')
-          img.logo(style='height: 40px;' src='http://mysalveo.com/api/uploads/logo.jpeg' alt='')
-    .row.row2(style='padding: 10px;width: 98%;')
-      .col-md-8(style='width:60%')
-        h5(style='margin: 0px')
-          | Patient Name: 
-          span   #{patientname}
-      .col-md-2(style='padding:2px 10px 2px 2px; text-align:right')
-        h5(style='margin: 0px')
-          | Age: 
-          span   #{patientage}
-      .col-md-2(style='padding:2px 10px 2px 2px;text-align:right')
-        h5(style='margin: 0px')
+          img.logo(src='http://54.212.108.156:3000/api/uploads/logo.png' alt='')
+    .row.row2(style='padding: 10px; margin-top: 10px;')
+      .col-md-12
+        hr(style='border-top: 1px solid #3050ff;')
+      .col-md-4
+        h5
+          | Owner&apos;s Name: 
+          span  #{owner_name}
+      .col-md-4
+        h5
+          | Pet Type: 
+          span  #{pet_type}
+      .col-md-4
+        h5
+          | Breed: 
+          span  #{breed}
+      .col-md-4
+        h5
           | Sex: 
-          span #{patientgender}
-      .col-md-8(style='padding:2px 10px 2px 2px; text-align:right')
-        h5(style='margin: 0px')
-          | Height: 
-          span  #{patientheight}
-      .col-md-2(style='padding:2px 10px 2px 2px; text-align:right')
-        h5(style='margin: 0px')
+          span  #{sex}
+      .col-md-4
+        h5
           | Weight: 
-          span  #{patientweight}
-    hr(style='border-top: 1px solid rgb(41, 150, 189);')
+          span  #{weight}
+      .col-md-4
+        h5
+          | Age: 
+          span  #{age} years
+      .col-md-4
+        h5
+          | Diagnosis: 
+          span  #{diagnosis} years
+      .col-md-4
+        h5
+          | Sub diagnosis: 
+          span  #{sub_diagnosis} years
+      .col-md-12
+        hr(style='border-top: 1px solid #3050ff;')
     .row.row3(style='padding: 10px')
       .col-md-12
-        h3(style='margin:10px 0px') Aliment Details:
+        h3 Allegories:
         table(style='width:100%')
-        
+          // <caption>Monthly savings</caption>
           tr
-            span  #{Problem_info} 
-             
+            td
+              | #{allegroies}
+    .row.row3(style='padding: 10px')
       .col-md-12
-        h3(style='margin:10px 0px') Past Medications:
-        table(style='width:100%')
-          tr
-            span  #{passed_Medications} 
-            
-      .col-md-12
-        h3(style='margin:10px 0px') Presciption:
+        h3 Prescription:
         table(style='width:100%')
           // <caption>Monthly savings</caption>
           tr
             th(style='width: 20%;font-size: 14px;color: #919090;text-align:center') Tablet Name
             th(style='width: 20%;font-size: 14px;color: #919090;text-align:center') Quantity
             th(style='width: 20%;font-size: 14px;color: #919090;text-align:center') Consumption
-          
           each n in Prescription_data
             tr
                td= n.Tablet_name
                td= n.Quantity
                td= n.consumption
       .col-md-12
-        h3(style='margin:7px 0px') Any other Instructions:
+        h3 Doctor comments:
         table(style='width:100%')
           // <caption>Monthly savings</caption>
           tr
@@ -154,6 +164,5 @@ section(style='padding: 50px 0px; margin: 0px 10%;')
             
     .row.row1(style='padding: 10px;')
       .col-md-12.doc(style='text-align:right;')
-        - var img = dotorsignature
-        img.logo(src=img style='width: 120px;height: 40px;' alt='')
+        img.logo(src='https://sgp1.digitaloceanspaces.com/quickcompany/trademark/25c298bee64b101a.jpg' style='width: 120px;height: 40px;' alt='')
         p (DR.#{doctorname})

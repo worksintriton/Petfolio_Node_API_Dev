@@ -43,7 +43,7 @@ catch(e){
 router.get('/deletes', function (req, res) {
       HolidayModel.remove({}, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");
-             res.json({Status:"Success",Message:"ActivityModel Deleted", Data : {} ,Code:200});     
+             res.json({Status:"Success",Message:"Holiday deleted", Data : {} ,Code:200});     
       });
 });
 

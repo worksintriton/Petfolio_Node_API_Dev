@@ -10,17 +10,48 @@ const puppeteer = require('puppeteer');
 const { v4: uuidv4 } = require('uuid');
 var fs = require('fs');
 var pug = require ('pug');
-var BaseUrl = "http://52.25.163.13:3000";
+var BaseUrl = "http://54.212.108.156:3000";
 var app = express();
 app.use('/api/', express.static(path.join(__dirname, 'public')));
 
-exports.pdfgenerator = async function (doctordata,Prescription_data,doctor_commeents) {
+exports.pdfgenerator = async function (pet_details,user_details,doctordata,Prescription_data,doctor_commeents,allergies,diagnosis,sub_diagnosis) {
    try{
     //console.log(Prescription_data);
     console.log("image path",doctordata);
+    console.log("pet_details",pet_details);
+    console.log("user_details",user_details);
+    console.log("allergies",allergies);
+    console.log("diagnosis",diagnosis);
+    console.log("sub_diagnosis",sub_diagnosis);
+
+
        var source = fs.readFileSync(path.resolve(__dirname, "./views/doctor.pug"),'utf-8');
        //console.log(source)
      var specialization = "";
+     for(let a  = 0 ; a < Prescription_data.length ; a++){
+      if(Prescription_data[a].consumption.morning == true){
+       Prescription_data[a].consumption.morning = 1;
+      }
+      if(Prescription_data[a].consumption.evening == true){
+       Prescription_data[a].consumption.evening = 1;
+      }
+      if(Prescription_data[a].consumption.night == true){
+       Prescription_data[a].consumption.night = 1;
+      }
+      if(Prescription_data[a].consumption.morning == false){
+       Prescription_data[a].consumption.morning = 0;
+      }
+      if(Prescription_data[a].consumption.evening == false){
+       Prescription_data[a].consumption.evening = 0;
+      }
+      if(Prescription_data[a].consumption.night == false){
+       Prescription_data[a].consumption.night = 0;
+      }
+       let temp_data = 'Morning - '+Prescription_data[a].consumption.morning+", Afternoon - "+Prescription_data[a].consumption.evening+", Night - "+Prescription_data[a].consumption.night;
+       console.log(temp_data);
+        Prescription_data[a].consumption = ""+temp_data;
+     }
+
      for(var i=0; i< doctordata.specialization.length; i++){
             
             if(i == 0){
@@ -32,32 +63,41 @@ exports.pdfgenerator = async function (doctordata,Prescription_data,doctor_comme
      }
      console.log(specialization)
      let template = pug.compile(source);
+    
+
+
+
+
+
+
+
+
      let data = {
       doctorname : doctordata.dr_name,
       doctorsepecilization: specialization,
       doctorsignature: doctordata.signature,
-       patientname : "",
-    //   patientage: patientdata.Age,
-    //   dotorsignature: doctordata.signature,
-    //   KMSnumber : doctordata.KMS_registration,
-    //   patientage:patientdata.age,
-    //   patientgender:patientdata.Gender,
-    //   patientheight: patientdata.Height,
-    //   patientweight:patientdata.Weight,
-    //   Problem_info:meditationdata.Problem_info,
-    //   passed_Medications:meditationdata.passed_Medications,
+      owner_name : user_details.first_name + " " + user_details.last_name,
+      pet_type :  pet_details.pet_type,
+      breed : pet_details.pet_breed,
+      sex : pet_details.pet_gender,
+      weight : pet_details.pet_weight,
+      age : pet_details.pet_age,
+      allegroies : allergies,
       Prescription_data:Prescription_data,
-       doctor_commeents:doctor_commeents
+      doctor_commeents:doctor_commeents,
+      diagnosis : diagnosis || "",
+      sub_diagnosis : sub_diagnosis || "", 
      }
+     console.log(data);
      let html = template(data);
-     //console.log("html data" , html);
-     //console.log(data)
-     //console.log("What is the path" , __dirname)
-        var options = { format: 'Letter', height: "20.5in",
+
+
+
+        var options = { format: 'Letter', height: "16in",
   width: "18in"};
         var filepath = __dirname + '/public/' + uuidv4() + '.pdf' ;
         console.log("beffore PDF TRm",filepath);
-        var filepart = filepath.slice(52,110);
+        var filepart = filepath.slice(38,110);
         console.log("filepart_1",filepath)
         var Finalpath = BaseUrl +'/api/public/' + filepart;
         console.log("Finalpath",Finalpath)
@@ -71,7 +111,7 @@ exports.pdfgenerator = async function (doctordata,Prescription_data,doctor_comme
                 });
             });
          return Finalpath;
-        //var html = pug.compileFile(layout, { pretty: true })(locals);
+
       }
       catch(e){
         console.log("error in catch", e)

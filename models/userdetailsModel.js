@@ -19,6 +19,8 @@ var userdetailsSchema = new mongoose.Schema({
   device_type : String,
   mobile_type : String,
   delete_status : Boolean,
+  ref_code : String,
+  my_ref_code : String,
 });
 userdetailsSchema.plugin(timestamps);
 mongoose.model('userdetails', userdetailsSchema);

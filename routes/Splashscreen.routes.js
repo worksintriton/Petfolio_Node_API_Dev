@@ -28,7 +28,7 @@ catch(e){
 });
 
 router.post('/filter_date', function (req, res) {
-        SplashscreenModel.find({}, function (err, StateList) {
+        SplashscreenModel.find({ delete_status : false}, function (err, StateList) {
           var final_Date = [];
           for(let a = 0; a < StateList.length; a ++){
             var fromdate = new Date(req.body.fromdate);
@@ -55,7 +55,7 @@ router.get('/deletes', function (req, res) {
 
 
 router.post('/getlist_id', function (req, res) {
-        SplashscreenModel.find({Person_id:req.body.Person_id}, function (err, StateList) {
+        SplashscreenModel.find({Person_id:req.body.Person_id, delete_status : false}, function (err, StateList) {
           res.json({Status:"Success",Message:"Splash screen  List", Data : StateList ,Code:200});
         });
 });
@@ -63,7 +63,7 @@ router.post('/getlist_id', function (req, res) {
 
 
 router.get('/getlist', function (req, res) {
-        SplashscreenModel.find({}, function (err, Functiondetails) {
+        SplashscreenModel.find({ delete_status : false}, function (err, Functiondetails) {
           res.json({Status:"Success",Message:"Splash screen  Details", Data : Functiondetails ,Code:200});
         });
 });

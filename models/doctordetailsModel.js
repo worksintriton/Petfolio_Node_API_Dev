@@ -17,6 +17,7 @@ var doctordetailsSchema = new mongoose.Schema({
   experience_details : Array,
   specialization : Array,
   pet_handled : Array,
+  thumbnail_image : String,
   clinic_pic : Array,
   certificate_pic :  Array,
   govt_id_pic : Array,
@@ -36,6 +37,10 @@ var doctordetailsSchema = new mongoose.Schema({
   comments : Number,
   rating : Number,
   doctor_exp : Number,
+  city_name : String,
+  doctor_info : String,
+  clinic_no : String,
+  doctor_id : String,
 });
 doctordetailsSchema.plugin(timestamps);
 mongoose.model('doctordetails', doctordetailsSchema);

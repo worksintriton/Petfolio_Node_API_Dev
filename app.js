@@ -11,6 +11,7 @@ const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
 var fs = require('fs');
 var pug = require ('pug');
+var request = require("request");
 
 var responseMiddleware = require('./middlewares/response.middleware');
 
@@ -28,14 +29,17 @@ var PrescriptionRouter  = require('./routes/Prescription.routes');
 
 var petdetails = require('./routes/petdetails.routes');
 var doctordetails = require('./routes/doctordetails.routes');
-var livedoctordetails = require('./routes/livedoctordetails.routes');
+var temdoctordetails = require('./routes/temdoctordetails.routes');
 var vendordetails = require('./routes/vendordetails.routes');
 var locationdetails = require('./routes/locationdetails.routes');
 var homebannerdetails = require('./routes/homebanner.routes');
 var doctor_sepc = require('./routes/doctor_sepc.routes');
 
+var sp_sepc = require('./routes/sp_sepc.routes');
+
 
 var appointments = require('./routes/appointments.routes');
+var walkin_appointment = require('./routes/walkin_appointment.routes');
 
 var pettype = require('./routes/pettype.routes');
 var breedtype = require('./routes/breedtype.routes');
@@ -55,11 +59,90 @@ var product_subcat = require('./routes/product_subcat.routes');
 var product_details = require('./routes/product_details.routes');
 
 
+var order_details = require('./routes/order_details.routes');
+var vendor_banner_detail = require('./routes/vendor_banner_detail.routes');
+var product_cart_detail = require('./routes/product_cart_detail.routes');
+var vendor_order_booking = require('./routes/vendor_order_booking.routes');
+var vendor_order_detail = require('./routes/vendor_order_detail.routes');
+
+
+var shippingdetails = require('./routes/shippingdetails.routes');
+
+
+var vendor_order_group = require('./routes/vendor_order_group.routes');
+var petlover_order_group = require('./routes/petlover_order_group.routes');
+
+var Doctor_fav = require('./routes/Doctor_fav.routes');
+var Sp_fav = require('./routes/Sp_fav.routes');
+var Product_fav = require('./routes/Product_fav.routes');
+
+
+var newproduct_detail = require('./routes/newproduct_detail.routes');
+var diagnosis = require('./routes/diagnosis.routes');
+var sub_diagnosis = require('./routes/sub_diagnosis.routes');
+
+var healthissue = require('./routes/healthissue.routes');
+var minibanner = require('./routes/minibanner.routes');
+
+var sos_pet = require('./routes/sos.routes.js');
+
+
+
+
+
+
+
+
+
+
+
+//////////Ordr Application/////
+
+
+
+var ordr_vendor_details = require('./routes/ordr_vendor_details.routes');
+var ordr_banner_details = require('./routes/ordr_banner_details.routes');
+var ordr_cate_details = require('./routes/ordr_cate_details.routes');
+var ordr_productitem_details = require('./routes/ordr_productitem_details.routes');
+var ordr_expensive_details = require('./routes/ordr_expensive_details.routes');
+var ordr_user_details = require('./routes/ordr_user_details.routes');
+var ordr_cartdetails_details = require('./routes/ordr_cartdetails_details.routes');
+var ordr_order_details = require('./routes/ordr_order_details.routes');
+var ordr_request_details = require('./routes/ordr_request_details.routes');
+var ordr_manager_details = require('./routes/ordr_manager_details.routes');
+var ordr_notification_details = require('./routes/ordr_notification_details.routes');
+var ordr_table_details = require('./routes/ordr_table_details.routes');
+
+
+/////// Kitchen Applciaton  /////
+var kitchen_user_detail = require('./routes/kitchen_user_detail.routes');
+var waiter_restaurent = require('./routes/waiter_restaurantdetail.routes');
+var waiter_table = require('./routes/waiter_tabledetail.routes');
+var waiter_waiter = require('./routes/waiter_waiterdetail.routes');
+var waiter_chef = require('./routes/waiter_chefdetail.routes');
+var waiter_category = require('./routes/waiter_categorydetail.routes');
+var waiter_item = require('./routes/waiter_itemdetail.routes');
+var waiter_billing = require('./routes/waiter_billing.routes');
+var waiter_order = require('./routes/waiter_order_detail.routes');
+var waiter_order_tem = require('./routes/waiter_order_tem.routes');
+var waiter_adminrequest = require('./routes/waiter_adminrequest.routes');
+var waiter_notification = require('./routes/waiter_notification.routes');
+var waiter_sos = require('./routes/waiter_sos.routes');
+
+
+
+////Chats//////
+// var Chat_userRouter = require('./routes/Chat_user.routes');
+// var Chat_catRouter = require('./routes/Chat_cat.routes');
+// var Chat_itemRouter = require('./routes/Chat_item.routes');
+// var Chat_billingRouter = require('./routes/Chat_billing.routes');
+
+
 
 
 /*Database connectivity*/
 
-var BaseUrl = "http://52.25.163.13:3000/api"; 
+var BaseUrl = "http://54.212.108.156:3000/api"; 
 const mongoose = require('mongoose'); 
 mongoose.connect('mongodb://localhost:27017/Salveo'); 
 var db = mongoose.connection; 
@@ -91,20 +174,114 @@ app.use((req, res, next) => {
 
 ///////Notification Auto Schedule Process for 15 min  once ///////
 const intervalObj = setInterval(() => {
-var indiaTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+var indiaTime = new Date(Date.now() + 1000 * (60 * 15)).toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
 console.log(indiaTime);
-var space = indiaTime.split(":");
-console.log(space);
-console.log(+space[1]);
-if(+space[1] % 5 === 0  ){
-  console.log("Checking Notification");
+// indiaTime.setMinutes(indiaTime.getMinutes() + 20);
+var fiftyteen = new Date(indiaTime).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
+var fiftyteen_test = fiftyteen.split(":");
+
+var final_fiftyteen_test = fiftyteen_test[0]+":"+fiftyteen_test[1]+":00";
+
+console.log(+fiftyteen_test[1]);
+
+
+var indiaTime1 = new Date(Date.now() - 1000 * (60 * 30)).toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+console.log(indiaTime1);
+var forutyfive = new Date(indiaTime1).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
+var forutyfive_test = forutyfive.split(":");
+
+var final_forutyfive_test = forutyfive_test[0]+":"+forutyfive_test[1]+":00";
+
+console.log(+forutyfive_test[1]);
+console.log(final_fiftyteen_test,final_forutyfive_test);
+
+console.log(+final_fiftyteen_test[1]);
+
+if(+final_fiftyteen_test[1] == 0){
+ console.log("Checking Notification");
+    notificationcall(final_fiftyteen_test,final_forutyfive_test);
 }
-notificationcall();
+if(+final_fiftyteen_test[1] == 15){
+   console.log("Checking Notification");
+      notificationcall(final_fiftyteen_test,final_forutyfive_test);
+}
+if(+final_fiftyteen_test[1] == 30){
+   console.log("Checking Notification");
+      notificationcall(final_fiftyteen_test,final_forutyfive_test);
+}
+if(+final_fiftyteen_test[1] == 45){
+   console.log("Checking Notification");
+   notificationcall(final_fiftyteen_test,final_forutyfive_test);
+}
+
 },60000);
 
-function notificationcall(){
+function notificationcall(final_fiftyteen_test,final_forutyfive_test){
     console.log("***********************API IS CALL *********************");
     console.log("********************************************");
+     var params =  {
+             "display_date": final_fiftyteen_test
+             }
+            request.post(
+                'http://54.212.108.156:3000/api/appointments/mobile/remaindernotification',
+                { json: params },
+                function (error, response, body) {
+                    if (!error && response.statusCode == 200) {
+                        console.log(body);
+                    }
+                }
+        );
+
+
+
+       var params1 =  {
+             "display_date": final_forutyfive_test
+             }
+            request.post(
+                'http://54.212.108.156:3000/api/appointments/mobile/noshownotification',
+                { json: params1 },
+                function (error, response, body) {
+                    if (!error && response.statusCode == 200) {
+                        console.log(body);
+                    }
+                }
+        );
+
+
+        var params =  {
+             "display_date": final_fiftyteen_test
+             }
+            request.post(
+                'http://54.212.108.156:3000/api/sp_appointments/mobile/remainder_notifications',
+                { json: params },
+                function (error, response, body) {
+                    if (!error && response.statusCode == 200) {
+                        console.log(body);
+                    }
+                }
+        );
+
+
+
+       var params1 =  {
+             "display_date": final_forutyfive_test
+             }
+            request.post(
+                'http://54.212.108.156:3000/api/sp_appointments/mobile/noshow_notifications',
+                { json: params1 },
+                function (error, response, body) {
+                    if (!error && response.statusCode == 200) {
+                        console.log(body);
+                    }
+                }
+        );
+
+
+
+
+
 //     console.log(time,dates);
 // let params = {   
 //         "Booking_Date" : dates,
@@ -143,6 +320,41 @@ app.post('/upload', function(req, res) {
   console.log('req.files >>>', req.files); // eslint-disable-line
 
   sampleFile = req.files.sampleFile;
+  var exten = sampleFile.name.split('.');
+  console.log(exten[exten.length - 1]);
+  var filetype = exten[exten.length - 1];
+
+
+
+  uploadPath = __dirname + '/public/uploads/'  + new Date().getTime() + "." + filetype;
+
+  var Finalpath =  BaseUrl +'/uploads/'+ new Date().getTime() + "." + filetype;
+   console.log("uploaded path",uploadPath )
+
+
+  sampleFile.mv(uploadPath, function(err) {
+    if (err) {
+   console.log(err)
+   return res.error(500, "Internal server error");
+    }
+   res.json({Status:"Success",Message:"file upload success", Data :Finalpath,Code:200});
+  });
+});
+
+
+
+app.post('/upload1', function(req, res) {
+  let sampleFile;
+  let uploadPath;
+
+  if (!req.files || Object.keys(req.files).length === 0) {
+    res.error(300,'No files were uploaded.');
+    return;
+  }
+
+  console.log('req.files >>>', req.files); // eslint-disable-line
+
+  sampleFile = req.files.sampleFile;
 
   uploadPath = __dirname + '/public/uploads/' + sampleFile.name;
 
@@ -158,6 +370,10 @@ app.post('/upload', function(req, res) {
    res.json({Status:"Success",Message:"file upload success", Data :Finalpath,Code:200});
   });
 });
+
+
+
+
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -178,7 +394,7 @@ app.use('/api/demoscreen', Demoscreen);
 
 app.use('/api/petdetails',petdetails);
 app.use('/api/doctordetails',doctordetails);
-app.use('/api/livedoctordetails',livedoctordetails);
+app.use('/api/temdoctordetails',temdoctordetails);
 app.use('/api/service_provider',vendordetails);
 app.use('/api/locationdetails',locationdetails);
 
@@ -190,12 +406,15 @@ app.use('/api/new_doctortime',New_DoctorAvailable);
 app.use('/api/holiday',HolidayRouter);
 app.use('/api/homebanner',homebannerdetails);
 app.use('/api/doctor_spec',doctor_sepc);
+app.use('/api/sp_spec',sp_sepc);
 app.use('/api/prescription',PrescriptionRouter);
 
 app.use('/api/sp_holiday',SP_Holiday);
 app.use('/api/sp_services',SP_services);
 app.use('/api/sp_appointments',SP_appointments);
 app.use('/api/sp_available_time',SP_available_time);
+
+
 
 
 
@@ -208,11 +427,83 @@ app.use('/api/product_details',product_details);
 
 
 
+app.use('/api/order_details',order_details);
+app.use('/api/vendor_banner_detail',vendor_banner_detail);
+app.use('/api/product_cart_detail',product_cart_detail);
+
+
+
+app.use('/api/vendor_order_booking',vendor_order_booking);
+app.use('/api/vendor_order_detail',vendor_order_detail);
+
+
+app.use('/api/shipping_address',shippingdetails);
+
+
+app.use('/api/vendor_order_group',vendor_order_group);
+app.use('/api/petlover_order_group',petlover_order_group);
+
+
+app.use('/api/doctor_fav',Doctor_fav);
+app.use('/api/sp_fav',Sp_fav);
+app.use('/api/product_fav',Product_fav);
+
+
+app.use('/api/newproduct_detail',newproduct_detail);
+
+app.use('/api/diagnosis',diagnosis);
+app.use('/api/sub_diagnosis',sub_diagnosis);
+app.use('/api/walkin_appointment',walkin_appointment);
+app.use('/api/healthissue',healthissue);
+app.use('/api/minibanner',minibanner);
+
+app.use('/api/sos_pet',sos_pet);
 
 
 
 
 
+/////Ordr/////
+
+app.use('/api/vendordetails',ordr_vendor_details);
+app.use('/api/bannerdetails',ordr_banner_details);
+app.use('/api/productcatagories',ordr_cate_details);
+app.use('/api/productitems',ordr_productitem_details);
+app.use('/api/expensivemng',ordr_expensive_details);
+app.use('/api/userdetailss',ordr_user_details);
+app.use('/api/cartdetails',ordr_cartdetails_details);
+app.use('/api/orderdetails',ordr_order_details);
+app.use('/api/managerdata',ordr_request_details);
+app.use('/api/manager',ordr_manager_details);
+app.use('/api/ordr_notification',ordr_notification_details);
+app.use('/api/ordr_table_details',ordr_table_details);
+
+
+//////Kitchen//////
+app.use('/api/kitchen_user_detail',kitchen_user_detail);
+app.use('/api/waiter_restaurent',waiter_restaurent);
+app.use('/api/waiter_table',waiter_table);
+app.use('/api/waiter_waiter',waiter_waiter);
+app.use('/api/waiter_chef',waiter_chef);
+app.use('/api/waiter_category',waiter_category);
+app.use('/api/waiter_item',waiter_item);
+app.use('/api/waiter_billing',waiter_billing);
+app.use('/api/waiter_order',waiter_order);
+app.use('/api/waiter_order_tem',waiter_order_tem);
+app.use('/api/waiter_adminrequest',waiter_adminrequest);
+app.use('/api/waiter_notification',waiter_notification);
+
+app.use('/api/waiter_sos',waiter_sos);
+
+
+
+
+
+/////Chat/////
+// app.use('/chat_user',Chat_userRouter);
+// app.use('/chat_cat',Chat_catRouter);
+// app.use('/chat_item',Chat_itemRouter);
+// app.use('/chat_billing',Chat_billingRouter);
 
 
 

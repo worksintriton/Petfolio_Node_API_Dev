@@ -24,7 +24,7 @@ router.post('/create', async function(req, res) {
         function (err, user) {
           console.log(err);
           console.log(user);
-           res.json({Status:"Success",Message:"SP Added successfully", Data : user ,Code:200}); 
+           res.json({Status:"Success",Message:"SP Holiday Added successfully", Data : user ,Code:200}); 
         });
             }
             else{
@@ -48,7 +48,7 @@ catch(e){
 router.get('/deletes', function (req, res) {
       SP_HolidayModel.remove({}, function (err, user) {
           if (err) return res.status(500).send("There was a problem deleting the user.");
-             res.json({Status:"Success",Message:"ActivityModel Deleted", Data : {} ,Code:200});     
+             res.json({Status:"Success",Message:"SP Holiday Delete", Data : {} ,Code:200});     
       });
 });
 

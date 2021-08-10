@@ -8,6 +8,10 @@ var doctordetailsModel = require('./../models/doctordetailsModel');
 var vendordetailsModel = require('./../models/vendordetailsModel');
 var userdetailsModel = require('./../models/userdetailsModel');
 
+var reviewdetailsModel = require('./../models/reviewdetailsModel');
+
+
+
 var request = require("request");
 
 router.post('/mobile/create', async function(req, res) {
@@ -18,34 +22,35 @@ router.post('/mobile/create', async function(req, res) {
         var doctor_token =  await userdetailsModel.findOne({_id:req.body.sp_id});
         var user_token = await userdetailsModel.findOne({_id:req.body.user_id});
         await SP_appointmentsModels.create({
-            sp_id : req.body.sp_id,
-            appointment_UID : Appointmentid,
-            booking_date : req.body.booking_date,
-            booking_time : req.body.booking_time,
-            booking_date_time : req.body.booking_date_time,
-            user_id : req.body.user_id,
-            pet_id : req.body.pet_id,
-            additional_info : req.body.additional_info,
-            sp_attched : req.body.doc_attched,
+            sp_id : req.body.sp_id || "",
+            appointment_UID : Appointmentid || "",
+            booking_date : req.body.booking_date || "",
+            booking_time : req.body.booking_time || "",
+            booking_date_time : req.body.booking_date_time || "",
+            user_id : req.body.user_id || "",
+            pet_id : req.body.pet_id || "",
+            additional_info : req.body.additional_info || "",
+            sp_attched : req.body.doc_attched || [],
             appoinment_status : "Incomplete",
             start_appointment_status : "Not Started",
             end_appointment_status : "Not End",
-            sp_feedback : req.body.sp_feedback,
-            sp_rate : req.body.sp_rate,
-            user_feedback : req.body.user_feedback,
-            user_rate : req.body.user_rate,
-            display_date : req.body.display_date,
-            server_date_time : req.body.server_date_time,
-            payment_id : req.body.payment_id,
-            payment_method : req.body.payment_method,
-            service_name :  req.body.service_name,
-            service_amount :  req.body.service_amount,
-            service_time : req.body.service_time,
-            completed_at : req.body.completed_at,
-            missed_at : req.body.missed_at,
-            mobile_type : req.body.mobile_type,
-            sp_business_info : doctordetailsModels,
-            delete_status : false
+            sp_feedback : req.body.sp_feedback || "",
+            sp_rate : req.body.sp_rate || "",
+            user_feedback : req.body.user_feedback || "",
+            user_rate : req.body.user_rate || "",
+            display_date : req.body.display_date || "",
+            server_date_time : req.body.server_date_time || "",
+            payment_id : req.body.payment_id || "",
+            payment_method : req.body.payment_method || "",
+            service_name :  req.body.service_name || "",
+            service_amount :  req.body.service_amount || "",
+            service_time : req.body.service_time || "",
+            completed_at : req.body.completed_at || "",
+            missed_at : req.body.missed_at || "",
+            mobile_type : req.body.mobile_type || "",
+            sp_business_info : doctordetailsModels || [],
+            delete_status : false,
+            date_and_time : req.body.date_and_time
         }, 
         function (err, user) {
           console.log(user)
@@ -60,26 +65,26 @@ router.post('/mobile/create', async function(req, res) {
 
  var params = {
             "user_id":  user_token._id,
-            "notify_title" : "New Appointment",
-            "notify_descri" : "Your Appointment Booked successfully " + Appointmentid + " at " + req.body.booking_date,
+            "notify_title" : "Pet services New Appointment",
+            "notify_descri" : "Your Appointment Booked successfully " + Appointmentid + " at " + req.body.booking_date_time,
             "notify_img" : "",
             "notify_time" : "",
-            "date_and_time" : req.body.booking_date,
+            "date_and_time" : req.body.booking_date_time,
             "user_token" : user_token.fb_token,
 }
 
 var params1 = {
             "user_token" : doctor_token.fb_token,
-            "notify_title" : "New Appointment",
-            "notify_descri" : "Your Appointment Booked successfully " + Appointmentid + " at " + req.body.booking_date,
+            "notify_title" : "Pet services New Appointment",
+            "notify_descri" : "You have a new appointment at " + req.body.booking_date_time,
             "notify_img" : "",
             "notify_time" : "",
-            "date_and_time" : req.body.booking_date,
+            "date_and_time" : req.body.booking_date_time,
             "user_id" : doctor_token._id
 }
 
 request.post(
-    'http://52.25.163.13:3000/api/notification/send_notifiation',
+    'http://54.212.108.156:3000/api/notification/send_notifiation',
     { json: params },
     function (error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -89,7 +94,7 @@ request.post(
 );
 
 request.post(
-    'http://52.25.163.13:3000/api/notification/send_notifiation',
+    'http://54.212.108.156:3000/api/notification/send_notifiation',
     { json: params1 },
     function (error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -114,6 +119,67 @@ router.post('/mobile/fetch_appointment_id', function (req, res) {
         }).populate('user_id sp_id pet_id');
 });
 
+
+
+router.post('/admin_panel/sp_appointments', function (req, res) {
+        SP_appointmentsModels.find({appoinment_status:req.body.appoinment_status}, function (err, StateList) {
+         res.json({Status:"Success",Message:"New Appointment List", Data : StateList ,Code:200});         
+        }).populate('user_id sp_id pet_id');
+});
+
+
+router.post('/mobile/noshow_notifications', function (req, res) {
+        SP_appointmentsModels.find({display_date:req.body.display_date,appoinment_status : "Incomplete"}, function (err, StateList) {
+           if(StateList.length !== 0){
+                   for(let a  = 0 ; a < StateList.length ; a++){
+let d = {"appointment_UID":StateList[a].appointment_UID,"date":StateList[a].booking_date_time,"sp_id":StateList[a].sp_id,"status":"No show","user_id":StateList[a].user_id}
+request.post(
+    'http://54.212.108.156:3000/api/notification/mobile/alert/sp_notification',
+    { json: d },
+    function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            console.log(body);
+        }
+    }
+);
+            let c = {
+                missed_at : StateList[a].booking_date_time,
+                appoinment_status : "Missed",
+                appoint_patient_st : "Doctor missed appointment"
+              }
+             SP_appointmentsModels.findByIdAndUpdate(StateList[a]._id, c, {new: true}, function (err, UpdatedDetails) {
+            });
+                   }
+ 
+           }else{
+            res.json({Status:"Success",Message:"No show datas", Data : {} ,Code:200});   
+           }
+        });
+});
+
+
+
+router.post('/mobile/remainder_notifications', function (req, res) {
+        SP_appointmentsModels.find({display_date:req.body.display_date,appoinment_status : "Incomplete"}, function (err, StateList) {
+           if(StateList.length !== 0){
+                   for(let a  = 0 ; a < StateList.length ; a++){
+let d = {"appointment_UID":StateList[a].appointment_UID,"date":StateList[a].booking_date_time,"sp_id":StateList[a].sp_id,"status":"Appointment Remainder","user_id":StateList[a].user_id}
+request.post(
+    'http://54.212.108.156:3000/api/notification/mobile/alert/sp_notification',
+    { json: d },
+    function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            console.log(body);
+        }
+    }
+);
+                   }
+ 
+           }else{
+            res.json({Status:"Success",Message:"No show datas", Data : {} ,Code:200});   
+           }
+        });
+});
 
 
 
@@ -469,6 +535,39 @@ router.post('/reviews/update', function (req, res) {
         });
 });
 
+// router.post('/reviews/update',async function (req, res) {
+//         var Appointment_details = await SP_appointmentsModels.findOne({_id:req.body._id});
+//         var doctor_details = await vendordetailsModel.findOne({user_id:Appointment_details.sp_id});
+//         await reviewdetailsModel.create({
+//             sp_id:  Appointment_details.sp_id,
+//             user_id : Appointment_details.user_id,
+//             rating : req.body.user_rate,
+//             reviews : req.body.user_feedback
+//         },async function (err, user) {
+//           console.log(user)
+//         var test_rat_count = 0; 
+//         var review_details = await reviewdetailsModel.find({sp_id:Appointment_details.sp_id});
+//         for(let a = 0 ; a < review_details.length ; a++){
+//             test_rat_count = +review_details[a].rating + test_rat_count;
+//          }
+//          var final_rat_count = test_rat_count / review_details.length;
+//         let c = {
+//         comments : review_details.length,
+//         rating : final_rat_count
+//         } 
+//         console.log(c);
+//         vendordetailsModel.findByIdAndUpdate(doctor_details._id, c, {new: true}, function (err, UpdatedDetails) {
+//             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+//              // res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
+//                console.log("DAtA updated in Doctor Details");
+//         });
+//         AppointmentsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
+//              if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+//              res.json({Status:"Success",Message:"Feedback updated successfully", Data : UpdatedDetails ,Code:200});
+//         });
+
+//         });    
+// });
 
 
 router.post('/edit',async function (req, res) {
@@ -478,7 +577,7 @@ if(req.body.appoinment_status == "Completed"){
 var appoint_details = await SP_appointmentsModels.findOne({_id:req.body._id});
 let d = {"appointment_UID":appoint_details.appointment_UID,"date":req.body.completed_at,"sp_id":appoint_details.sp_id,"status":"Appointment Completed","user_id":appoint_details.user_id}
 request.post(
-    'http://52.25.163.13:3000/api/notification/mobile/alert/sp_notification',
+    'http://54.212.108.156:3000/api/notification/mobile/alert/sp_notification',
     { json: d },
     function (error, response, body) {
         if (!error && response.statusCode == 200) {
