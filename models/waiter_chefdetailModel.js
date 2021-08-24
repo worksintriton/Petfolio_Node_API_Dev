@@ -13,6 +13,7 @@ var chef_detailSchema = new mongoose.Schema({
   chef_emergency_no : Number,
   chef_status : String,
   date_of_create : String,
+  fb_token : String,
 });
 chef_detailSchema.plugin(timestamps);
 mongoose.model('chef_detail', chef_detailSchema);

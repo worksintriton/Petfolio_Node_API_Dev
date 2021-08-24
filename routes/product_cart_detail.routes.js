@@ -164,7 +164,6 @@ router.post('/fetch_cart_details_by_userid', async function(req, res) {
             res.json({Status:"Success",Message:"Fetch cart details", Data : [] , prodouct_total : prodouct_total , shipping_charge : 0, discount_price : 0, grand_total : grand_total,prodcut_count : prodcut_count,prodcut_item_count : prodcut_item_count,Code:200});
     }else{
           for(let a = 0  ; a < product_details.length ; a ++){
-      console.log("product_details",product_details);
       if(product_details[a].product_id.discount_amount !== 0 ){
       prodouct_total = prodouct_total + product_details[a].product_id.discount_amount * product_details[a].product_count;
       let temp = (product_details[a].product_id.discount_amount - product_details[a].product_id.cost) * product_details[a].product_count;

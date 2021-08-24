@@ -19,7 +19,6 @@ router.post('/create', async function(req, res) {
             delete_status : false
         }, 
         function (err, user) {
-          console.log(user)
         res.json({Status:"Success",Message:"Health issue Added successfully", Data : user ,Code:200}); 
         });
   }else{
@@ -41,7 +40,6 @@ router.post('/filter_date', function (req, res) {
             var fromdate = new Date(req.body.fromdate);
             var todate = new Date(req.body.todate);
             var checkdate = new Date(StateList[a].createdAt);
-            console.log(fromdate,todate,checkdate);
             if(checkdate >= fromdate && checkdate <= todate){
               final_Date.push(StateList[a]);
             }

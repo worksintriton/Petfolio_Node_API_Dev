@@ -57,35 +57,27 @@ var product_vendor = require('./routes/product_vendor.routes');
 var product_cate = require('./routes/product_categories.routes');
 var product_subcat = require('./routes/product_subcat.routes');
 var product_details = require('./routes/product_details.routes');
-
-
 var order_details = require('./routes/order_details.routes');
 var vendor_banner_detail = require('./routes/vendor_banner_detail.routes');
 var product_cart_detail = require('./routes/product_cart_detail.routes');
 var vendor_order_booking = require('./routes/vendor_order_booking.routes');
 var vendor_order_detail = require('./routes/vendor_order_detail.routes');
-
-
 var shippingdetails = require('./routes/shippingdetails.routes');
-
-
 var vendor_order_group = require('./routes/vendor_order_group.routes');
 var petlover_order_group = require('./routes/petlover_order_group.routes');
-
 var Doctor_fav = require('./routes/Doctor_fav.routes');
 var Sp_fav = require('./routes/Sp_fav.routes');
 var Product_fav = require('./routes/Product_fav.routes');
-
-
 var newproduct_detail = require('./routes/newproduct_detail.routes');
 var diagnosis = require('./routes/diagnosis.routes');
 var sub_diagnosis = require('./routes/sub_diagnosis.routes');
-
 var healthissue = require('./routes/healthissue.routes');
 var minibanner = require('./routes/minibanner.routes');
-
 var sos_pet = require('./routes/sos.routes.js');
 
+var coupon_code = require('./routes/coupon_code.routes');
+var refund_coupon = require('./routes/refund_coupon.routes');
+var block_slot = require('./routes/block_slot.routes');
 
 
 
@@ -458,7 +450,9 @@ app.use('/api/healthissue',healthissue);
 app.use('/api/minibanner',minibanner);
 
 app.use('/api/sos_pet',sos_pet);
-
+app.use('/api/coupon_code',coupon_code);
+app.use('/api/refund_coupon',refund_coupon);
+app.use('/api/block_slot',block_slot);
 
 
 
@@ -496,7 +490,7 @@ app.use('/api/waiter_notification',waiter_notification);
 app.use('/api/waiter_sos',waiter_sos);
 
 
-
+refund_coupon
 
 
 /////Chat/////

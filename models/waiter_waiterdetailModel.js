@@ -13,6 +13,7 @@ var waiter_detailSchema = new mongoose.Schema({
   waiter_emergency_no : Number,
   waiter_status : String,
   date_of_create : String,
+  fb_token : String,
 });
 waiter_detailSchema.plugin(timestamps);
 mongoose.model('waiter_detail', waiter_detailSchema);

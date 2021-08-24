@@ -58,7 +58,6 @@ router.post('/create', async function(req, res) {
             clinic_no : req.body.clinic_no,
             doctor_id : req.body.doctor_id,
         },async function (err, user) {
-              console.log("doctor_created_successfully");
                   await temdoctordetailsModel.create({
             user_id:  req.body.user_id,
             dr_title : req.body.dr_title || "",
@@ -113,7 +112,6 @@ router.post('/filter_date', function (req, res) {
             var fromdate = new Date(req.body.fromdate);
             var todate = new Date(req.body.todate);
             var checkdate = new Date(StateList[a].createdAt);
-            console.log(fromdate,todate,checkdate);
             if(checkdate >= fromdate && checkdate <= todate){
               final_Date.push(StateList[a]);
             }
@@ -142,7 +140,6 @@ router.post('/getlist_id', function (req, res) {
 
 
 router.post('/text_search',async function (req, res) {
-        console.log(req.body);
         let banner = [
          { 
           title : "title1",
@@ -157,21 +154,16 @@ router.post('/text_search',async function (req, res) {
         let userlocation  =  await locationdetailsModel.findOne({user_id:req.body.user_id,default_status: true});
         var user_lat = userlocation.location_lat;
         var user_long = userlocation.location_long;
-         console.log(user_lat,user_long);
         doctordetailsModel.find({}, function (err, StateList) {
         var final_data = [];
         var keyword = req.body.search_string.toLowerCase();
-        console.log(StateList.length);
         for(let a = 0 ; a  < StateList.length ; a ++)
         {
             var point1 = new GeoPoint(+user_lat, +user_long);
             var point2 = new GeoPoint(+StateList[a].clinic_lat,+StateList[a].clinic_long);
             var distance = point1.distanceTo(point2, true)//output in kilometers
-            console.log(distance);
           var doctorname = StateList[a].dr_name.toLowerCase();
-          console.log("value",doctorname.indexOf(keyword) !== -1);
           if(doctorname.indexOf(keyword) !== -1 == true){
-          	console.log("value",doctorname.indexOf(keyword) !== -1);
           if(req.body.communication_type == 0){
           if(StateList[a].communication_type == 'Online Or Visit' || StateList[a].communication_type == 'Online'){
             let d = {
@@ -222,7 +214,6 @@ router.post('/text_search',async function (req, res) {
           {
            for(let b = 0; b < StateList[a].specialization.length ; b++){
               let spec = StateList[a].specialization[b].specialization.toLowerCase();
-              console.log(spec);
               if(spec.indexOf(keyword) !== -1 == true){
           if(req.body.communication_type == 0){
           if(StateList[a].communication_type == 'Online Or Visit' || StateList[a].communication_type == 'Online'){
@@ -276,10 +267,8 @@ router.post('/text_search',async function (req, res) {
             }           
           }
           if(a == StateList.length - 1){
-          	  console.log(final_data.length);
              if(req.body.communication_type == 0){
               let final_data_chat = [];
-              console.log(final_data.length);
               for(let c  = 0 ; c < final_data.length ; c ++){
                  if(+final_data[c].distance < 6000){
                    final_data_chat.push(final_data[c]);
@@ -305,7 +294,6 @@ router.post('/text_search',async function (req, res) {
 
 
 router.post('/filter_doctor',async function (req, res) {
-console.log("filter_doctor_request",req.body);
     let banner = [
         { 
           title : "title1",
@@ -343,10 +331,8 @@ console.log("filter_doctor_request",req.body);
           }
           final_data.push(d);
          if(a == StateList.length - 1){
-        console.log('Check 1');
         var specialization_filter_data = [];
         if(req.body.specialization == '') {
-          console.log('Check 2');
           specialization_filter_data = final_data;
            var star_count_filter_data = [];
             if(req.body.Review_count == 0){
@@ -355,13 +341,10 @@ console.log("filter_doctor_request",req.body);
             }else{
               star_count_filter_data = [];
               for(let t = 0 ; t < specialization_filter_data.length ; t++){
-                console.log("in");
-                console.log(specialization_filter_data[t].star_count,req.body.Review_count);
                  if(specialization_filter_data[t].star_count <= req.body.Review_count){
                         star_count_filter_data.push(specialization_filter_data[t]);
                  }                  
                  if(t == specialization_filter_data.length - 1){
-                  console.log("Output");
                     res.json({Status:"Success",Message:"Filtered Doctor List", Data : star_count_filter_data ,banner: banner,Code:200});
 
                  }
@@ -370,34 +353,24 @@ console.log("filter_doctor_request",req.body);
         } 
         else
         {
-          console.log('check 3');
         for(let c = 0 ; c < final_data.length; c++){
-          console.log(final_data[c]);
-          console.log(final_data[c].specialization);
           for(let b = 0; b < final_data[c].specialization.length ; b++){
-            console.log('check 4');
-            console.log(final_data[c].specialization[b].specialization,req.body.specialization);
             if(final_data[c].specialization[b].specialization == req.body.specialization){
                   specialization_filter_data.push(final_data[c]);
             }
           }
           if(c == final_data.length - 1){
-            console.log('check 5');
-            console.log(req.body.Review_count);
             var star_count_filter_data = [];
             if(req.body.Review_count == 0){
               star_count_filter_data = specialization_filter_data;
             res.json({Status:"Success",Message:"Filtered Doctor List", Data : star_count_filter_data ,banner: banner,Code:200});
             }else{
-              console.log("Reviewing in not");
-              console.log(specialization_filter_data);
                 if(specialization_filter_data.length == 0){
                    star_count_filter_data = specialization_filter_data;
                    res.json({Status:"Success",Message:"Filtered Doctor List", Data : star_count_filter_data ,banner: banner,Code:200});
                }
 
               for(let t = 0 ; t < specialization_filter_data.length ; t++){
-                console.log("in");
                  if(specialization_filter_data[t].review_count > req.body.Review_count){
                         star_count_filter_data.push(specialization_filter_data[t]);
                  }                  
@@ -451,15 +424,12 @@ console.log("filter_doctor_request",req.body);
 
 
 router.post('/fetch_doctor_id', function (req, res) {
-  console.log(req.body);
       doctordetailsModel.findOne({user_id:req.body.doctor_id},async function (err, StateList) {
-      console.log(StateList);
       var doc_fav = await Doctor_favModel.findOne({user_id:req.body.user_id,doctor_id:req.body.doctor_id});
       var temp_fav = false;
         if(doc_fav !==  null){
                temp_fav = true;
         }
-          console.log(err);
       let dd = {
             '_id' : StateList._id,
             'user_id':  StateList.user_id,
@@ -499,7 +469,6 @@ router.post('/fetch_doctor_id', function (req, res) {
 
 router.post('/fetch_doctor_user_id', function (req, res) {
         doctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
-          console.log(StateList);
           res.json({Status:"Success",Message:"Docotor Details", Data : StateList ,Code:200});
         });
 });
@@ -510,7 +479,6 @@ router.post('/fetch_doctor_user_id', function (req, res) {
 
 router.post('/check_status', function (req, res) {
         doctordetailsModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
-          console.log(StateList);
           let message = "Dear Doctor, We appreciate your interest and look forward to have you as part of Petfolio Team. Our team is reviewing your profile and will get in touch with you to close the formalities. Your profile is pending verification.";
          if(StateList == null){
           let dd = {
@@ -552,7 +520,6 @@ router.post('/check_status', function (req, res) {
 
 router.post('/update_calendar_status',async function (req, res) {
         let doctordetails  =  await doctordetailsModel.findOne({user_id:req.body.user_id});
-        console.log(doctordetails);
         doctordetailsModel.findByIdAndUpdate(doctordetails._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
@@ -566,13 +533,10 @@ router.post('/doctor/dashboar',async function (req, res) {
   var appointment_status_com = await AppointmentsModel.find({doctor_id:req.body.doctor_id, appoinment_status : "Completed"}).count();
   var appointment_status_mis = await AppointmentsModel.find({doctor_id:req.body.doctor_id, appoinment_status : "Missed"}).count();
   var appointment_status = await AppointmentsModel.find({doctor_id:req.body.doctor_id, appoinment_status : "Completed"});
-  console.log(appointment_status);
   let price = 0;
   for(let c  = 0 ; c < appointment_status.length; c++){
-    console.log("Fee",appointment_status[c].amount);
     price = price + +appointment_status[c].amount;
   }
-  console.log(appointment_status_new,appointment_status_com,appointment_status_mis);
 let a  = {
     new_appointment_count : appointment_status_new,
     complete_appointment_count : appointment_status_com,
@@ -589,13 +553,10 @@ router.post('/doctor/dashboar1',async function (req, res) {
   var appointment_status_com = await walkin_appointmentModel.find({doctor_id:req.body.doctor_id, appoinment_status : "Completed"}).count();
   var appointment_status_mis = await walkin_appointmentModel.find({doctor_id:req.body.doctor_id, appoinment_status : "Missed"}).count();
   var appointment_status = await walkin_appointmentModel.find({doctor_id:req.body.doctor_id, appoinment_status : "Completed"});
-  console.log(appointment_status);
     let price = 0;
   for(let c  = 0 ; c < appointment_status.length; c++){
-    console.log("Fee",appointment_status[c].amount);
     price = price + +appointment_status[c].amount;
   }
-  console.log(appointment_status_new,appointment_status_com,appointment_status_mis);
 let a  = {
     new_appointment_count : appointment_status_new,
     complete_appointment_count : appointment_status_com,
@@ -636,7 +597,6 @@ router.get('/mobile/getlist', function (req, res) {
 
 
 router.post('/verify/edit', function (req, res) {
- console.log(req.body);
   doctordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
@@ -648,13 +608,10 @@ router.post('/verify/edit', function (req, res) {
 
 
 router.post('/edit', function (req, res) {
- console.log(req.body);
- console.log(req.body.experience_details);
  var exp = 0;
  for(let a = 0 ; a  < req.body.experience_details.length ; a ++){
       exp = exp + req.body.experience_details[a].yearsofexperience;
  }
- console.log("Expr",exp);
  req.body.doctor_exp = exp;
   doctordetailsModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});

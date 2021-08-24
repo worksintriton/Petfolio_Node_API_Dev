@@ -23,7 +23,6 @@ router.post('/create', async function(req, res) {
             p_order_text : req.body.p_order_text,
         }, 
         function (err, user) {
-          console.log(user)
         res.json({Status:"Success",Message:"Demo screen Added successfully", Data : user ,Code:200}); 
         });
 }
@@ -35,7 +34,6 @@ catch(e){
 
 
 router.post('/get_grouped_order_by_petlover', function (req, res) {
-  console.log("*****get_grouped_order_by_petlover******",req.body);
         req.body.skip_count = req.body.skip_count - 1 ;
         req.body.skip_count = req.body.skip_count * 5 ;
         petlover_order_groupModel.find({p_user_id:req.body.petlover_id,p_order_status:req.body.status}, function (err, StateList) {
@@ -44,7 +42,6 @@ router.post('/get_grouped_order_by_petlover', function (req, res) {
            } else {
            let final_data = [];
            for(let f = 0 ; f < StateList.length; f++){
-             console.log(StateList[f].p_order_image);
              let c = {
             p_order_id : StateList[f].p_order_id,
             p_user_id : StateList[f].p_user_id,
@@ -76,17 +73,14 @@ router.post('/get_grouped_order_by_petlover', function (req, res) {
 
 
 router.post('/get_product_list_by_petlover', function (req, res) {
-    console.log("*********get_product_list_by_petlover*********", req.body);
         petlover_order_groupModel.find({p_order_id:req.body.order_id},async function (err, StateList) {
         var shipping_address = await shipping_addressModel.findOne({_id:"60797c16a20ca32d2668a30c"});
            if(StateList.length == 0){
               res.json({Status:"Success",Message:"Petlover Product Grouped", Data : [] ,Code:200});
            } else {
-           console.log(StateList[0].p_order_image);
            let temp_data = StateList[0].p_product_details;
            let final_data = [];
            for(let f = 0 ; f < temp_data.length; f++){
-            console.log(temp_data[f]);
             let c = {
               product_id : temp_data[f].product_order_id,
               product_image : temp_data[f].product_detail.thumbnail_image || '',
@@ -142,7 +136,6 @@ router.post('/fetch_single_product_detail', function (req, res) {
            // console.log("Response",StateList[0].p_product_details);
            let temp_data = StateList[0].p_product_details;
            let final_data = [];
-           console.log(temp_data.length);
            for(let f = 0 ; f < temp_data.length; f++){
             if(temp_data[f].product_order_id == req.body.product_order_id){
             let c = {
@@ -205,7 +198,6 @@ router.post('/filter_date', function (req, res) {
             var fromdate = new Date(req.body.fromdate);
             var todate = new Date(req.body.todate);
             var checkdate = new Date(StateList[a].createdAt);
-            console.log(fromdate,todate,checkdate);
             if(checkdate >= fromdate && checkdate <= todate){
               final_Date.push(StateList[a]);
             }

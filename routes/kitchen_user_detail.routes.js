@@ -128,6 +128,45 @@ router.post('/login',async function (req, res) {
 
 
 
+
+
+
+router.post('/update_fbtoken',async function (req, res) {
+    var admin_user = await waiter_restaurantdetailModel.findOne({res_contact_no:+req.body.phone_no});
+    var waiter_user = await waiter_waiterdetailModel.findOne({waiter_number:+req.body.phone_no});
+    var chef_user = await waiter_chefdetailModel.findOne({chef_number:+req.body.phone_no});
+   if(admin_user !== null){
+        waiter_restaurantdetailModel.findByIdAndUpdate(admin_user._id, req.body, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Admin Token Updated", Data : UpdatedDetails ,Code:200});
+        });
+   }
+   else if(waiter_user !== null){
+       waiter_waiterdetailModel.findByIdAndUpdate(waiter_user._id, req.body, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Waiter Token Updated", Data : UpdatedDetails ,Code:200});
+        });
+
+   }else if(chef_user !== null){
+      waiter_chefdetailModel.findByIdAndUpdate(chef_user._id, req.body, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             res.json({Status:"Success",Message:"Cheif Token Updated", Data : UpdatedDetails ,Code:200});
+        });
+   }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 router.post('/dashboard',async function (req, res) {
   console.log(req.body);
  var order_detail = await waiter_order_detailModel.findOne({rest_id:req.body.rest_id}).count();

@@ -8,6 +8,7 @@ var locationdetailsModel = require('./../models/locationdetailsModel');
 
 router.post('/create', async function(req, res) {
    let default_Status = true
+   console.log(req.body);
    let location_details  =  await locationdetailsModel.findOne({user_id:req.body.user_id});
    console.log(location_details);
    if(location_details == null){

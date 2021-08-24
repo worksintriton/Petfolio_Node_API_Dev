@@ -68,6 +68,16 @@ var appointmentSchema = new mongoose.Schema({
 
   health_issue_title : String,
 
+  coupon_status : String,
+  coupon_code : String,
+  original_price : Number,
+  discount_price : Number,
+  total_price : Number,
+
+
+
+
+
 
   
 });

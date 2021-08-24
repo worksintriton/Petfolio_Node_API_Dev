@@ -16,7 +16,6 @@ var SP_specialationsMode = require('./../models/SP_servicesModel');
 
 
 router.post('/create', async function(req, res) {
-  console.log("Vendor Details",req.body);
   try{
         await product_vendorModel.create({
             user_id:  req.body.user_id,
@@ -41,8 +40,6 @@ router.post('/create', async function(req, res) {
             delete_status : false
         }, 
         function (err, user) {
-          console.log(user)
-            console.log(err)
         res.json({Status:"Success",Message:"Vendor Added successfully", Data : user ,Code:200}); 
         });
 }
@@ -93,7 +90,6 @@ router.post('/filter_date', function (req, res) {
             var fromdate = new Date(req.body.fromdate);
             var todate = new Date(req.body.todate);
             var checkdate = new Date(StateList[a].createdAt);
-            console.log(fromdate,todate,checkdate);
             if(checkdate >= fromdate && checkdate <= todate){
               final_Date.push(StateList[a]);
             }
@@ -194,9 +190,7 @@ router.get('/sp_dropdown',async function (req, res) {
 
 
 router.post('/check_status', function (req, res) {
-  console.log("sadfasdfasdf");
         product_vendorModel.findOne({user_id:req.body.user_id}, function (err, StateList) {
-          console.log(StateList);
           let message = "Dear Vendor, We appreciate your interest and look forward to have you as part of Petfolio Team. Our team is reviewing your profile and will get in touch with you to close the formalities. Your profile is pending verification.";
          if(StateList == null){
           let dd = {
@@ -240,7 +234,6 @@ router.get('/mobile/getlist', function (req, res) {
 
 router.post('/edit', function (req, res) {
         product_vendorModel.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, UpdatedDetails) {
-          console.log(err);
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Vendor Updated", Data : UpdatedDetails ,Code:200});
         });

@@ -50,10 +50,17 @@ router.post('/mobile/create', async function(req, res) {
             mobile_type : req.body.mobile_type || "",
             sp_business_info : doctordetailsModels || [],
             delete_status : false,
-            date_and_time : req.body.date_and_time
+            date_and_time : req.body.date_and_time,
+
+            coupon_status : req.body.coupon_status || "",
+            coupon_code : req.body.coupon_code || "",
+            original_price : req.body.original_price || 0,
+            discount_price : req.body.discount_price || 0,
+            total_price : req.body.total_price || 0,
         }, 
         function (err, user) {
-          console.log(user)
+
+          console.log(err);
           var data = {
           _id : user._id,
           video_id : "https://meet.jit.si/" + user._id,
@@ -71,6 +78,11 @@ router.post('/mobile/create', async function(req, res) {
             "notify_time" : "",
             "date_and_time" : req.body.booking_date_time,
             "user_token" : user_token.fb_token,
+             "data_type" : {
+            "usertype":"1",
+            "appintments":"New",
+            "orders":""
+             }
 }
 
 var params1 = {
@@ -80,7 +92,12 @@ var params1 = {
             "notify_img" : "",
             "notify_time" : "",
             "date_and_time" : req.body.booking_date_time,
-            "user_id" : doctor_token._id
+            "user_id" : doctor_token._id,
+             "data_type" : {
+            "usertype":"2",
+            "appintments":"New",
+            "orders":""
+             }
 }
 
 request.post(
@@ -88,7 +105,6 @@ request.post(
     { json: params },
     function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            console.log(body);
         }
     }
 );
@@ -98,7 +114,6 @@ request.post(
     { json: params1 },
     function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            console.log(body);
         }
     }
 );
@@ -108,6 +123,7 @@ request.post(
         });
 }
 catch(e){
+         console.log(e);
       res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
 }
 });
@@ -138,7 +154,6 @@ request.post(
     { json: d },
     function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            console.log(body);
         }
     }
 );
@@ -169,7 +184,6 @@ request.post(
     { json: d },
     function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            console.log(body);
         }
     }
 );
@@ -185,13 +199,9 @@ request.post(
 
 router.post('/mobile/sp_getlist/newapp', function (req, res) {
         SP_appointmentsModels.find({sp_id:req.body.sp_id,appoinment_status:"Incomplete"}, function (err, StateList) {
-          console.log(StateList);
            StateList.sort(function compare(a, b) {
-              console.log(a.server_date_time);
-              console.log(b.server_date_time);
                var dateA = new Date(a.server_date_time);
                var dateB = new Date(b.server_date_time);
-               console.log(dateA,dateB);
                return dateB - dateA;
                });
 
@@ -209,7 +219,6 @@ router.post('/mobile/sp_getlist/newapp', function (req, res) {
               sort_data.push(StateList[b]);
                 }
                 if(b == StateList.length - 1){
-                   console.log(sort_data);
                 res.json({Status:"Success",Message:"New Appointment List", Data : sort_data ,Code:200});
                 }
              }
@@ -230,7 +239,6 @@ router.post('/filter_date', function (req, res) {
             var fromdate = new Date(req.body.fromdate);
             var todate = new Date(req.body.todate);
             var checkdate = new Date(StateList[a].createdAt);
-            console.log(fromdate,todate,checkdate);
             if(checkdate >= fromdate && checkdate <= todate){
               final_Date.push(StateList[a]);
             }
@@ -245,13 +253,9 @@ router.post('/filter_date', function (req, res) {
 
 router.post('/mobile/sp_getlist/comapp', function (req, res) {
         SP_appointmentsModels.find({sp_id:req.body.sp_id,appoinment_status:"Completed"}, function (err, StateList) {
-          console.log(StateList);
            StateList.sort(function compare(a, b) {
-              console.log(a.server_date_time);
-              console.log(b.server_date_time);
                var dateA = new Date(a.server_date_time);
                var dateB = new Date(b.server_date_time);
-               console.log(dateA,dateB);
                return dateB - dateA;
                });
           res.json({Status:"Success",Message:"Completed Appointment List", Data : StateList ,Code:200});
@@ -262,13 +266,9 @@ router.post('/mobile/sp_getlist/comapp', function (req, res) {
 
 router.post('/mobile/sp_getlist/missapp', function (req, res) {
         SP_appointmentsModels.find({sp_id:req.body.sp_id,appoinment_status:"Missed"}, function (err, StateList) {
-          console.log(StateList);
            StateList.sort(function compare(a, b) {
-              console.log(a.server_date_time);
-              console.log(b.server_date_time);
                var dateA = new Date(a.server_date_time);
                var dateB = new Date(b.server_date_time);
-               console.log(dateA,dateB);
                return dateB - dateA;
                });
           res.json({Status:"Success",Message:"Missed Appointment List", Data : StateList ,Code:200});
@@ -280,13 +280,9 @@ router.post('/mobile/sp_getlist/missapp', function (req, res) {
 
 router.post('/mobile/plove_getlist/newapp',async function (req, res) {
         SP_appointmentsModels.find({user_id:req.body.user_id,appoinment_status:"Incomplete"}, function (err, StateList) {
-          console.log(StateList);
            StateList.sort(function compare(a, b) {
-              console.log(a.server_date_time);
-              console.log(b.server_date_time);
                var dateA = new Date(a.server_date_time);
                var dateB = new Date(b.server_date_time);
-               console.log(dateA,dateB);
                return dateB - dateA;
                });
           res.json({Status:"Success",Message:"New Appointment List", Data : StateList ,Code:200});
@@ -296,13 +292,9 @@ router.post('/mobile/plove_getlist/newapp',async function (req, res) {
 
 router.post('/mobile/plove_getlist/comapp', function (req, res) {
         SP_appointmentsModels.find({user_id:req.body.user_id,appoinment_status:"Completed"}, function (err, StateList) {
-          console.log(StateList);
            StateList.sort(function compare(a, b) {
-              console.log(a.server_date_time);
-              console.log(b.server_date_time);
                var dateA = new Date(a.server_date_time);
                var dateB = new Date(b.server_date_time);
-               console.log(dateA,dateB);
                return dateB - dateA;
                });
           res.json({Status:"Success",Message:"Completed Appointment List", Data : StateList ,Code:200});
@@ -313,13 +305,9 @@ router.post('/mobile/plove_getlist/comapp', function (req, res) {
 
 router.post('/mobile/plove_getlist/missapp', function (req, res) {
         SP_appointmentsModels.find({user_id:req.body.user_id,appoinment_status:"Missed"}, function (err, StateList) {
-          console.log(StateList);
            StateList.sort(function compare(a, b) {
-              console.log(a.server_date_time);
-              console.log(b.server_date_time);
                var dateA = new Date(a.server_date_time);
                var dateB = new Date(b.server_date_time);
-               console.log(dateA,dateB);
                return dateB - dateA;
                });
           res.json({Status:"Success",Message:"Missed Appointment List", Data : StateList ,Code:200});
@@ -366,12 +354,10 @@ router.post('/get_doc_new',async function (req, res) {
                              Comm_type_video = 'Yes';
                              Comm_type_chat = 'Yes';
                       }
-                       console.log(req.body.Date,req.body.cur_date);
 
                       if(req.body.Date == req.body.cur_date){
                         let datas = [];
                         let check = 1;
-                        console.log(finaltime);
                         for(let a  = 0 ; a < finaltime.length ; a ++)
                         {
                           // console.log(finaltime[a].time)
@@ -380,11 +366,8 @@ router.post('/get_doc_new',async function (req, res) {
                           let cur_time2 = finaltime[a].time.split(" ");
                           let cur_time3 = req.body.cur_time.split(" ");
                           if(cur_time2[1] == cur_time3[1]){
-                            console.log(finaltime[a].time);
-                            console.log(+cur_time[0],+cur_time1[0]);
                           if(+cur_time[0] >= +cur_time1[0]){
                             check = 0;
-                            console.log("Testing");
                            }
                            }
                           if(check == 0){
@@ -399,7 +382,6 @@ router.post('/get_doc_new',async function (req, res) {
                                      let cur_time1 = cur_time3[0].split(":");
                                      let cur_time2 = datas[0].time.split(" ");
                                      let cur_time4 = cur_time2[0].split(":");
-                                     console.log(cur_time1,cur_time4); 
                                      if(+cur_time1[1] > 0 &&  cur_time1[0] == cur_time4[0]){
                                          datas.splice(0, 1);
                                      }
@@ -407,7 +389,6 @@ router.post('/get_doc_new',async function (req, res) {
                           }
                         }
                       }
-                      console.log(finaltime);
                       let dd = {
                         Comm_type_chat : Comm_type_chat,
                         Comm_type_video : Comm_type_video,
@@ -417,7 +398,6 @@ router.post('/get_doc_new',async function (req, res) {
                         Times : finaltime    
                       }
                       ad.push(dd);
-                       console.log("VVVVVVV",Holiday_details);
                        let checkss = 0
                      
                        if(Holiday_details.length == 0){
@@ -462,7 +442,6 @@ router.post('/get_doc_new',async function (req, res) {
 router.post('/check', async function(req, res) {
   try{
     await SP_appointmentsModels.findOne({user_id:req.body.user_id,Booking_Date:req.body.Booking_Date,Booking_Time:req.body.Booking_Time}, function (err, Appointmentdetails) {
-          console.log(Appointmentdetails);
           if(Appointmentdetails!== null){
             res.json({Status:"Failed",Message:"Slot not Available",Data : {} ,Code:300});
           }
@@ -571,8 +550,6 @@ router.post('/reviews/update', function (req, res) {
 
 
 router.post('/edit',async function (req, res) {
-console.log("SP Edit Details XYZ",req.body.appoinment_status);
-console.log("SP Edit Details XYZS",req.body);
 if(req.body.appoinment_status == "Completed"){
 var appoint_details = await SP_appointmentsModels.findOne({_id:req.body._id});
 let d = {"appointment_UID":appoint_details.appointment_UID,"date":req.body.completed_at,"sp_id":appoint_details.sp_id,"status":"Appointment Completed","user_id":appoint_details.user_id}
@@ -581,7 +558,6 @@ request.post(
     { json: d },
     function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            console.log(body);
         }
     }
 );

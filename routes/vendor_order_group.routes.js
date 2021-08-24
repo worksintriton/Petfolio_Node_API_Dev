@@ -9,6 +9,9 @@ var shipping_addressModel = require('./../models/shipping_addressModel');
 var product_detailsModel = require('./../models/product_detailsModel');
 var product_rate_reviewModel = require('./../models/product_rate_reviewModel');
 var request = require("request");
+var userdetailsModel = require('./../models/userdetailsModel');
+var product_vendorModel = require('./../models/product_vendorModel');
+
 
 router.post('/create', async function(req, res) {
   try{
@@ -169,6 +172,13 @@ router.post('/fetch_single_product_detail', function (req, res) {
 router.post('/update_vendor_status1',async function (req, res) {
   var vendor_order_details = await vendor_order_groupModel.findOne({v_order_id:req.body.order_id,v_vendor_id:req.body.vendor_id});
   var petlover_order_details = await petlover_order_groupModel.findOne({p_order_id:req.body.order_id});
+  
+
+
+
+
+
+
 for(let r = 0 ; r < req.body.product_id.length ; r ++){
     let ven_temp_data = vendor_order_details.v_product_details;
     for(let a  = 0 ; a < ven_temp_data.length ; a ++){
@@ -212,7 +222,7 @@ for(let r = 0 ; r < req.body.product_id.length ; r ++){
      });
      });
 if(r == req.body.product_id.length - 1){
-var params = {"order_id":req.body.order_id,"status" : "New",v_vendor_id:req.body.vendor_id}
+var params = {"order_id":req.body.order_id,"status" : "New",v_vendor_id:req.body.vendor_id , "date" : req.body.date }
   request.post(
     'http://54.212.108.156:3000/api/vendor_order_group/check_order_status',
     { json: params },
@@ -280,7 +290,7 @@ for(let r = 0 ; r < req.body.product_id.length ; r ++){
      });
 if(r == req.body.product_id.length - 1){
 
-  var params = {"order_id":req.body.order_id,"status" : "New",v_vendor_id:req.body.vendor_id}
+  var params = {"order_id":req.body.order_id,"status" : "New",v_vendor_id:req.body.vendor_id , "date" : req.body.date }
   request.post(
     'http://54.212.108.156:3000/api/vendor_order_group/check_order_status',
     { json: params },
@@ -341,7 +351,7 @@ for(let r = 0 ; r < req.body.product_id.length ; r ++){
      });
      });
 if(r == req.body.product_id.length - 1){
-  var params = {"order_id":req.body.order_id,"status" : "New",v_vendor_id:req.body.vendor_id}
+  var params = {"order_id":req.body.order_id,"status" : "New",v_vendor_id:req.body.vendor_id , "date" : req.body.date }
   request.post(
     'http://54.212.108.156:3000/api/vendor_order_group/check_order_status',
     { json: params },
@@ -360,7 +370,6 @@ if(r == req.body.product_id.length - 1){
 
 router.post('/update_vendor_status4',async function (req, res) {
 
-  console.log("req_body",req.body);
    var temp_datasss = await vendor_order_groupModel.find({v_order_id:req.body.order_id});
    for(let p = 0 ;  p < temp_datasss.length ; p++){
   var vendor_order_details = await vendor_order_groupModel.findOne({v_vendor_id:temp_datasss[p].v_vendor_id,v_order_id:req.body.order_id});
@@ -407,8 +416,7 @@ router.post('/update_vendor_status4',async function (req, res) {
      });
 if(r == req.body.product_id.length - 1){
 
-  var params = {"order_id":req.body.order_id,"status" : "New", v_vendor_id:temp_datasss[p].v_vendor_id}
-  console.log("check_status_reqeust",params);
+  var params = {"order_id":req.body.order_id,"status" : "New", v_vendor_id:temp_datasss[p].v_vendor_id , "date" : req.body.date }
   request.post(
     'http://54.212.108.156:3000/api/vendor_order_group/check_order_status',
     { json: params },
@@ -428,7 +436,6 @@ if(p == temp_datasss.length - 1){
 
 
 router.post('/update_vendor_status5',async function (req, res) {
-   console.log("Update_status_5",req.body);
    var temp_datasss = await vendor_order_groupModel.find({v_order_id:req.body.order_id});
    for(let p = 0 ;  p < temp_datasss.length ; p++){
   var vendor_order_details = await vendor_order_groupModel.findOne({v_vendor_id:temp_datasss[p].v_vendor_id,v_order_id:req.body.order_id});
@@ -468,7 +475,7 @@ router.post('/update_vendor_status5',async function (req, res) {
      petlover_order_groupModel.findByIdAndUpdate(d._id, d, {new: true},async function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
 
-var params = {"order_id":req.body.order_id,"status" : "New",v_vendor_id:temp_datasss[p].v_vendor_id}
+var params = {"order_id":req.body.order_id,"status" : "New",v_vendor_id:temp_datasss[p].v_vendor_id , "date" : req.body.date }
   request.post(
     'http://54.212.108.156:3000/api/vendor_order_group/check_order_status',
     { json: params },
@@ -489,10 +496,8 @@ if(p == temp_datasss.length - 1){
 
 
 router.post('/check_order_status',async function (req, res) {
-  console.log("check_order_status",req.body);
   var vendor_order_details = await vendor_order_groupModel.findOne({v_order_id:req.body.order_id,v_vendor_id:req.body.v_vendor_id});
   var petlover_order_details = await petlover_order_groupModel.findOne({p_order_id:req.body.order_id});
-  console.log("vendor_order_details",vendor_order_details);
   let product_count = vendor_order_details.v_product_details.length;
   let temp_cancel_count = 0;
   let temp_dispatch_count = 0;
@@ -509,10 +514,10 @@ router.post('/check_order_status',async function (req, res) {
         temp_order_book_count = temp_order_book_count + 1;
     }
     if(a == product_details_temp.length - 1){
-       console.log("V_check_status_result",temp_order_book_count,product_count,temp_dispatch_count,temp_cancel_count);
       let status = "New";
+      let dates = "";
       if(temp_order_book_count == 0 && product_count ==  temp_dispatch_count+temp_cancel_count){
-          status = "Complete"
+          status = "Complete";
       }
       if(temp_order_book_count !== 0){
          status = "New"
@@ -526,7 +531,42 @@ router.post('/check_order_status',async function (req, res) {
      }
       vendor_order_groupModel.findByIdAndUpdate(d._id, d, {new: true},async function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
-              // res.json({Status:"Success",Message:"Vendor product detail update", Data : {},Code:200});    
+              // res.json({Status:"Success",Message:"Vendor product detail update", Data : {},Code:200});
+            console.log("Update Status",UpdatedDetails);
+            var product_detail = await product_vendorModel.findOne({_id:UpdatedDetails.v_vendor_id});
+            var user_token = await userdetailsModel.findOne({_id:product_detail.user_id});
+            let status = '';
+            if(UpdatedDetails.v_order_status == "New"){
+              status = "New";
+            }else if(UpdatedDetails.v_order_status == "Cancelled"){
+              status = "Cancelled";
+            }else if(UpdatedDetails.v_order_status == "Complete"){
+              status = "Completed";
+            }
+            console.log("Status",status);
+            var params = {
+            "user_id":  user_token._id,
+            "notify_title" : "Order Status Updated",
+            "notify_descri" : "Your " + UpdatedDetails.v_order_id + " has be update check the status" ,
+            "notify_img" : "",
+            "notify_time" : "",
+            "date_and_time" : req.body.date || "",
+            "user_token" : user_token.fb_token,
+            "data_type" : {
+            "usertype":"3",
+            "appintments":"",
+            "orders":status
+             }
+             }
+     request.post(
+     'http://54.212.108.156:3000/api/notification/send_notifiation',
+     { json: params },
+     function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            // console.log(body);
+        }
+     }
+     );
      });
        product_count = petlover_order_details.p_product_details.length;
        temp_cancel_count = 0;
@@ -544,7 +584,6 @@ router.post('/check_order_status',async function (req, res) {
         temp_order_book_count = temp_order_book_count + 1;
         }
         if(b == product_details_temp.length - 1){
-          console.log("P_check_status_result",temp_order_book_count,product_count,temp_dispatch_count,temp_cancel_count);
           let status = "New";
           if(temp_order_book_count == 0 && product_count ==  temp_dispatch_count+temp_cancel_count){
           status = "Complete"
@@ -560,8 +599,42 @@ router.post('/check_order_status',async function (req, res) {
           p_order_status : status
           }
          petlover_order_groupModel.findByIdAndUpdate(e._id, e, {new: true},async function (err, UpdatedDetails) {
-            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
-              res.json({Status:"Success",Message:"Petlover product detail update", Data : {},Code:200});    
+           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+
+
+            let status = '';
+            if(UpdatedDetails.p_order_status == "New"){
+              status = "New";
+            }else if(UpdatedDetails.p_order_status == "Cancelled"){
+              status = "Cancelled";
+            }else if(UpdatedDetails.p_order_status == "Complete"){
+              status = "Completed";
+            }
+            var user_token = await userdetailsModel.findOne({_id:UpdatedDetails.p_user_id});
+            var params = {
+            "user_id":  user_token._id,
+            "notify_title" : "Order Status Updated",
+            "notify_descri" : "Your " + UpdatedDetails.p_order_id + " has be update check the status" ,
+            "notify_img" : "",
+            "notify_time" : "",
+            "date_and_time" : req.body.date || "",
+            "user_token" : user_token.fb_token,
+            "data_type" : {
+            "usertype":"1",
+            "appintments":"",
+            "orders":status
+             }
+             }
+     request.post(
+     'http://54.212.108.156:3000/api/notification/send_notifiation',
+     { json: params },
+     function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            // console.log(body);
+        }
+     }
+     );
+              // res.json({Status:"Success",Message:"Petlover product detail update", Data : {},Code:200});    
          });
         }
        }

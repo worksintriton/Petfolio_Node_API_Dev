@@ -20,6 +20,16 @@ var petlover_order_groupSchema = new mongoose.Schema({
   p_completed_date : String,
   p_user_feedback : String,
   p_user_rate : Number,
+
+  coupon_status : String,
+  coupon_code : String,
+  original_price : Number,
+  coupon_discount_price : Number,
+  total_price : Number,
+
+
+
+
 });
 petlover_order_groupSchema.plugin(timestamps);
 mongoose.model('petlover_order_group', petlover_order_groupSchema);

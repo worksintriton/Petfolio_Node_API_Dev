@@ -8,10 +8,10 @@ var product_cart_detailsModel = require('./../models/product_cart_detailsModel')
 var shipping_addressModel = require('./../models/shipping_addressModel');
 var product_detailsModel = require('./../models/product_detailsModel');
 
-
+var userdetailsModel = require('./../models/userdetailsModel');
 var vendor_order_groupModel = require('./../models/vendor_order_groupModel');
 var petlover_order_groupModel = require('./../models/petlover_order_groupModel');
-
+var product_vendorModel = require('./../models/product_vendorModel');
 
 
 var request = require("request");
@@ -769,8 +769,32 @@ router.post('/create1', async function(req, res) {
             v_completed_date : "",
             v_user_feedback : "",
             v_user_rate : 0
-        }, 
-        function (err, user) {
+        },async function (err, user) {
+            var user_token = await userdetailsModel.findOne({_id:user.v_user_id});
+            console.log("user_detail",user_token);
+             var params = {
+            "user_id":  user_token._id,
+            "notify_title" : "New Order Booked",
+            "notify_descri" : "Order Booked successfully " + user.v_order_id + " at " + user.v_order_booked_on,
+            "notify_img" : "",
+            "notify_time" : "",
+            "date_and_time" : user.v_order_booked_on,
+            "user_token" : user_token.fb_token,
+            "data_type" : {
+            "usertype":"1",
+            "appintments":"",
+            "orders":"New"
+             }
+             }
+     request.post(
+     'http://54.212.108.156:3000/api/notification/send_notifiation',
+     { json: params },
+     function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            // console.log(body);
+        }
+     }
+     );
         // res.json({Status:"Success",Message:"product Sub categories screen Added successfully", Data : user ,Code:200}); 
         });
          }
@@ -798,10 +822,41 @@ router.post('/create1', async function(req, res) {
             p_cancelled_date : "",
             p_completed_date : "",
             p_user_feedback : "",
-            p_user_rate : 0
-        }, 
-        function (err, user) {
-          console.log("**********Order head **********",user);
+            p_user_rate : 0,
+            coupon_status : req.body.coupon_status || "",
+            coupon_code : req.body.coupon_code || "",
+            original_price : req.body.original_price || 0,
+            coupon_discount_price : req.body.coupon_discount_price || 0,
+            total_price : req.body.total_price || 0,
+        },async function (err, user) {
+          var vendor_detail = await product_vendorModel.findOne({_id:user.p_vendor_id});
+          console.log("vendor_detail",vendor_detail);
+          var user_token = await userdetailsModel.findOne({_id:vendor_detail.user_id});
+          console.log("patient details",user_token);
+             var params = {
+            "user_id":  user_token._id,
+            "notify_title" : "New Order Booked",
+             "notify_descri" : "You have a new Order " + user.p_order_id + " at " + user.p_order_booked_on,
+            "notify_img" : "",
+            "notify_time" : "",
+            "date_and_time" : user.p_order_booked_on,
+            "user_token" : user_token.fb_token,
+            "data_type" : {
+            "usertype":"3",
+            "appintments":"",
+            "orders":"New"
+             }
+             }
+     request.post(
+     'http://54.212.108.156:3000/api/notification/send_notifiation',
+     { json: params },
+     function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            // console.log(body);
+        }
+     }
+     );
+          // console.log("**********Order head **********",user);
         let r = {"Booking_id": Appointmentid,"prodouct_total":req.body.prodouct_total,"discount_price":req.body.discount_price,"grand_total":req.body.grand_total,"date_of_booking_display":req.body.date_of_booking}
         res.json({Status:"Success",Message:"Order booked successfully", Data : r, Code:200});
           // res.json({Status:"Success",Message:"Order booked successfully", Data : vendor_order_group, Data1 : petlover_order_group, Code:200});

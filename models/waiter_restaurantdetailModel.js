@@ -20,6 +20,8 @@ var waiter_restaurantSchema = new mongoose.Schema({
   waiter_count : Number,
   chef_count : Number,
   user_count : Number,
+  fb_token : String,
+
 });
 waiter_restaurantSchema.plugin(timestamps);
 mongoose.model('waiter_restaurant', waiter_restaurantSchema);

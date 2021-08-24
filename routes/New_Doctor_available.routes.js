@@ -11,6 +11,7 @@ var date_datas = require('./date_datas.json');
 var responseMiddleware = require('./../middlewares/response.middleware');
 var HolidayModel = require('./../models/HolidayModel');
 var doctordetailsModel = require('./../models/doctordetailsModel');
+var AppointmentsModel = require('./../models/AppointmentsModel');
 
 router.use(responseMiddleware());
 var AppointmentsModel = require('./../models/AppointmentsModel');
@@ -900,6 +901,237 @@ router.post('/get_doc_new2',async function (req, res) {
    }
    }
 });
+
+
+
+
+router.post('/slot/get_doc_new1',async function (req, res) {
+  // console.log(req.body);
+   var Appointmentdetails = await AppointmentsModel.find({doctor_id:req.body.user_id,booking_date:req.body.Date});
+   var date_details = await New_Doctor_time.findOne({user_id:req.body.user_id});
+   var Holiday_details = await HolidayModel.find({user_id:req.body.user_id});
+   if(date_details ==  null){
+    res.json({Status:"Failed",Message:"Doctor is not available on this day", Data : [] ,Code:404});
+   }else{
+    let reqdate = req.body.Date.split("-");
+    let repdate = reqdate[2]+"-"+reqdate[1]+"-"+reqdate[0];
+   var d = new Date(req.body.current_time);
+   let weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+   let dayss = weekday[d.getDay()];
+   for(let a = 0 ; a < date_details.Doctor_date_time.length ; a ++){
+    // console.log("Test - 1",dayss,date_details.Doctor_date_time[a].Title);
+     if(dayss == date_details.Doctor_date_time[a].Title){
+               if(date_details.Doctor_date_time[a].Status == false){
+                res.json({Status:"Failed",Message:"Doctor is not available on this day", Data : [] ,Code:404});
+               }else{
+                   let times = date_details.Doctor_time[a].Time;
+                   let finaltime = [];
+                     console.log(times);
+                   for(let c = 0 ; c < times.length ; c ++){
+                    if(times[c].Status == true){
+                      let d = {
+                        time : times[c].Time,
+                        twentyfour : times[c].format
+                      }
+                      finaltime.push(d);
+                    }
+                    if(c == times.length-1){
+                      let ad = [];
+                      let Comm_type_chat = 'No';
+                      let Comm_type_video = 'No';
+                      let Doctor_ava_Date = req.body.Date;
+                      let Doctor_name = "";
+                      let Doctor_email_id =  "";
+                      // if(doctor_details.call_type == 'Chat'){
+                      //       Comm_type_chat = 'Yes';
+                      // }else if(doctor_details.call_type == 'Video'){
+                      //        Comm_type_video = 'Yes';
+                      // }else if(doctor_details.call_type == 'Chat & Video'){
+                      //        Comm_type_video = 'Yes';
+                      //        Comm_type_chat = 'Yes';
+                      // }
+                      if(req.body.Date == req.body.cur_date){
+                        let datas = [];
+                        let check = 1;
+                        for(let a  = 0 ; a < finaltime.length ; a ++)
+                        {
+                          let cur_time = req.body.cur_date.split("-");
+                          let correct_date = cur_time[2]+"-"+cur_time[1]+"-"+cur_time[0]+" "+finaltime[a].twentyfour;
+                          // console.log("Marked date time",correct_date);
+                          // console.log("Current Dates time",req.body.current_time);
+                          var marked_time = new Date(correct_date);
+                          var current_time = new Date(req.body.current_time);
+                          console.log(marked_time);
+                          console.log(current_time);
+                          if(current_time < marked_time){
+                            console.log("true");
+                            let d = {
+                            time : finaltime[a].time
+                            }
+                            datas.push(d);
+                          }else {
+                            console.log("false");
+                          }
+                          if(a == finaltime.length - 1){
+                            if(datas.length == 0){
+                              finaltime = [];
+                            }else{
+                              finaltime = [];
+                              var com = [];
+                                     console.log(datas);
+                                     // let cur_time3 = req.body.cur_time.split(" ");
+                                     // let cur_time1 = cur_time3[0].split(":");
+                                     // let cur_time2 = datas[0].time.split(" ");
+                                     // let cur_time4 = cur_time2[0].split(":");
+                                     let fifteenmin = date_datas.fiftymin;   
+                                     finaltime = datas;
+                            }
+                          }
+                        }
+                      }
+                      let dd = {
+                        Comm_type_chat : Comm_type_chat,
+                        Comm_type_video : Comm_type_video,
+                        Doctor_email_id : Doctor_email_id,
+                        Doctor_ava_Date : Doctor_ava_Date,
+                        Doctor_name : Doctor_name,
+                        Times : finaltime    
+                      }
+                      ad.push(dd);
+                       let checkss = 0
+                       if(Holiday_details.length == 0){
+                             if(ad[0].Times.length == 0){
+                                              res.json({Status:"Failed",Message:"Doctor is not available on this day", Data : [] ,Code:404});
+
+                                       }else{
+                                        time_final = [];
+                                        for(let p = 0; p < ad[0].Times.length; p++){
+                                              var checks1 = 0;  
+                                              if(Appointmentdetails.length == 0){
+                                          {
+                                                           let o = 
+                                          {
+                                          "time": ad[0].Times[p].time,
+                                          "book_status" : true,
+                                          "status" : "Available"
+                                          }
+                                          time_final.push(o);
+                                                      }
+                    
+                                              }else{
+                                                 for(let q = 0 ; q < Appointmentdetails.length; q ++ ){
+                                                // console.log(ad[0].Doctor_ava_Date,req.body.Date,ad[0].Times[p].time,Appointmentdetails[q].booking_time);
+                                                   if(ad[0].Doctor_ava_Date == req.body.Date && ad[0].Times[p].time == Appointmentdetails[q].booking_time){
+                                                    // console.log("Checking in");
+                                                    checks1 = 1
+                                                   }
+                                                   if(q == Appointmentdetails.length - 1){
+                                                      if(checks1 == 1){
+                                                         let o = 
+                                                        {
+                                          "time": ad[0].Times[p].time,
+                                          "book_status" : false,
+                                          "status" : "Not Available"
+                                          }
+                                          time_final.push(o);
+
+                                                      }
+                                                      else{
+                                                           let o = 
+                                          {
+                                          "time": ad[0].Times[p].time,
+                                          "book_status" : true,
+                                          "status" : "Available"
+                                          }
+                                          time_final.push(o);
+                                                      }
+                                                   }
+                                              }
+                                              }                    
+                                          if(p == ad[0].Times.length - 1){
+                                              ad[0].Times = time_final
+                                            res.json({Status:"Success",Message:"Doctor Available", Data : ad,Code:200});
+                                          }
+                                        }
+                                       }
+                       }else{
+                       for(let t = 0 ; t < Holiday_details.length ; t++){
+                           if(req.body.Date == Holiday_details[t].Date){
+                            checkss = 1
+                           }
+                           if(t == Holiday_details.length - 1){
+                                 if(checkss == 0){
+                                       if(ad[0].Times.length == 0){
+                                              res.json({Status:"Failed",Message:"Doctor is not available on this day", Data : [] ,Code:404});
+
+                                       }
+                                       else
+                                       {
+                                        time_final = [];
+                                          for(let p = 0; p < ad[0].Times.length; p++){
+                                              var checks1 = 0;  
+                                              if(Appointmentdetails.length == 0){
+                                          {
+                                                           let o = 
+                                          {
+                                          "time": ad[0].Times[p].time,
+                                          "book_status" : true,
+                                          "status" : "Available"
+                                          }
+                                          time_final.push(o);
+                                                      }
+                    
+                                              }else{
+                                                 for(let q = 0 ; q < Appointmentdetails.length; q ++ ){
+                                                // console.log(ad[0].Doctor_ava_Date,req.body.Date,ad[0].Times[p].time,Appointmentdetails[q].booking_time);
+                                                   if(ad[0].Doctor_ava_Date == req.body.Date && ad[0].Times[p].time == Appointmentdetails[q].booking_time){
+                                                    // console.log("Checking in");
+                                                    checks1 = 1
+                                                   }
+                                                   if(q == Appointmentdetails.length - 1){
+                                                      if(checks1 == 1){
+                                                         let o = 
+                                                        {
+                                          "time": ad[0].Times[p].time,
+                                          "book_status" : false,
+                                          "status" : "Not Available"
+                                          }
+                                          time_final.push(o);
+
+                                                      }
+                                                      else{
+                                                           let o = 
+                                          {
+                                          "time": ad[0].Times[p].time,
+                                          "book_status" : true,
+                                          "status" : "Available"
+                                          }
+                                          time_final.push(o);
+                                                      }
+                                                   }
+                                              }
+                                              }                    
+                                          if(p == ad[0].Times.length - 1){
+                                              ad[0].Times = time_final
+                                            res.json({Status:"Success",Message:"Doctor Available", Data : ad,Code:200});
+                                          }
+                                        }
+                                       res.json({Status:"Success",Message:"Doctor Available", Data : ad,Code:200});
+                                       }
+                                      }else{
+                                                                   res.json({Status:"Failed",Message:"Doctor is not available on this day", Data : [] ,Code:404});
+                                                       }
+                           }
+                       }
+                     }
+                    }
+                   }
+               }
+     }
+   }
+   }
+});
+
 
 
 

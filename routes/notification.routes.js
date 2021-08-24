@@ -13,7 +13,7 @@ router.post('/create', async function(req, res) {
             user_id:  req.body.user_id,
             notify_title : req.body.notify_title,
             notify_descri : req.body.notify_descri,
-            notify_img : req.body.notify_img,
+            notify_img : "http://54.212.108.156:3000/api/uploads/1629809356957.png",
             notify_time : "",
             date_and_time : req.body.date_and_time,
             delete_status : false
@@ -67,7 +67,7 @@ router.post('/mobile/alert/notification',async function (req, res) {
         };
 
 
-       sendnotify(req.body.user_id,title,body,subtitle,date);
+       sendnotify(req.body.user_id,title,body,subtitle,date,data_type);
        } 
        else if(req.body.status == "Patient Appointment Cancelled"){
        appointmetitle = "Appointment Cancelled";
@@ -75,16 +75,22 @@ router.post('/mobile/alert/notification',async function (req, res) {
        doc_body = "Patient Cancelled the appointment of "+appointment_id+" at "+date;
        pet_subtitle = "Appointment Cancelled";
        pet_body = "You have Cancelled the appointment of "+appointment_id+" at "+date;
-       data_type = {
+       data_type1 = {
        "usertype":"1",
-       "appintments":"",
+       "appintments":"Missed",
+       "orders":""
+        };
+
+        data_type2 = {
+       "usertype":"4",
+       "appintments":"Missed",
        "orders":""
         };
 
 
 
-       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date);
-       sendnotify(req.body.doctor_id,title,doc_body,doc_subtitle,date);
+       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date,data_type1);
+       sendnotify(req.body.doctor_id,title,doc_body,doc_subtitle,date,data_type2);
        } 
        else if(req.body.status == "Doctor Appointment Cancelled"){
        title = "Appointment Cancelled";
@@ -92,14 +98,19 @@ router.post('/mobile/alert/notification',async function (req, res) {
        doc_body = "You have Cancelled the appointment of "+appointment_id+" at "+date;
        pet_subtitle = "Appointment Cancelled";
        pet_body = "Doctor Cancelled the appointment of "+appointment_id+" at "+date;
-       data_type = {
+       data_type1 = {
        "usertype":"1",
-       "appintments":"",
+       "appintments":"Missed",
+       "orders":""
+        };
+        data_type2 = {
+       "usertype":"4",
+       "appintments":"Missed",
        "orders":""
         };
 
-       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date);
-       sendnotify(req.body.doctor_id,title,doc_body,doc_subtitle,date);
+       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date,data_type1);
+       sendnotify(req.body.doctor_id,title,doc_body,doc_subtitle,date,data_type2);
        } 
        else if(req.body.status == "No show"){
        title = "Appointment Missed";
@@ -107,14 +118,20 @@ router.post('/mobile/alert/notification',async function (req, res) {
        doc_body = "You have Missed the appointment of "+appointment_id+" at "+date;
        pet_subtitle = "Appointment Missed";
        pet_body = "You have Missed the appointment of "+appointment_id+" at "+date;
-       data_type = {
+       data_type1 = {
        "usertype":"1",
-       "appintments":"",
+       "appintments":"Missed",
        "orders":""
         };
 
-       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date);
-       sendnotify(req.body.doctor_id,title,doc_body,doc_subtitle,date);
+       data_type2 = {
+       "usertype":"4",
+       "appintments":"Missed",
+       "orders":""
+        };
+
+       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date,data_type1);
+       sendnotify(req.body.doctor_id,title,doc_body,doc_subtitle,date,data_type4);
 
        }
 
@@ -125,15 +142,21 @@ router.post('/mobile/alert/notification',async function (req, res) {
        doc_body = "You have an appointment of "+appointment_id+" at "+date;
        pet_subtitle = "Appointment Remainder";
        pet_body = "You have an appointment of "+appointment_id+" at "+date;
-       data_type = {
+       data_type1 = {
        "usertype":"1",
-       "appintments":"",
+       "appintments":"New",
+       "orders":""
+        };
+
+       data_type2 = {
+       "usertype":"4",
+       "appintments":"New",
        "orders":""
         };
 
 
-       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date);
-       sendnotify(req.body.doctor_id,title,doc_body,doc_subtitle,date);
+       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date,data_type1);
+       sendnotify(req.body.doctor_id,title,doc_body,doc_subtitle,date,data_type2);
 
        }
 
@@ -143,15 +166,21 @@ router.post('/mobile/alert/notification',async function (req, res) {
        doc_body = "You have Completed the appointment of "+appointment_id+" at "+date;
        pet_subtitle = "Appointment Completed";
        pet_body = "You have Completed the appointment of "+appointment_id+" at "+date;
-       data_type = {
+       data_type1 = {
        "usertype":"1",
-       "appintments":"",
+       "appintments":"Completed",
+       "orders":""
+        };
+
+       data_type2 = {
+       "usertype":"4",
+       "appintments":"Completed",
        "orders":""
         };
 
 
-       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date);
-       sendnotify(req.body.doctor_id,title,doc_body,doc_subtitle,date);
+       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date,data_type1);
+       sendnotify(req.body.doctor_id,title,doc_body,doc_subtitle,date,data_type2);
 
        }
 async function sendnotify(user_id,title1,body1,subtitle1,datetime1,data_type) {
@@ -190,7 +219,8 @@ const headers = {
             body: body1,
             subtitle: subtitle1,
             sound: "default"
-          }
+          },
+          data : data_type
         };
         console.log(body1);
          request1.post(
@@ -222,7 +252,7 @@ const headers = {
             user_id:  phone._id,
             notify_title : subtitle1,
             notify_descri : body1.notification.body,
-            notify_img : "",
+            notify_img : "http://54.212.108.156:3000/api/uploads/1629809356957.png",
             notify_time : datetime1,
             date_and_time : datetime1
         }, 
@@ -247,7 +277,7 @@ const headers = {
 
 
 router.post('/mobile/alert/sp_notification',async function (req, res) {
-
+     var data_type = {};
   console.log("sp_notification",req.body);
        var appointment_id = req.body.appointment_UID;
        var title  = '';
@@ -258,7 +288,7 @@ router.post('/mobile/alert/sp_notification',async function (req, res) {
        title = "Payment Failed";
        subtitle = "Payment Failed";
        body = "There was an error processing your appointment. Please try again"
-       sendnotify(req.body.user_id,title,body,subtitle,date);
+       sendnotify(req.body.user_id,title,body,subtitle,date,data_type);
        } 
        else if(req.body.status == "Patient Appointment Cancelled"){
        appointmetitle = "Appointment Cancelled";
@@ -266,8 +296,23 @@ router.post('/mobile/alert/sp_notification',async function (req, res) {
        doc_body = "Patient Cancelled the appointment of "+appointment_id+" at "+date;
        pet_subtitle = "Appointment Cancelled";
        pet_body = "You have Cancelled the appointment of "+appointment_id+" at "+date;
-       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date);
-       sendnotify(req.body.sp_id,title,doc_body,doc_subtitle,date);
+
+
+        data_type1 = {
+       "usertype":"1",
+       "appintments":"Missed",
+       "orders":""
+        };
+        data_type2 = {
+       "usertype":"2",
+       "appintments":"Missed",
+       "orders":""
+        };
+
+
+
+       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date,data_type1);
+       sendnotify(req.body.sp_id,title,doc_body,doc_subtitle,date,data_type2);
        } 
        else if(req.body.status == "Doctor Appointment Cancelled"){
        title = "Appointment Cancelled";
@@ -275,8 +320,21 @@ router.post('/mobile/alert/sp_notification',async function (req, res) {
        doc_body = "You have cancelled the appointment of "+appointment_id+" at "+date;
        pet_subtitle = "Appointment Cancelled";
        pet_body = "SP Cancelled the appointment of "+appointment_id+" at "+date;
-       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date);
-       sendnotify(req.body.sp_id,title,doc_body,doc_subtitle,date);
+
+        data_type1 = {
+       "usertype":"1",
+       "appintments":"Missed",
+       "orders":""
+        };
+        data_type2 = {
+       "usertype":"2",
+       "appintments":"Missed",
+       "orders":""
+        };
+
+
+       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date,data_type1);
+       sendnotify(req.body.sp_id,title,doc_body,doc_subtitle,date,data_type2);
        } 
        else if(req.body.status == "No show"){
 
@@ -285,8 +343,21 @@ router.post('/mobile/alert/sp_notification',async function (req, res) {
        doc_body = "You have missed the appointment of "+appointment_id+" at "+date;
        pet_subtitle = "Appointment Missed";
        pet_body = "You have missed the appointment of "+appointment_id+" at "+date;
-       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date);
-       sendnotify(req.body.sp_id,title,doc_body,doc_subtitle,date);
+
+        data_type1 = {
+       "usertype":"1",
+       "appintments":"Missed",
+       "orders":""
+        };
+
+       data_type2 = {
+       "usertype":"2",
+       "appintments":"Missed",
+       "orders":""
+        };
+
+       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date,data_type1);
+       sendnotify(req.body.sp_id,title,doc_body,doc_subtitle,date,data_type2);
 
        }
 
@@ -297,8 +368,23 @@ router.post('/mobile/alert/sp_notification',async function (req, res) {
        doc_body = "You have an appointment of "+appointment_id+" at "+date;
        pet_subtitle = "Appointment Remainder";
        pet_body = "You have an appointment of "+appointment_id+" at "+date;
-       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date);
-       sendnotify(req.body.sp_id,title,doc_body,doc_subtitle,date);
+
+
+       data_type1 = {
+       "usertype":"1",
+       "appintments":"New",
+       "orders":""
+        };
+
+       data_type2 = {
+       "usertype":"2",
+       "appintments":"New",
+       "orders":""
+        };
+
+
+       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date,data_type1);
+       sendnotify(req.body.sp_id,title,doc_body,doc_subtitle,date,data_type2);
 
        }
 
@@ -308,12 +394,26 @@ router.post('/mobile/alert/sp_notification',async function (req, res) {
        doc_body = "You have Completed the appointment of "+appointment_id+" at "+date;
        pet_subtitle = "Appointment Completed";
        pet_body = "You have Completed the appointment of "+appointment_id+" at "+date;
-       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date);
-       sendnotify(req.body.sp_id,title,doc_body,doc_subtitle,date);
+
+        data_type1 = {
+       "usertype":"1",
+       "appintments":"Completed",
+       "orders":""
+        };
+
+       data_type2 = {
+       "usertype":"2",
+       "appintments":"Completed",
+       "orders":""
+        };
+
+
+       sendnotify(req.body.user_id,title,pet_body,pet_subtitle,date,data_type1);
+       sendnotify(req.body.sp_id,title,doc_body,doc_subtitle,date,data_type2);
 
        }
        
-async function sendnotify(user_id,title1,body1,subtitle1,datetime1) {
+async function sendnotify(user_id,title1,body1,subtitle1,datetime1,data_type) {
   console.log(user_id,title1,body1,subtitle1,datetime1);
 
 let phone  =  await userdetailsModel.findOne({_id:user_id});
@@ -323,6 +423,7 @@ let phone  =  await userdetailsModel.findOne({_id:user_id});
   var body1 = body1;
   var subtitle1 = subtitle1;
   var datetime1 = datetime1;
+  var data_type = data_type;
 
 
  // userdetailsModel.findOne({_id:user_id},async function (err, phone) {
@@ -347,7 +448,8 @@ const headers = {
             body: body1,
             subtitle: subtitle1,
             sound: "default"
-          }
+          },
+          data : data_type
         };
         console.log(body1);
          request1.post(
@@ -379,7 +481,7 @@ const headers = {
             user_id:  phone._id,
             notify_title : subtitle1,
             notify_descri : body1.notification.body,
-            notify_img : "",
+            notify_img : "http://54.212.108.156:3000/api/uploads/1629809356957.png",
             notify_time : datetime1,
             date_and_time : datetime1
         }, 
@@ -457,7 +559,7 @@ router.post('/sendnotification_doc_start', async function(req, res) {
             user_id:  req.body.user_id,
             notify_title : "Appointment",
             notify_descri : "Doctor Start the appointment, waiting for you",
-            notify_img : "",
+            notify_img : "http://54.212.108.156:3000/api/uploads/1629809356957.png",
             notify_time : "",
             date_and_time : req.body.date_and_time
         }, 
@@ -527,7 +629,7 @@ router.post('/send_notifiation', async function(req, res) {
             user_id:  req.body.user_id,
             notify_title : req.body.notify_title,
             notify_descri : req.body.notify_descri,
-            notify_img : req.body.notify_img,
+            notify_img : "http://54.212.108.156:3000/api/uploads/1629809356957.png",
             notify_time : "",
             date_and_time : req.body.date_and_time
         }, 

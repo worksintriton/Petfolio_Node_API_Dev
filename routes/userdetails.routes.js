@@ -34,7 +34,6 @@ router.post('/create', async function(req, res) {
 
        if(req.body.ref_code !== ''){
        var ref_code_details  =  await userdetailsModel.findOne({my_ref_code:req.body.ref_code});
-       console.log(ref_code_details);
        if(ref_code_details == null ){
         res.json({Status:"Failed",Message:"Referrel code not found",Data : {},Code:404});
         process.exit(1);
@@ -167,7 +166,6 @@ router.post('/send/emailotp',async function (req, res) {
            result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
           }
 
-   console.log(result);
    let phone  =  await userdetailsModel.findOne({user_email:req.body.user_email,user_email_verification:true});
    if(phone !== null){
       res.json({Status:"Failed",Message:"This email Id already Exist", Data : {} ,Code:404});     
@@ -352,10 +350,8 @@ router.post('/petlove/mobile/dashboard',async function (req, res) {
 
 
 router.post('/petlove/mobile/dashboard1',async function (req, res) {
- console.log(req.body);
  let userdetails  =  await userdetailsModel.findOne({_id:req.body.user_id});
  let SP_servicelist  =  await SP_servicesMode.find({});
- console.log(SP_servicelist);
  let color_code = ['#F9A826','#FF7A7A','#9BD152','#009377','#FF0000','#FF6F00'];
  let icon_list = ['http://54.212.108.156:3000/api/uploads/1617889303126.png','http://54.212.108.156:3000/api/uploads/1617889319529.png','http://54.212.108.156:3000/api/uploads/1617889353269.png','http://54.212.108.156:3000/api/uploads/1617889386383.png','http://54.212.108.156:3000/api/uploads/1617889386383.png','http://54.212.108.156:3000/api/uploads/1617889353269.png'];
  var SP_servicelist_final = [];
@@ -394,8 +390,6 @@ router.post('/petlove/mobile/dashboard1',async function (req, res) {
     var point2 = new GeoPoint(+tem_doctordetailsModel[a].clinic_lat,+tem_doctordetailsModel[a].clinic_long);
     var distance = point1.distanceTo(point2, true)//output in kilometers
 
-    console.log(tem_doctordetailsModel[a].rating);
-    console.log(tem_doctordetailsModel[a].comments);
     let dd = {
        '_id' : tem_doctordetailsModel[a].user_id,
        "doctor_name" : tem_doctordetailsModel[a].dr_name,
@@ -436,7 +430,6 @@ router.post('/petlove/mobile/dashboard1',async function (req, res) {
 
 
 router.post('/petlove/mobile/dashboardtest',async function (req, res) {
- console.log(req.body);
  let userdetails  =  await userdetailsModel.findOne({_id:req.body.user_id});
  let SP_servicelist  =  await SP_servicesMode.find({});
  let homebanner  =  await homebannerModel.find({});
@@ -461,7 +454,6 @@ router.post('/petlove/mobile/dashboardtest',async function (req, res) {
  let Banner_details  =  await doctordetailsModel.find({});
  var product_list = await product_detailsModel.find({delete_status : false}).limit(4).populate('cat_id');
  let product_categoriesModels  =  [];
- console.log("*****product_list******",product_list);
    for(let y = 0 ; y < product_list.length;y++) {
         var pro_fav = await Product_favModel.findOne({user_id:req.body.user_id,product_id:product_list[y]._id});
         var temp_fav = false;
@@ -516,8 +508,6 @@ router.post('/petlove/mobile/dashboardtest',async function (req, res) {
     var point2 = new GeoPoint(+tem_doctordetailsModel[a].clinic_lat,+tem_doctordetailsModel[a].clinic_long);
     var distance = point1.distanceTo(point2, true)//output in kilometers
 
-    console.log(tem_doctordetailsModel[a]);
-    console.log(tem_doctordetailsModel[a].comments);
     var doc_fav = await Doctor_favModel.findOne({user_id:req.body.user_id,doctor_id:tem_doctordetailsModel[a].user_id});
       var temp_fav = false;
         if(doc_fav !==  null){
@@ -825,6 +815,26 @@ router.post('/getlist_id', function (req, res) {
 });
 
 
+
+router.post('/update_token', function (req, res) {
+        userdetailsModel.find({},async function (err, StateList) {
+          for(let a  = 0 ; a  < StateList.length; a++)
+          {
+         userdetailsModel.findByIdAndUpdate(StateList[a]._id,{fb_token : ""}, {new: true}, function (err, UpdatedDetails) {
+            if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+             // res.json({Status:"Success",Message:"FB Updated", Data : UpdatedDetails ,Code:200});
+          });
+          if(a == StateList.length - 1){
+          res.json({Status:"Success",Message:"User Details List", Data : StateList ,Code:200});
+          }
+          }
+        });
+});
+
+
+
+
+
 router.post('/mobile/resendotp', function (req, res) {
         userdetailsModel.findOne({user_phone:req.body.user_phone}, function (err, StateList) {
         if(StateList == null){
@@ -873,7 +883,6 @@ router.post('/mobile/resendotp', function (req, res) {
 
 router.post('/check_user_admin', function (req, res) {
         userdetailsModel.findOne({user_phone : req.body.user_phone},async function (err, Functiondetails) {
-          console.log(Functiondetails);
           if(Functiondetails == null){
          var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
           var result = '';
@@ -912,7 +921,6 @@ router.post('/check_user_admin', function (req, res) {
 
 router.post('/check_user', function (req, res) {
         userdetailsModel.findOne({user_phone : req.body.user_phone},async function (err, Functiondetails) {
-          console.log(Functiondetails);
           if(Functiondetails == null) {
             res.json({Status:"Success",Message:"New User", Data : Functiondetails ,Code:200});
           }
@@ -955,12 +963,9 @@ res.json({Status:"Success",Message:"Dashboard Details", Data : a ,Code:200});
 
 
 router.post('/mobile/update/fb_token', function (req, res) {
-  console.log(req.body);
         userdetailsModel.findByIdAndUpdate(req.body.user_id, req.body, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
-            console.log(err);
              res.json({Status:"Success",Message:"FB Updated", Data : UpdatedDetails ,Code:200});
-             console.log(req.body);
         });
 });
 

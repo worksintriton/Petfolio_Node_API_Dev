@@ -20,7 +20,6 @@ var Product_favModel = require('./../models/Product_favModel');
 
 router.post('/create', async function(req, res) {
     req.body.cost = +req.body.cost;
-    console.log("Product_details***********",req.body);
   try{
         await product_detailsModel.create({
             user_id :  req.body.user_id,
@@ -54,12 +53,10 @@ router.post('/create', async function(req, res) {
             product_review :  0,
         }, 
         function (err, user) {
-        console.log("Product_details***********1",user);
         res.json({Status:"Success",Message:"product details screen Added successfully", Data : user ,Code:200}); 
         });
 }
 catch(e){
-    console.log(e);
       res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
 }
 });
@@ -144,7 +141,6 @@ router.post('/today_deal',async function (req, res) {
 
 
 router.post('/fetch_product_by_cat',async function (req, res) {
-    console.log("fetch_product_by_cat",req.body);
         var product_list_count = await product_detailsModel.count({cat_id:req.body.cat_id,delete_status : false});
         req.body.skip_count = req.body.skip_count - 1 ;
         req.body.skip_count = req.body.skip_count * 5 ;
@@ -153,7 +149,6 @@ router.post('/fetch_product_by_cat',async function (req, res) {
         if(product_list.length == 0){
          res.json({Status:"Success",Message:"product list", Data : [] , product_list_count :product_list_count, Code:200});  
         }
-        console.log("fetch_product_by_cat***",product_list);
          for(let y = 0 ; y < product_list.length;y++){
             let k = {
                         "_id": product_list[y]._id,
@@ -182,10 +177,10 @@ router.post('/fetch_product_by_cat',async function (req, res) {
 
 router.post('/fetch_product_by_id',async function (req, res) {
       var product_details = await product_cart_detailsModel.findOne({user_id :req.body.user_id,product_id:req.body.product_id,delete_status : false});
-      console.log(product_details);
+
       // var vendor_details = await product_vendorModel.findOne({user_id :product_details.user_id});
       var product_list = await product_detailsModel.findOne({_id:req.body.product_id,delete_status : false}).populate('cat_id breed_type pet_type'); 
-      console.log(product_list.user_id);
+
       var vendor_details = await product_vendorModel.findOne({_id :product_list.user_id,delete_status : false});
       var related_product_list = await product_detailsModel.find({product_name:product_list.product_name,delete_status : false}).limit(10);
       var final_related_product = [];
@@ -339,7 +334,7 @@ router.post('/getproductdetails_list',async function (req, res) {
     a.Today_Special = today_deals;
     a.Banner_details = Banner_details;
     a.Product_details = Product_details;
-    console.log(a.Today_Special);
+
    res.json({Status:"Success",Message:"product list", Data : a ,Code:200});     
 
 });
@@ -412,10 +407,10 @@ router.post('/filter',async function (req, res) {
           {
             discount_value = 30;
           } 
-          console.log(discount_value);
+
           if(req.body.discount_value == "0"){
             for(let a  = 0  ; a < breed_type_data.length ; a ++){
-              console.log(breed_type_data[a].discount);
+
             if(10 > breed_type_data[a].discount){
                discount_data.push(breed_type_data[a]);
             }
@@ -425,7 +420,7 @@ router.post('/filter',async function (req, res) {
           }
           }else{
             for(let a  = 0  ; a < breed_type_data.length ; a ++){
-            console.log(breed_type_data[a].discount);
+
             if(discount_value <= breed_type_data[a].discount){
                discount_data.push(breed_type_data[a]);
             }
@@ -609,7 +604,7 @@ router.post('/mobile/getlist_from_vendor_id1', function (req, res) {
             }
         }).populate('cat_id sub_cat_id breed_type pet_type');
      }else{
-          console.log("Search String");
+
           var keyword = req.body.search_string.toLowerCase();
           product_detailsModel.find({user_id:req.body.vendor_id,delete_status : false}, function (err, StateList) {
             var  final_data  = [];
@@ -617,7 +612,7 @@ router.post('/mobile/getlist_from_vendor_id1', function (req, res) {
             res.json({Status:"Success",Message:"Product details list", Data : StateList ,Code:200});
             }
             else{
-                console.log("StateList",StateList.length);
+
              for(let b  = 0 ; b < StateList.length ; b ++){
      var doctorname = StateList[b].product_name.toLowerCase();
      if(doctorname.indexOf(keyword) !== -1 == true){
@@ -1266,7 +1261,7 @@ router.post('/discount_single',async function (req, res) {
 
 
 router.post('/cal_discount_single',async function (req, res) {
-    console.log("req",req.body);
+
     if(req.body.discount_status ==  true){
      var product_Details = await product_detailsModel.findOne({_id:req.body._id,delete_status : false});
     let calcualtions =  ((req.body.discount/ 100) * product_Details.cost).toFixed(2);
@@ -1282,7 +1277,7 @@ router.post('/cal_discount_single',async function (req, res) {
             "discount_end_date" : req.body.discount_end_date || "",
             "today_deal" : true
      }
-     console.log(a);
+
       res.json({Status:"Success",Message:"Discount added to product", Data : a ,Code:200});
      // product_detailsModel.findByIdAndUpdate(req.body._id, a, {new: true}, function (err, UpdatedDetails) {
      //        if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
@@ -1304,7 +1299,7 @@ router.post('/cal_discount_single',async function (req, res) {
             "discount_end_date" : req.body.discount_end_date || "",
             "today_deal" : true
      }
-          console.log(a);
+
      res.json({Status:"Success",Message:"product details screen  Updated", Data : a ,Code:200});
      // product_detailsModel.findByIdAndUpdate(req.body._id, a, {new: true}, function (err, UpdatedDetails) {
      //        if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
@@ -1385,22 +1380,22 @@ router.post('/reviews/update',async function (req, res) {
             reviews : req.body.user_feedback,
             rating : req.body.user_rate
         },async function (err, user) {
-            console.log("Rating Created", user);
+
         var test_rat_count = 0; 
         var final_rat_count = 0;
         var review_details = await product_rate_reviewModel.find({product_id:order_details.product_id,delete_status : false});
-        console.log('Review Details',review_details);
+
         for(let a = 0 ; a < review_details.length ; a++) {
             test_rat_count = +review_details[a].rating + test_rat_count;
         }
-        console.log(test_rat_count,review_details.length);
+
         var final_rat_count = +test_rat_count / review_details.length;
-        console.log(final_rat_count);
+
         let c = {
         user_feedback : req.body.user_feedback,
         user_rate : req.body.user_rate,
         } 
-        console.log("Rating Details",c);
+
         let a = {
           product_rating :  final_rat_count.toFixed(1),
           product_review :  review_details.length,
@@ -1408,7 +1403,7 @@ router.post('/reviews/update',async function (req, res) {
         product_detailsModel.findByIdAndUpdate(order_details.product_id, a, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              // res.json({Status:"Success",Message:"Docotor Details Updated", Data : UpdatedDetails ,Code:200});
-               console.log("Update in Product Details");
+
         });
         vendor_order_bookingModel.findByIdAndUpdate(req.body.order_id, c, {new: true}, function (err, UpdatedDetails) {
              if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
@@ -1507,7 +1502,7 @@ router.post('/mobile/edit_product',async function (req, res) {
       product_name : req.body.product_name,
       product_discription : req.body.product_discription
       }
-          console.log(final_update_data);
+
         product_detailsModel.findByIdAndUpdate(req.body._id, final_update_data, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Product Details Update successfully", Data : {} ,Code:200});
@@ -1525,7 +1520,7 @@ router.post('/mobile/edit_product',async function (req, res) {
       "discount_start_date": "",
       "discount_status": false,
       }
-                console.log(final_update_data);
+
         product_detailsModel.findByIdAndUpdate(req.body._id, final_update_data, {new: true}, function (err, UpdatedDetails) {
             if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
              res.json({Status:"Success",Message:"Product Details Update successfully", Data : {} ,Code:200});
